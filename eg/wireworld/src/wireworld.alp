@@ -1,0 +1,13 @@
+/*
+   The WireWorld automaton, expressed in ALPACA.
+   Simulates the wireworld as described in 
+   "Computer Recreations", Scientific American, Jan. 1990, p.146
+
+   The source file uses ' ' for space, '=' for wires, '#' for
+   heads and '-' for tails.
+*/
+
+state Space " ";
+state Spark "#" to Tail;
+state Tail  "-" to Wire;
+state Wire  "=" to Spark when 1 Spark and not 3 Spark.
