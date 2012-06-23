@@ -1,27 +1,57 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
-# alpaca.pl v0.90-1999.07.14                    Chris Pressey
-# http://www.cats-eye.com/esoteric/alpaca/
-# (c)1999 Cat's-Eye Technologies.  Freely redistributable.
-#   All I ask is if you hack or use this for your own purposes,
-#   drop me a line at alpaca@cats-eye.com.
-#   Or better yet, join the Esoteric mailing list by going to
-#   http://www.cats-eye.com/mailing-lists.cgi?esoteric
+# alpaca.pl v0.93 Chris Pressey
+# http://catseye.webhop.net/projects/alpaca/
+# Copyright (c)1999-2005 Cat's Eye Technologies.  All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 
+#   Redistributions of source code must retain the above copyright
+#   notice, this list of conditions and the following disclaimer.
+# 
+#   Redistributions in binary form must reproduce the above copyright
+#   notice, this list of conditions and the following disclaimer in
+#   the documentation and/or other materials provided with the
+#   distribution.
+# 
+#   Neither the name of Cat's Eye Technologies nor the names of its
+#   contributors may be used to endorse or promote products derived
+#   from this software without specific prior written permission. 
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+# STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+# OF THE POSSIBILITY OF SUCH DAMAGE. 
 
 # Usage: [perl] alpaca[.pl] alpaca-file [program-file]
 
 # If alpaca-file is a badly formed ALPACA file, nothing is
-# guaranteed - there is no error checking as such.
+# guaranteed - there is very little error checking.
+
+# If alpaca-file is not specified, it is read from standard
+# input.
 
 # If program-file is not specified, the results of the
 # compilation are routed to the standard output.
 
-use strict 'vars refs subs';
+use strict vars, refs, subs;
 
-%State = ();
-%Class = ();
+### GLOBALS ###
 
-%Relation =
+my %State = ();
+my %Class = ();
+
+my %Relation =
 (
   'n'     => '$Playfield->[$x][$y-1]',
   's'     => '$Playfield->[$x][$y+1]',
@@ -44,12 +74,17 @@ use strict 'vars refs subs';
   'v<'    => '$Playfield->[$x-1][$y+1]'
 );
 
-$Program = '';
-$Token = '';
-$TokenType = '';
-$Emission = '';
+my $Program = '';
+my $Token = '';
+my $TokenType = '';
+my $Emission = '';
 
-$Class = '';
+my $Class = '';
+
+my $line = '';
+my $emit_comments = 0;
+
+### UTILITY SUBROUTINES ###
 
 sub gtok()
 {
@@ -95,9 +130,19 @@ sub gtok()
   }
 }
 
-sub BoolPrimitive
+sub emit_comment($)
 {
-  # $Emission .= "\n# BoolPrimitive\n";
+  my $comment = shift;
+  if ($emit_comments) {
+    $Emission .= "\n# " . $comment . ": ($Token, $TokenType)\n";
+  }
+}
+
+### RECURSIVE DESCENT PARSER ###
+
+sub BoolPrimitive()
+{
+  emit_comment("BoolPrimitive");
   if ($TokenType eq 'bareword')
   {
     if ($Token eq 'true')
@@ -116,9 +161,9 @@ sub BoolPrimitive
   return 0;
 }
 
-sub AdjacentcyFunc
+sub AdjacencyFunc()
 {
-  # $Emission .= "\n# AdjacentcyFunc\n";
+  emit_comment("AdjacencyFunc");
   if ($TokenType eq 'integer')
   {
     my $n = 0 + $Token;
@@ -139,9 +184,9 @@ sub AdjacentcyFunc
   return 0;
 }
 
-sub StateDesignator # this one RETURNS text
+sub StateDesignator() # this function RETURNS text rather than emitting it
 {
-  # $Emission .= "\n# StateDesignator: ($Token, $TokenType)\n";
+  emit_comment("StateDesignator");
 
   my $e = '';
   if ($TokenType eq 'bareword' or $TokenType eq 'arrow')
@@ -162,9 +207,9 @@ sub StateDesignator # this one RETURNS text
   return '';
 }
 
-sub RelationalFunc
+sub RelationalFunc()
 {
-  # $Emission .= "\n# RelationalFunc ($Token, $TokenType)\n";
+  emit_comment("RelationalFunc");
   if ($TokenType eq 'bareword' or $TokenType eq 'arrow')
   {
     my $e = StateDesignator();
@@ -184,13 +229,13 @@ sub RelationalFunc
   return 0;
 }
 
-sub Expression;
-sub Term
+sub Expression(); # forward
+sub Term()
 {
-  # $Emission .= "\n# Term\n";
+  emit_comment("Term");
   if ($TokenType eq 'integer')
   {
-    AdjacentcyFunc();
+    AdjacencyFunc();
     return 1;
   }
   elsif ($Token eq '(')
@@ -221,9 +266,9 @@ sub Term
   return 0;
 }
 
-sub Expression
+sub Expression()
 {
-  # $Emission .= "\n# Expression\n";
+  emit_comment("Expression");
   Term();
   while ($Token eq 'and' or $Token eq 'or' or $Token eq 'xor')
   {
@@ -233,9 +278,9 @@ sub Expression
   }
 }
 
-sub Rule
+sub Rule()
 {
-  # $Emission .= "\n# Rule\n";
+  emit_comment("Rule");
   if ($Token eq 'to')
   {
     gtok();
@@ -256,9 +301,9 @@ sub Rule
   return 0;
 }
 
-sub Rules
+sub Rules()
 {
-  # $Emission .= "\n# Rules\n";
+  emit_comment("Rules");
   Rule();
   while ($Token eq ',')
   {
@@ -267,9 +312,9 @@ sub Rules
   }
 }
 
-sub ClassDesignator
+sub ClassDesignator()
 {
-  # $Emission .= "\n# ClassDesignator\n";
+  emit_comment("ClassDesignator");
   if ($Token eq 'is')
   {
     gtok();
@@ -280,11 +325,11 @@ sub ClassDesignator
   return 0;
 }
 
-sub State
+sub State()
 {
   my @supers = ();
 
-  # $Emission .= "\n# State\n";
+  emit_comment("State");
   if ($Token eq 'state')
   {
     gtok();
@@ -321,11 +366,11 @@ sub State
   return 0;
 }
 
-sub Class
+sub Class()
 {
   my @supers = ();
 
-  # $Emission .= "\n# Class\n";
+  emit_comment("Class");
   if ($Token eq 'class')
   {
     gtok();
@@ -361,9 +406,9 @@ sub Class
   return 0;
 }
 
-sub Entry
+sub Entry()
 {
-  # $Emission .= "\n# Entry\n";
+  emit_comment("Entry");
   if ($Token eq 'class')
   {
     Class();
@@ -374,12 +419,16 @@ sub Entry
     State();
     return 1;
   }
+  else
+  {
+    die "Expected 'class' or 'state' but found '$Token'";
+  }
   return 0;
 }
 
-sub Entries
+sub Entries()
 {
-  # $Emission .= "\n# Entries\n";
+  emit_comment("Entries");
   Entry();
   while ($Token eq ';')
   {
@@ -391,17 +440,22 @@ sub Entries
 
 sub AlpacaProgram
 {
-  $Emission .= "#!/usr/local/bin/perl\n
+  $Emission .= <<"END_OF_HEADER";
+#!/usr/bin/perl
 # $ARGV[1] - automatically generated from $ARGV[0] by:
-# alpaca.pl v0.90-1999.07.14
-# http://www.cats-eye.com/esoteric/alpaca/\n
-######################################################\n\n";
-  $Emission .= "use Alpaca;\n\n";
+# alpaca.pl v0.93
+# http://catseye.webhop.net/projects/alpaca/
+######################################################
+
+use Alpaca qw(true false guess
+	      adjacent_state adjacent_class
+	      load_playfield display_playfield process_playfield);
+
+END_OF_HEADER
   gtok();
   Entries();
   if ($Token eq '.')
   {
-
     foreach my $k (sort keys %Class)
     {
       $Emission .= "sub ${k}ClassMember {\n  return ";
@@ -433,10 +487,21 @@ sub AlpacaProgram
     }
     $Emission .= "\n};\n\n";
 
-    $Emission .= "load_playfield();\n\ndisplay_playfield();\n\n";
-    $Emission .= "while (!\$done)\n{\n  process_playfield();\n  display_playfield();\n}\n\n";
-    $Emission .= "exit(0);\n\n### END ###\n";
+    $Emission .= <<"END_OF_FOOTER";
+load_playfield(\$ARGV[0]);
 
+display_playfield();
+
+while (!\$done)
+{
+  process_playfield();
+  display_playfield();
+}
+
+exit(0);
+
+### END ###
+END_OF_FOOTER
     return 1;
   }
   return 0;
@@ -446,7 +511,12 @@ sub AlpacaProgram
 
 $Program = '';
 
-open FILE, "<$ARGV[0]";
+if (defined($ARGV[0]))
+{
+  open FILE, "<$ARGV[0]";
+} else {
+  open FILE, "-"; # STDIN
+}
 while (defined($line = <FILE>))
 {
   chomp $line;

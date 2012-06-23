@@ -1,12 +1,12 @@
-#!/usr/local/bin/perl
-
-# redgreen\redgreen.pl - automatically generated from redgreen\redgreen.alp by:
-# alpaca.pl v0.90-1999.07.14
-# http://www.cats-eye.com/esoteric/alpaca/
-
+#!/usr/bin/perl
+# eg/redgreen/script/redgreen.pl - automatically generated from eg/redgreen/src/redgreen.alp by:
+# alpaca.pl v0.93
+# http://catseye.webhop.net/projects/alpaca/
 ######################################################
 
-use Alpaca;
+use Alpaca qw(true false guess
+	      adjacent_state adjacent_class
+	      load_playfield display_playfield process_playfield);
 
 sub FallableClassRules {
   return 'Air' if ((not SupportClassMember($Playfield->[$x][$y+1])) and (adjacent_state('Air') >= 2) and (not (adjacent_state('DuctTape') >= 1)));
@@ -289,7 +289,7 @@ $StateRule = {
 
 };
 
-load_playfield();
+load_playfield($ARGV[0]);
 
 display_playfield();
 

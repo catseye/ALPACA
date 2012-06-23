@@ -1,0 +1,18 @@
+/*
+ * The Circute cellular automaton, expressed in ALPACA.
+*/
+
+state Space " ";
+state NAND  "N";
+state Wire  "="
+    to Spark when
+        < Spark or > Spark or ^ Spark or v Spark or
+	(v NAND and (v< Wire or v> Wire)) or
+	(^ NAND and (^< Wire or ^> Wire));
+state Spark "#"
+    to Tail when
+        < Tail or > Tail or ^ Tail or v Tail or
+	(v NAND and v< Spark and v> Spark) or
+	(^ NAND and ^< Spark and ^> Spark);
+state Tail  "-"
+    to Wire.

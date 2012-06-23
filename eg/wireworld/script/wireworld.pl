@@ -1,12 +1,12 @@
-#!/usr/local/bin/perl
-
-# wireworld\wireworld.pl - automatically generated from wireworld\wireworld.alp by:
-# alpaca.pl v0.90-1999.07.14
-# http://www.cats-eye.com/esoteric/alpaca/
-
+#!/usr/bin/perl
+# eg/wireworld/script/wireworld.pl - automatically generated from eg/wireworld/src/wireworld.alp by:
+# alpaca.pl v0.93
+# http://catseye.webhop.net/projects/alpaca/
 ######################################################
 
-use Alpaca;
+use Alpaca qw(true false guess
+	      adjacent_state adjacent_class
+	      load_playfield display_playfield process_playfield);
 
 sub SpaceStateRules {
   return 'Space'
@@ -51,7 +51,7 @@ $StateRule = {
 
 };
 
-load_playfield();
+load_playfield($ARGV[0]);
 
 display_playfield();
 
