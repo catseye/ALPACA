@@ -34,35 +34,39 @@ Example: a trivial ALPACA description with two states:
 ### States ###
 
 A state definition gives the name of the state, zero or more _representation
-elements_ associated with the state, and a comma-separated list of zero or
-more _transition rules_ for the state.
+declarations_ associated with the state, and a comma-separated list of zero
+or more _transition rules_ for the state.
 
-#### Representation Elements ####
+#### Representation Declarations ####
 
-Each representation element may be a single UTF-8 character enclosed in
+Each representation declaration may be a single UTF-8 character enclosed in
 quotes, or it may be a datum tagged with a name.  The tag declares the
 purpose and/or the intended interpretation of the datum.  The tag may be
 drawn from a set defined by this specification, or it may be
 implementation-defined.  The datum may consist essentially arbitrary data,
 and may refer to a character, a colour, a graphic image, or anything else.
 
-Representation elements are not required.  In this case, representation
+Representation declarations are not required.  In this case, representation
 information can be supplied by the implementation, or can be defined with
 external configuration files ("skins" or "themes".)  Even if representation
-elements are included, there is nothing preventing an implementation from
+declarations are included, there is nothing preventing an implementation from
 overriding them with some other representation.
 
 Example: a trivial ALPACA description with single character representation
-elements:
+declarations:
 
     state Space " ";
     state Thing "*".
 
 Example: a trivial ALPACA description with tagged-data representation
-elements:
+declarations:
 
-    state Space colour:black;
-    state Thing image:"http://example.com/thing.gif".
+    state Space colour:"black";
+    state Thing image: "http://example.com/thing.gif".
+
+Representation declarations generally specify a visual representation,
+however, to drive home that this is not necessarily the case, the
+verbiage "visual" and "appearance" has been avoided in this specification.
 
 #### Transition Rules ####
 
@@ -78,9 +82,9 @@ Example: a simple ALPACA description where the states have trivial
 transition rules:
 
     state Space
-      to Thing;
+      to Thing when true;
     state Thing
-      to Space.
+      to Space when true.
 
 ### Classes ###
 
@@ -100,12 +104,13 @@ Whitespace is ignored between tokens, and comments extend from
     Entry           ::= Class | State.
     Class           ::= "class" ClassID {ClassDesignator}
                         [Rules].
-    State           ::= "state" StateID [Appearance] {ClassDesignator}
+    State           ::= "state" StateID {ReprDecl} {ClassDesignator}
                         [Rules].
 
     ClassID         ::= identifier.
     StateID         ::= identifier.
-    Appearance      ::= character.
+    ReprDecl        ::= quoted-char
+                      | identifier ":" quoted-string.
 
     ClassDesignator ::= "is" ClassID.
 
@@ -114,7 +119,7 @@ Whitespace is ignored between tokens, and comments extend from
 
     Expression      ::= Term {("and" | "or" | "xor") Term}.
 
-    Term            ::= AdjacentcyFunc
+    Term            ::= AdjacencyFunc
                       | "(" Expression ")"
                       | "not" Term
                       | BoolPrimitive
@@ -127,10 +132,16 @@ Whitespace is ignored between tokens, and comments extend from
                       | "w" | "<" | "sw" | "v<"
                       | "e" | ">" | "se" | "v>" | "me" | StateID.
 
-    AdjacentcyFunc  ::= ("1" | "2" | "3" | "4" | "5" | "6" | "7" | "8")
+    AdjacencyFunc   ::= ("1" | "2" | "3" | "4" | "5" | "6" | "7" | "8")
                         (StateDesignator | ClassDesignator).
 
     BoolPrimitive   ::= "true" | "false" | "guess".
 
-    character       ::= quote printable-non-quote quote.
+The following are token definitions, not productions.
+
+    quoted-char     ::= quote printable-non-quote quote.
+    quoted-string   ::= quote {printable-non-quote} quote.
     identifier      ::= alpha {alpha | digit}.
+    quote           ::= ["].
+    alpha           ::= [a-zA-Z].
+    digit           ::= [0-9].
