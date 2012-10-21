@@ -7,8 +7,8 @@ It is currently a work in progress.  Thus it is referred to as version
 
 The language described herein is mostly compatible with the version
 of language which has existed until now (version 0.9x).  However, it
-extends it in some significant ways, and it may be backwards-incompatible
-in certain way.  An implementation of 1.0-PRE does not yet exist.
+extends it in some significant ways, and is be backwards-incompatible
+in certain minor ways.  An implementation of 1.0-PRE does not yet exist.
 
 Encoding
 --------
@@ -23,10 +23,10 @@ Syntax
 An ALPACA description consists of a list of one or more _definitions_,
 optionally followed by an _initial configuration_.
 
-Each definition may specify either a _state_ or a _class_.  The definitions
-in the list are seperated with semicolons and the list ends with either a
-period (if no initial configuration is given) or the token `begin` (which
-introduces the initial configuration.)
+Each definition may specify either a _state_, a _class_, or a _neighbourhood_.
+The definitions in the list are seperated with semicolons and the list ends
+with either a period (if no initial configuration is given) or the token
+`begin` (which introduces the initial configuration.)
 
 Example: a trivial ALPACA description with two states:
 
@@ -42,9 +42,9 @@ for the state.
 
 #### Representation Declarations ####
 
-Each representation declaration may be a single ASCII character enclosed in
-quotes, or it may be a datum tagged with a name.  The tag declares the
-purpose and/or the intended interpretation of the datum.  The tag may be
+Each representation declaration may be a single printable ASCII character
+enclosed in quotes, or it may be a datum tagged with a name.  The tag declares
+the purpose and/or the intended interpretation of the datum.  The tag may be
 drawn from a set defined by this specification, or it may be
 implementation-defined.  The datum may consist essentially arbitrary data,
 and may refer to a character, a colour, a graphic image, or anything else.
@@ -94,6 +94,8 @@ transition rules:
       to Thing when true;
     state Thing
       to Space when true.
+
+TODO default transition rule.
 
 ##### State Referents #####
 
@@ -181,17 +183,77 @@ A class-inclusion comparison is similar to a state comparison, but instead
 of a state referent, the second term is a class referent.  An example will
 be given under "Classes", below.
 
-An adjacency comparison is an expression consisting of an integer from
-1 to 8 followed by a state or class referent.  It evaluates to true
-only if the cell has at least that many (Moore?) neighbours of that
-state or class.  (TODO: extend to other neighbourhoods.)
+An adjacency comparison is an expression consisting of an integer greater
+than or equal to 1, followed by an optional neighbourhood specifier,
+followed by a state or class referent.  It evaluates to true only if the
+cell has at least that many neighbours of that state or class, in that
+neighbourhood.  If no neighbourhood is given, a Moore neighbourhood is
+assumed.
 
 ### Classes ###
 
 A class declaration defines the general behaviour of a number of states.
-Each state can belong to many classes, and are listed in overload order.
-Classes can have their own rules, and the `is` operator can be used to
-check for any of the states of a class instead of a single state.
+Classes can have their own rules, and these are shared by all states which
+are members of the class.
+
+Example: a cellular automaton with three states, two of which are members
+of the same class.
+
+    state " " Space
+      to Space when true;
+    class Animal
+      to Space when > Space;
+    state "*" Dog is Animal
+      to Cat when ^ Cat;
+    state "#" Cat is Animal
+      to Dog when ^ Dog.
+
+Each state can belong to zero or more classes.  When it belongs to more
+than one, class the transition rules for each class are applied in order
+the classes are listed in the state definition.
+
+(TODO: Do the rules in a state take precedence over rules inherited from the
+class?  May need to fix next example.)
+
+Example: a cellular automaton with two states and two classes, where both
+states are members of both classes, but they inherit in different orders.
+In it, Ones always remain Ones, and Twos always remain Twos.
+
+    class AlphaType
+      to One when true;
+    class BetaType
+      to Two when true;
+    state "1" One is AlphaType is BetaType
+      to Two when true;
+    state "2" Two is BetaType is AlphaType
+      to One when true.
+
+In a transition rule, a class-inclusion comparison may be used by
+giving a state referent, the token `is`, and the name of a class.
+Intuitively, this evaluates to true if the state so referred to is a
+member of that class.
+
+Example: (TODO describe)
+
+    state " " Space
+      to Space when true;
+    class Animal
+      to Space when > is Animal;
+    state "*" Dog is Animal
+      to Cat when not ^ is Animal;
+    state "#" Cat is Animal
+      to Dog when not ^ is Animal.
+
+### Neighbourhoods ###
+
+Example:
+
+    neighbourhood Moore
+      (< > ^ v ^> ^< v> v<);
+    state " " Space
+      to Active when 1 Moore Active;
+    state "*" Active
+      to Space when 4 (^ v < >) Space.
 
 ### Initial Configuration ###
 
@@ -212,14 +274,19 @@ Whitespace is ignored between tokens, and comments extend from
 
     AlpacaProgram   ::= Entries ("." | "begin" initial-configuration).
     Entries         ::= Entry {";" Entry}.
-    Entry           ::= Class | State.
-    Class           ::= "class" ClassID {MembershipDecl}
+    Entry           ::= ClassDefinition
+                      | StateDefinition
+                      | NeighbourhdDef.
+    ClassDefinition ::= "class" ClassID {MembershipDecl}
                         [Rules].
-    State           ::= "state" StateID {ReprDecl} {MembershipDecl}
+    StateDefinition ::= "state" StateID {ReprDecl} {MembershipDecl}
                         [Rules].
+    NeighbourhdDef  ::= "neighbourhood" NeighbourhoodID
+                        Neighbourhood.
 
     ClassID         ::= identifier.
     StateID         ::= identifier.
+    NeighbourhoodID ::= identifier.
     ReprDecl        ::= quoted-char
                       | identifier ":" quoted-string.
 
@@ -241,8 +308,11 @@ Whitespace is ignored between tokens, and comments extend from
                       | RelationalFunc.
     RelationalFunc  ::= StateReferent (["="] StateReferent | ClassReferent).
     AdjacencyFunc   ::= ("1" | "2" | "3" | "4" | "5" | "6" | "7" | "8")
+                        [Neigbourhood | NeighbourhoodID]
                         (StateReferent | ClassReferent).
     BoolPrimitive   ::= "true" | "false" | "guess".
+
+    Neighbourhood   ::= "(" {arrow-chain} ")".
 
 The following are token definitions, not productions.
 
@@ -298,6 +368,9 @@ for state designators; instead, only arrow-chains in the set {`^`, `v`, `<`,
 supported eight compass directions (`n`, `ne`, etc) in place of arrow chains.
 This is no longer supported.  However, a future version might introduce a
 more "readable" alternative state referent syntax.
+
+Previous versions of ALPACA always assumed a Moore neighbourhood when making
+an adjacency comparison.
 
 Previous versions of ALPACA did not support giving an initial configuration
 for the cellular automaton.
