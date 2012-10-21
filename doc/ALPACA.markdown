@@ -70,8 +70,8 @@ verbiage "visual" and "appearance" has been avoided in this specification.
 
 #### Transition Rules ####
 
-Each transition rule begins with `to`, gives a _state designator_ which
-refers to the state to which to make the transition, followed by `when` and
+Each transition rule begins with `to`, gives a _state referent_ which
+specifes the state to which to make the transition, followed by `when` and
 a _boolean expression_ describing the conditions under which the transition
 occurs.
 
@@ -82,6 +82,8 @@ transition rules:
       to Thing when true;
     state Thing
       to Space when true.
+
+##### State Referents #####
 
 The state referent may be:
 
@@ -97,8 +99,27 @@ make any form in this cellular automaton "scroll downwards":
 
     state " " Space
       to ^ when true;
-    state "* Thing
+    state "*" Thing
       to ^ when true.
+
+An arrow is either `^` (referring to one cell "north" or "above" the
+current cell,) `v` (one cell "south" or "below",) `<` (one cell "west"
+or "to the left",) or `>` (one cell "east" or "to the right".)  Each arrow
+is its own token; they may or may not be separated with whitespace.  The
+arrow chain may be redundant; for example, `>>v<<^` is simply an alias
+for `me`.  However, an implementation is encouraged to produce warnings
+when encountering a redundant arrow-chain.
+
+Example: an ALPACA description of a cellular automaton where `Thing`
+elements grow "streaks" to the northwest.
+
+    state " " Space
+      to Thing when v> Thing,
+      to Space when true;
+    state "*" Thing
+      to Thing when true.
+
+##### Boolean Expressions #####
 
 The boolean expression may be:
 
@@ -144,26 +165,22 @@ Whitespace is ignored between tokens, and comments extend from
     ClassDesignator ::= "is" ClassID.
 
     Rules           ::= Rule {"," Rule}.
-    Rule            ::= "to" StateDesignator "when" Expression.
+    Rule            ::= "to" StateReferent "when" Expression.
+
+    StateReferent   ::= StateID
+                      | Arrow {Arrow}
+                      | "me".
+    Arrow           ::= "^" | "v" | "<" | ">".
 
     Expression      ::= Term {("and" | "or" | "xor") Term}.
-
     Term            ::= AdjacencyFunc
                       | "(" Expression ")"
                       | "not" Term
                       | BoolPrimitive
                       | RelationalFunc.
-
-    RelationalFunc  ::= StateDesignator (StateDesignator | ClassDesignator).
-
-    StateDesignator ::= "n" | "^" | "nw" | "^<"
-                      | "s" | "v" | "ne" | "^>"
-                      | "w" | "<" | "sw" | "v<"
-                      | "e" | ">" | "se" | "v>" | "me" | StateID.
-
+    RelationalFunc  ::= StateReferent (StateReferent | ClassDesignator).
     AdjacencyFunc   ::= ("1" | "2" | "3" | "4" | "5" | "6" | "7" | "8")
-                        (StateDesignator | ClassDesignator).
-
+                        (StateReferent | ClassDesignator).
     BoolPrimitive   ::= "true" | "false" | "guess".
 
 The following are token definitions, not productions.
@@ -180,6 +197,17 @@ Semantics
 
 A cellular automaton evolves.  (TODO be more specific)
 
+Assuming a cellular automaton form is supplied, either in the ALPACA
+description, or from an external source, that form is used as the initial
+configuration of the playfield.
+
+All cells which are not defined in this initial configuration are assumed
+to be "empty".  (Ooh! tricky. in previous versions, this meant "the state
+whose appearance is `" "`.  In ALPACA 1.0... not sure yet.  Also, this is
+a little implementation-defined; an implementation can actually provide
+an initial playfield where all cells are defined, in some regular
+pattern, which just happens to most commonly be "all empty")
+
 Notes
 -----
 
@@ -187,3 +215,18 @@ An ALPACA description consisting only of classes is valid, but somewhat
 meaningless by itself.  It might be used as a "module" by some other
 description, however, this spec does not define a standard way in which
 that could happen.
+
+Differences between ALPACA 1.0 and Previous Versions
+----------------------------------------------------
+
+Previous versions of ALPACA did not support tagged-datum representation
+declarations, or multiple representation declarations; they supported only
+a single quoted character to be used as the "appearance".
+
+Previous versions of ALPACA did not support arbitrary strings of arrows
+for state designators; instead, only arrow-chains in the set {`^`, `v`, `<`,
+`>`, `^<`, `^>`, `v<`, `v>`} were pemitted (in both their arrow and
+compass-direction forms.)  In addition, previous versions supported
+eight compass directions (`n`, `ne`, etc) in place of arrow chains.  This
+is no longer supported.  However, a future version might introduce a more
+"readable" alternative state referent syntax.
