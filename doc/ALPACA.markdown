@@ -130,11 +130,14 @@ The boolean expression may be:
     has its usual meaning
 *   two boolean expressions joined by one of the infix operators
     `and`, `or,` or `xor`, which have their usual meanings
-*   ...
-
-The expression may also make use of whether
-there are a certain minimum number of neighbours of a state or class,
-whether neighbours in certain positions hold a certain state or class.
+*   a "relational comparison" which tells you whether neighbours in
+    certain positions hold a certain state or class
+    (TODO describe please)
+*   an adjacency comparison, which takes the form of an integer from
+    1 to 8 followed by a state or class referent; it evaluates to true
+    if the cell has at least that many (Moore) neighbours of that
+    state or class
+*   a parenthesized boolean expression (to change precedence rules.)
 
 ### Classes ###
 
@@ -142,6 +145,17 @@ A class declaration defines the general behaviour of a number of states.
 Each state can belong to many classes, and are listed in overload order.
 Classes can have their own rules, and the `is` operator can be used to
 check for any of the states of a class instead of a single state.
+
+### Initial Configuration ###
+
+The list of definitions may end either with a period or the token
+`begin`.  If it is the token `begin`, the remainder of the file is
+assumed to contain an initial configuration for the cellular automton
+now defined.
+
+`begin` should be followed by a newline.  Each subsequent line of text
+contains characters which map to cells of the playfield in the initial
+configuration.
 
 Grammar
 -------
