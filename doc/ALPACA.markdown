@@ -70,13 +70,10 @@ verbiage "visual" and "appearance" has been avoided in this specification.
 
 #### Transition Rules ####
 
-Each transition rule specifies a boolean expression describing the
-conditions under which the transition occurs, and the state to which to
-change under those conditions.  The expression may make use of whether
-there are a certain minimum number of neighbours of a state or class,
-whether neighbours in certain positions hold a certain state or class,
-and constant true, false, and random boolean terms, manipulated by infix
-boolean operators.
+Each transition rule begins with `to`, gives a _state designator_ which
+refers to the state to which to make the transition, followed by `when` and
+a _boolean expression_ describing the conditions under which the transition
+occurs.
 
 Example: a simple ALPACA description where the states have trivial
 transition rules:
@@ -85,6 +82,38 @@ transition rules:
       to Thing when true;
     state Thing
       to Space when true.
+
+The state referent may be:
+
+*   the name of a state, to refer to that state directly
+*   `me`, to refer to the current state
+*   a chain of _arrows_, to refer to the state of the cell found at
+    that relative position in the playfield
+
+Example: a somewhat less simple ALPACA description.  Here the states
+have transition rules that cause each cell to take on the state of the
+cell to the "north" (immediately above it.)  The effect would be to
+make any form in this cellular automaton "scroll downwards":
+
+    state " " Space
+      to ^ when true;
+    state "* Thing
+      to ^ when true.
+
+The boolean expression may be:
+
+*   the constant `true` or the constant `false`
+*   the nullary function `guess`, which randomly evaluates to either
+    `true` or `false` (50% chance of each) each time it is evaluated
+*   a boolean expression preceded by the prefix operator `not`, which
+    has its usual meaning
+*   two boolean expressions joined by one of the infix operators
+    `and`, `or,` or `xor`, which have their usual meanings
+*   ...
+
+The expression may also make use of whether
+there are a certain minimum number of neighbours of a state or class,
+whether neighbours in certain positions hold a certain state or class.
 
 ### Classes ###
 
@@ -145,3 +174,16 @@ The following are token definitions, not productions.
     quote           ::= ["].
     alpha           ::= [a-zA-Z].
     digit           ::= [0-9].
+
+Semantics
+---------
+
+A cellular automaton evolves.  (TODO be more specific)
+
+Notes
+-----
+
+An ALPACA description consisting only of classes is valid, but somewhat
+meaningless by itself.  It might be used as a "module" by some other
+description, however, this spec does not define a standard way in which
+that could happen.
