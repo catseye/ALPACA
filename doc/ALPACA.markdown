@@ -154,6 +154,9 @@ The boolean expression may be:
     `and`, `or,` or `xor`, which have their usual meanings
 *   a parenthesized boolean expression (to change precedence rules.)
 
+Please refer to the grammar for the associativeness and precedence of the
+boolean operators.
+
 A state comparison is an expression consisting of a state referent
 and another state referent.  It evaluates to true if the two state
 referents refer to the same state.
@@ -197,9 +200,6 @@ are not adjacent to three other `Thing`s.
       to Space when true;
     state Thing
       to Space when not 3 Thing.
-
-Please refer to the grammar for the associativeness and precedence of the
-boolean operators.
 
 ### Classes ###
 
@@ -246,7 +246,9 @@ giving a state referent, the token `is`, and the name of a class.
 This expression evaluates to true if the state so referred to is a
 member of that class.
 
-Example: (TODO describe)
+Example: a cellular automaton where `Dog`s and `Cat`s (both `Animal`s)
+switch to the other when the cell to the north is not an `Animal` and turn
+to `Space` when the cell to the east is an `Animal`.
 
     state Space
       to Space when true;
@@ -259,14 +261,19 @@ Example: (TODO describe)
 
 ### Neighbourhoods ###
 
+A neighbourhood is a set of positions relative to a cell.  A neighbourhood
+is specified in ALPACA with a sequence of arrow chains inside parentheses.
+A neighbourhood definition associates a neighbourhood with a name, so that
+whereever a neighbourhood can be specified, the name can be used instead.
+
 Example:
 
     neighbourhood Moore
       (< > ^ v ^> ^< v> v<);
     state Space
-      to Thing when 1 Moore Thing;
+      to Thing when 1 in Moore Thing;
     state Thing
-      to Space when 3 (^ v < >) Space.
+      to Space when 3 in (^ v < >) Space.
 
 ### Initial Configuration ###
 
@@ -332,8 +339,7 @@ Whitespace is ignored between tokens, and comments extend from
                       | BoolPrimitive
                       | RelationalFunc.
     RelationalFunc  ::= StateReferent (["="] StateReferent | ClassReferent).
-    AdjacencyFunc   ::= ("1" | "2" | "3" | "4" | "5" | "6" | "7" | "8")
-                        [Neigbourhood | NeighbourhoodID]
+    AdjacencyFunc   ::= natural-number ["in" (Neigbourhood | NeighbourhoodID)]
                         (StateReferent | ClassReferent).
     BoolPrimitive   ::= "true" | "false" | "guess".
 
@@ -344,6 +350,7 @@ The following are token definitions, not productions.
     quoted-char     ::= quote printable-non-quote quote.
     quoted-string   ::= quote {printable-non-quote} quote.
     identifier      ::= alpha {alpha | digit}.
+    natural-number  ::= digit {digit}.
     quote           ::= ["].
     alpha           ::= [a-zA-Z].
     digit           ::= [0-9].
@@ -357,14 +364,21 @@ Assuming a cellular automaton form is supplied, either in the ALPACA
 description, or from an external source, that form is used as the initial
 configuration of the playfield.
 
-All cells which are not defined in this initial configuration are assumed
-to be "empty".  (Ooh! tricky. in previous versions, this meant "the state
-whose appearance is `" "`.  In ALPACA 1.0... not sure yet.  Also, this is
-a little implementation-defined; an implementation can actually provide
-an initial playfield where all cells are defined, in some regular
-pattern, which just happens to most commonly be "all empty")
+All cells which are not defined in this initial configuration are assigned
+states in an implementation-dependent manner which we will call _empty_.
 
-Each time quantum (which we'll call a "tick"), all cells in the playfield
+An implementation should at a minimum support populating the undefined area
+of the playfield uniformly with the first state defined in the ALPACA
+description.  An informal survey of extant ALPACA descriptions suggested that
+the first defined state is the one that is most commonly assumed to permeate
+"everywhere else" in the playfield and represent emptiness.
+
+Of course, an implementation may support, beyond this bare minimum, populating
+the space outside the given configuration with any pattern it sees fit.
+ALPACA does not (yet) support specifying this pattern, so emptiness is
+entirely implementation-dependent.
+
+Each time quantum (which we'll call a _tick_), all cells in the playfield
 are considered, and an empty "new playfield" is established.  The state of
 each cell is examined.  Each transition rule for the state is considered in
 source code order.  If any transition rule is true for that cell, the
@@ -375,10 +389,10 @@ is replaced with the new playfield, and the next tick happens.
 Notes
 -----
 
-An ALPACA description consisting only of classes is valid, but somewhat
-meaningless by itself.  It might be used as a "module" by some other
-description, however, this spec does not define a standard way in which
-that could happen.
+An ALPACA description consisting only of classes and/or neighbourhoods is
+valid, but somewhat meaningless by itself.  It might be used as a "module"
+by some other description, however, this spec does not define a standard
+way in which that could happen.
 
 Differences between ALPACA 1.0 and Previous Versions
 ----------------------------------------------------
