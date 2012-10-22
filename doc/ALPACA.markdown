@@ -6,8 +6,8 @@ It is currently a work in progress.  Thus it is referred to as version
 1.0-PRE.
 
 The language described herein is mostly compatible with the version
-of language which has existed until now (version 0.9x).  However, it
-extends it in some significant ways, and is be backwards-incompatible
+of the language which has existed until now (version 0.9x).  However, it
+extends it in some significant ways, and is backwards-incompatible with it
 in certain minor ways.  An implementation of 1.0-PRE does not yet exist.
 
 Encoding
@@ -15,7 +15,7 @@ Encoding
 
 The encoding of the text of an ALPACA description is not defined; any
 encoding may be used.  However, for interchange purposes, ALPACA
-descriptions are typically encoded in UTF-8.
+descriptions are typically encoded in UTF-8 and contained in text files.
 
 Syntax
 ------
@@ -24,7 +24,7 @@ An ALPACA description consists of a list of one or more _definitions_,
 optionally followed by an _initial configuration_.
 
 Each definition may specify either a _state_, a _class_, or a _neighbourhood_.
-The definitions in the list are seperated with semicolons and the list ends
+The definitions in the list are separated with semicolons, and the list ends
 with either a period (if no initial configuration is given) or the token
 `begin` (which introduces the initial configuration.)
 
@@ -43,17 +43,17 @@ for the state.
 #### Representation Declarations ####
 
 Each representation declaration may be a single printable ASCII character
-enclosed in quotes, or it may be a datum tagged with a name.  The tag declares
-the purpose and/or the intended interpretation of the datum.  The tag may be
-drawn from a set defined by this specification, or it may be
-implementation-defined.  The datum may consist essentially arbitrary data,
+enclosed in double quotes, or it may be a datum tagged with a name.  The tag
+declares the purpose and/or the intended interpretation of the datum.  The
+tag may be drawn from a set defined by this specification, or it may be
+implementation-defined.  The datum may consist of essentially arbitrary data,
 and may refer to a character, a colour, a graphic image, or anything else.
 
-Representation declarations are not required.  In this case, representation
+Representation declarations are not required.  If omitted, representation
 information can be supplied by the implementation, or can be defined with
 external configuration files ("skins" or "themes".)  Even if representation
-declarations are included, there is nothing preventing an implementation from
-overriding them with some other representation.
+declarations are included in the ALPACA description, there is nothing to
+prevent an implementation from overriding them with some other representation.
 
 However, if an initial configuration is included, it will be interpreted
 using the single ASCII character representation declarations of the states.
@@ -70,8 +70,8 @@ declarations:
     state Space colour:"black";
     state Thing image: "http://example.com/thing.gif".
 
-Representation declarations generally specify a visual representation,
-however, to drive home that this is not necessarily the case, the
+Representation declarations generally specify a visual representation.
+However, to drive home that this is not necessarily the case, the
 verbiage "visual" and "appearance" has been avoided in this specification.
 
 #### Class Memberships ####
@@ -83,25 +83,30 @@ will be given in the "Classes" section below.
 #### Transition Rules ####
 
 Each transition rule begins with `to`, gives a _state referent_ which
-specifes the state to which to make the transition, followed by `when` and
-a _boolean expression_ describing the conditions under which the transition
-occurs.
+specifes the state to which to transition, followed by `when` and a _boolean
+expression_ describing the conditions under which the transition occurs.
 
 Example: a simple ALPACA description where the states have trivial
-transition rules:
+transition rules.  The result is an automaton where all cells toggle their
+state from `Space` to `Thing` on every tick.
 
     state Space
       to Thing when true;
     state Thing
       to Space when true.
 
-TODO default transition rule.
+During evolution of the cellular automaton, transition rules are evaluated
+in source-code order; as soon as one transition rule is found to apply, the
+remaining transition rules are ignored.
+
+If no transition rule is found to apply for a state, the default transition
+will apply, which is no transition at all, i.e., remain in the same state.
 
 ##### State Referents #####
 
-The state referent may be:
+A state referent may be:
 
-*   the name of a state, to refer to that state directly
+*   the name of a defined state, to refer to that state directly
 *   `me`, to refer to the current state
 *   a chain of _arrows_, to refer to the state of the cell found at
     that relative position in the playfield
@@ -111,9 +116,9 @@ have transition rules that cause each cell to take on the state of the
 cell to the "north" (immediately above it.)  The effect would be to
 make any form in this cellular automaton "scroll downwards":
 
-    state " " Space
+    state Space
       to ^ when true;
-    state "*" Thing
+    state Thing
       to ^ when true.
 
 An arrow is either `^` (referring to one cell "north" or "above" the
@@ -127,10 +132,10 @@ when encountering a redundant arrow-chain.
 Example: an ALPACA description of a cellular automaton where `Thing`
 elements grow "streaks" to the northwest (diagonally up and to the left.)
 
-    state " " Space
+    state Space
       to Thing when v> Thing,
       to Space when true;
-    state "*" Thing
+    state Thing
       to Thing when true.
 
 ##### Boolean Expressions #####
@@ -140,13 +145,13 @@ The boolean expression may be:
 *   the constant `true` or the constant `false`
 *   the nullary function `guess`, which randomly evaluates to either
     `true` or `false` (50% chance of each) each time it is evaluated
+*   a _state comparison_, described below
+*   a _class-inclusion comparison_, described below
+*   an _adjacency comparison_, described below
 *   a boolean expression preceded by the prefix operator `not`, which
     has its usual meaning
 *   two boolean expressions joined by one of the infix operators
     `and`, `or,` or `xor`, which have their usual meanings
-*   a _state comparison_, described below
-*   a _class-inclusion comparison_, described below
-*   an _adjacency comparison_, described below
 *   a parenthesized boolean expression (to change precedence rules.)
 
 A state comparison is an expression consisting of a state referent
@@ -156,26 +161,20 @@ referents refer to the same state.
 Example: a cellular automaton where `Thing`s become `Spaces` only
 if the cell to the east is a `Thing`:
 
-    state " " Space
+    state Space
       to Space when true;
-    state "*" Thing
+    state Thing
       to Space when > Thing,
       to Thing when true.
 
-Example: a cellular automaton where `Thing`s become `Spaces` only
+For more clarity, an equals sign may occur between the two state referents.
+
+Example: a cellular automaton where `Thing`s become `Space`s only
 if the cell to the north and the cell to the south are the same state:
 
-    state " " Space
+    state Space
       to Space when true;
-    state "*" Thing
-      to Space when ^ v,
-      to Thing when true.
-
-For more clarity, an equals sign may occur between the two state referents:
-
-    state " " Space
-      to Space when true;
-    state "*" Thing
+    state Thing
       to Space when ^ = v,
       to Thing when true.
 
@@ -188,7 +187,19 @@ than or equal to 1, followed by an optional neighbourhood specifier,
 followed by a state or class referent.  It evaluates to true only if the
 cell has at least that many neighbours of that state or class, in that
 neighbourhood.  If no neighbourhood is given, a Moore neighbourhood is
-assumed.
+assumed.  Neighbourhoods are explained in more depth in the "Neighbourhoods"
+section.
+
+Example: a cellular automaton where `Thing`s become `Space`s only if they
+are not adjacent to three other `Thing`s.
+
+    state Space
+      to Space when true;
+    state Thing
+      to Space when not 3 Thing.
+
+Please refer to the grammar for the associativeness and precedence of the
+boolean operators.
 
 ### Classes ###
 
@@ -199,13 +210,13 @@ are members of the class.
 Example: a cellular automaton with three states, two of which are members
 of the same class.
 
-    state " " Space
+    state Space
       to Space when true;
     class Animal
       to Space when > Space;
-    state "*" Dog is Animal
+    state Dog is Animal
       to Cat when ^ Cat;
-    state "#" Cat is Animal
+    state Cat is Animal
       to Dog when ^ Dog.
 
 Each state can belong to zero or more classes.  When it belongs to more
@@ -223,9 +234,9 @@ In it, Ones always remain Ones, and Twos always remain Twos.
       to One when true;
     class BetaType
       to Two when true;
-    state "1" One is AlphaType is BetaType
+    state One is AlphaType is BetaType
       to Two when true;
-    state "2" Two is BetaType is AlphaType
+    state Two is BetaType is AlphaType
       to One when true.
 
 In a transition rule, a class-inclusion comparison may be used by
@@ -235,13 +246,13 @@ member of that class.
 
 Example: (TODO describe)
 
-    state " " Space
+    state Space
       to Space when true;
     class Animal
       to Space when > is Animal;
-    state "*" Dog is Animal
+    state Dog is Animal
       to Cat when not ^ is Animal;
-    state "#" Cat is Animal
+    state Cat is Animal
       to Dog when not ^ is Animal.
 
 ### Neighbourhoods ###
@@ -250,10 +261,10 @@ Example:
 
     neighbourhood Moore
       (< > ^ v ^> ^< v> v<);
-    state " " Space
-      to Active when 1 Moore Active;
-    state "*" Active
-      to Space when 4 (^ v < >) Space.
+    state Space
+      to Thing when 1 Moore Thing;
+    state Thing
+      to Space when 3 (^ v < >) Space.
 
 ### Initial Configuration ###
 
@@ -265,6 +276,18 @@ now defined.
 `begin` should be followed by a newline.  Each subsequent line of text
 contains characters which map to cells of the playfield in the initial
 configuration.
+
+Example: a glider, pointed northeast, in John Conway's Game of Life
+automaton:
+
+    state Dead  " "
+      to Alive when 3 Alive and 5 Dead;
+    state Alive "*"
+      to Dead when 4 Alive or 7 Dead
+    begin
+     **
+    * *
+      *
 
 Grammar
 -------
