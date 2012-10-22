@@ -208,7 +208,9 @@ Classes can have their own rules, and these are shared by all states which
 are members of the class.
 
 Example: a cellular automaton with three states, two of which are members
-of the same class.
+of the same class.  `Cat` and `Dog` will behave differently when there is
+a state of the other type to the north, but they will both turn into
+`Space` when there is a `Space` to the east.
 
     state Space
       to Space when true;
@@ -221,27 +223,27 @@ of the same class.
 
 Each state can belong to zero or more classes.  When it belongs to more
 than one, class the transition rules for each class are applied in order
-the classes are listed in the state definition.
+the classes are listed in the state definition.  In addition, the transition
+rules for the state itself are always applied first, before any class rules
+are considered.
 
-(TODO: Do the rules in a state take precedence over rules inherited from the
-class?  May need to fix next example.)
-
-Example: a cellular automaton with two states and two classes, where both
+Example: a cellular automaton with three states and two classes, where all
 states are members of both classes, but they inherit in different orders.
-In it, Ones always remain Ones, and Twos always remain Twos.
+In it, `One`s always remain `One`s, `Two`s always remain `Two`s, and `Three`s
+always remain `Three`s.
 
     class AlphaType
       to One when true;
     class BetaType
       to Two when true;
-    state One is AlphaType is BetaType
-      to Two when true;
-    state Two is BetaType is AlphaType
-      to One when true.
+    state One is AlphaType is BetaType;
+    state Two is BetaType is AlphaType;
+    state Three is BetaType is AlphaType
+      to Three when true.
 
 In a transition rule, a class-inclusion comparison may be used by
 giving a state referent, the token `is`, and the name of a class.
-Intuitively, this evaluates to true if the state so referred to is a
+This expression evaluates to true if the state so referred to is a
 member of that class.
 
 Example: (TODO describe)
