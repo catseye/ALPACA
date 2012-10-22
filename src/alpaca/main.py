@@ -7,9 +7,9 @@ version 1.0-PRE.
 """
 
 from optparse import OptionParser
-import random
-import re
 import sys
+
+from alpaca import ast, scanner
 
 
 def main(argv):
