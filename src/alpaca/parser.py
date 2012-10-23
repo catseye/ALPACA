@@ -108,10 +108,39 @@ class Parser(object):
         self.scanner.expect('to')
         s = self.state_ref()
         self.scanner.expect('when')
-        e = self.bool_expr()
+        e = self.expression()
         return AST('Rule', [s, e])
 
     def state_ref(self):
         # XXX arrows, too
         id = self.scanner.consume_type('identifier')
         return AST('StateRef', value=id)
+
+    def expression(self):
+        e = self.term()
+        while self.scanner.on_type('boolean operator'):
+            op = self.scanner.consume_type('boolean operator')
+            t = self.term()
+            e = AST('BoolOp', [e, t], value=op)
+        return e
+    
+    def term(self):
+        if self.scanner.on_type('integer literal'):
+            count = self.scanner.consume_type('integer literal')
+            # XXX in neighbourhood
+            # XXX class_ref
+            s = self.state_ref()
+            return AST('Adjacency', [s], value=count)
+        elif self.scanner.consume('('):
+            e = self.expression()
+            self.scanner.expect(')')
+            return e
+        elif self.scanner.consume('not'):
+            e = self.term()
+            return AST('Not', [e])
+        elif self.scanner.on_type('boolean literal'):
+            lit = self.scanner.consume_type('boolean literal')
+            return AST('BoolLit', value=lit)
+        else:
+            # XXX relationalfunc
+            pass

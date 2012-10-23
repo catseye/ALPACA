@@ -30,8 +30,12 @@ class Scanner(object):
             return
         if self.scan_pattern(r'\.|\;|\,|\(|\)|\=', 'punctuation'):
             return
-        if self.scan_pattern(r'class|state|neighbourhood|is|to|when|me|in'
-                             r'and|or|xor|not|true|false|guess', 'keyword'):
+        if self.scan_pattern(r'class|state|neighbourhood|is|to|when|me|in|not',
+                             'keyword'):
+            return
+        if self.scan_pattern(r'and|or|xor', 'boolean operator'):
+            return
+        if self.scan_pattern(r'true|false|guess', 'boolean literal'):
             return
         if self.scan_pattern(r'\d+', 'integer literal'):
             return
