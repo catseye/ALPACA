@@ -28,7 +28,7 @@ class Scanner(object):
             self.token = None
             self.type = 'EOF'
             return
-        if self.scan_pattern(r'\.|\;|\,|\(|\)|\=', 'punctuation'):
+        if self.scan_pattern(r'\.|\;|\,|\(|\)|\{|\}|\=', 'punctuation'):
             return
         if self.scan_pattern(r'[<>^v]+', 'arrow chain'):
             return

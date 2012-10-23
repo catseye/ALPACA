@@ -53,15 +53,15 @@ class Parser(object):
 
     def alpaca(self):
         defns = []
+        playfield = None
         defns.append(self.defn())
         while self.scanner.consume(';'):
             defns.append(self.defn())
         if self.scanner.consume('begin'):
-            # XXX read playfield
-            pass
+            playfield = self.scanner.read_playfield()
         else:
             self.scanner.expect('.')
-        return AST('Alpaca', defns)
+        return AST('Alpaca', [defns, playfield])
 
     def defn(self):
         if self.scanner.on('state'):
@@ -71,19 +71,32 @@ class Parser(object):
         elif self.scanner.on('neighbourhood'):
             return self.neighbourhood_defn()
         else:
-            # XXX complain
-            pass
+            raise SyntaxError("Expected 'state', 'class', or "
+                              "'neighbourhood', but found "
+                              "'%s'" % self.scanner.token)
     
     def state_defn(self):
         self.scanner.expect('state')
         id = self.scanner.consume_type('identifier')
-        # XXX todo alternate representations
-        repr = self.scanner.consume_type('string literal')
+        attrs = []
+        char_repr = self.scanner.consume_type('string literal')
+        if self.scanner.consume('{'):
+            attrs.append(self.tagged_datum())
+            while self.scanner.consume(','):
+                attrs.append(self.tagged_datum())
+            self.scanner.expect('}')
         classes = []
         while self.scanner.consume('is'):
             classes.append(self.scanner.consume_type('identifier'))
         rules = self.rules()
-        return AST('StateDefn', rules, value=id)
+        return AST('StateDefn', [char_repr, attrs, classes, rules],
+                   value=id)
+
+    def tagged_datum(self):
+        id = self.scanner.consume_type('identifier')
+        self.scanner.expect(':')
+        value = self.scanner.consume_type('string literal')
+        return AST('Attribute', [id, value])
 
     def class_defn(self):
         self.scanner.expect('class')
