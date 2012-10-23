@@ -35,16 +35,19 @@ Example: a trivial ALPACA description with two states:
 
 ### States ###
 
-A state definition gives the name of the state, zero or more _representation
-declarations_ associated with the state, a list of zero or more _class
+A state definition gives the name of the state, an optional _representation
+declaration_ associated with the state, a list of zero or more _class
 memberships_, and a comma-separated list of zero or more _transition rules_
 for the state.
 
-#### Representation Declarations ####
+#### Representation Declaration ####
 
-Each representation declaration may be a single printable ASCII character
-enclosed in double quotes, or it may be a datum tagged with a name.  The tag
-declares the purpose and/or the intended interpretation of the datum.  The
+A representation declaration consists of an optional single printable ASCII
+character enclosed in double quotes, followed by an optional comma-separated
+list of _tagged data_ enclosed in curly braces.
+
+In a tagged datum, the tag declares the purpose and/or the intended
+interpretation of the datum, which is a double-quoted string literal.  The
 tag may be drawn from a set defined by this specification, or it may be
 implementation-defined.  The datum may consist of essentially arbitrary data,
 and may refer to a character, a colour, a graphic image, or anything else.
@@ -67,8 +70,15 @@ declarations:
 Example: a trivial ALPACA description with tagged-data representation
 declarations:
 
-    state Space colour:"black";
-    state Thing image: "http://example.com/thing.gif".
+    state Space { colour: "black" };
+    state Thing { image:  "http://example.com/thing.gif" }.
+
+Example: a trivial ALPACA description with both single character and
+tagged-data representation declarations:
+
+    state Space " " { color:  "black" };
+    state Thing "x" { image:  "http://example.com/thing.gif",
+                      border: "1px solid green" }.
 
 Representation declarations generally specify a visual representation.
 However, to drive home that this is not necessarily the case, the
@@ -83,8 +93,9 @@ will be given in the "Classes" section below.
 #### Transition Rules ####
 
 Each transition rule begins with `to`, gives a _state referent_ which
-specifes the state to which to transition, followed by `when` and a _boolean
-expression_ describing the conditions under which the transition occurs.
+specifes the state to which to transition, optionally followed by `when` and
+a _boolean expression_ describing the conditions under which the transition
+occurs.
 
 Example: a simple ALPACA description where the states have trivial
 transition rules.  The result is an automaton where all cells toggle their
@@ -94,6 +105,11 @@ state from `Space` to `Thing` on every tick.
       to Thing when true;
     state Thing
       to Space when true.
+
+If `when` is omitted, `when true` is assumed, so the above example could
+also be written:
+
+    state Space to Thing; state Thing to Space.
 
 During evolution of the cellular automaton, transition rules are evaluated
 in source-code order; as soon as one transition rule is found to apply, the
@@ -304,14 +320,16 @@ Grammar
 Whitespace is ignored between tokens, and comments extend from
 `/*` to `*/` and do not nest.
 
-    AlpacaProgram   ::= Entries ("." | "begin" initial-configuration).
-    Entries         ::= Entry {";" Entry}.
-    Entry           ::= ClassDefinition
-                      | StateDefinition
+    Alpaca          ::= Definitions ("." | "begin" initial-configuration).
+    Definitions     ::= Definition {";" Definition}.
+    Definition      ::= StateDefinition
+                      | ClassDefinition
                       | NeighbourhdDef.
-    ClassDefinition ::= "class" ClassID {MembershipDecl}
+    StateDefinition ::= "state" StateID [quoted-char] [ReprDecl]
+                        {MembershipDecl}
                         [Rules].
-    StateDefinition ::= "state" StateID {ReprDecl} {MembershipDecl}
+    ClassDefinition ::= "class" ClassID
+                        {MembershipDecl}
                         [Rules].
     NeighbourhdDef  ::= "neighbourhood" NeighbourhoodID
                         Neighbourhood.
@@ -319,14 +337,15 @@ Whitespace is ignored between tokens, and comments extend from
     ClassID         ::= identifier.
     StateID         ::= identifier.
     NeighbourhoodID ::= identifier.
-    ReprDecl        ::= quoted-char
-                      | identifier ":" quoted-string.
+
+    ReprDecl        ::= "{" TaggedDatum {"," TaggedDatum} "}".
+    TaggedDatum     ::= identifier ":" quoted-string.
 
     MembershipDecl  ::= ClassReferent.
     ClassReferent   ::= "is" ClassID.
 
     Rules           ::= Rule {"," Rule}.
-    Rule            ::= "to" StateReferent "when" Expression.
+    Rule            ::= "to" StateReferent ["when" Expression].
 
     StateReferent   ::= StateID
                       | arrow-chain

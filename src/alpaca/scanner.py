@@ -30,6 +30,8 @@ class Scanner(object):
             return
         if self.scan_pattern(r'\.|\;|\,|\(|\)|\=', 'punctuation'):
             return
+        if self.scan_pattern(r'[<>^v]+', 'arrow chain'):
+            return
         if self.scan_pattern(r'class|state|neighbourhood|is|to|when|me|in|not',
                              'keyword'):
             return

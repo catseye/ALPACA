@@ -2,14 +2,16 @@ from alpaca.ast import AST
 from alpaca.scanner import Scanner
 
 """
-AlpacaProgram   ::= Entries ("." | "begin" initial-configuration).
-Entries         ::= Entry {";" Entry}.
-Entry           ::= ClassDefinition
-                  | StateDefinition
+Alpaca          ::= Definitions ("." | "begin" initial-configuration).
+Definitions     ::= Definition {";" Definition}.
+Definition      ::= StateDefinition
+                  | ClassDefinition
                   | NeighbourhdDef.
-ClassDefinition ::= "class" ClassID {MembershipDecl}
+StateDefinition ::= "state" StateID [quoted-char] [ReprDecl]
+                    {MembershipDecl}
                     [Rules].
-StateDefinition ::= "state" StateID {ReprDecl} {MembershipDecl}
+ClassDefinition ::= "class" ClassID
+                    {MembershipDecl}
                     [Rules].
 NeighbourhdDef  ::= "neighbourhood" NeighbourhoodID
                     Neighbourhood.
@@ -17,14 +19,15 @@ NeighbourhdDef  ::= "neighbourhood" NeighbourhoodID
 ClassID         ::= identifier.
 StateID         ::= identifier.
 NeighbourhoodID ::= identifier.
-ReprDecl        ::= quoted-char
-                  | identifier ":" quoted-string.
+
+ReprDecl        ::= "{" TaggedDatum {"," TaggedDatum} "}".
+TaggedDatum     ::= identifier ":" quoted-string.
 
 MembershipDecl  ::= ClassReferent.
 ClassReferent   ::= "is" ClassID.
 
 Rules           ::= Rule {"," Rule}.
-Rule            ::= "to" StateReferent "when" Expression.
+Rule            ::= "to" StateReferent ["when" Expression].
 
 StateReferent   ::= StateID
                   | arrow-chain
@@ -49,18 +52,18 @@ class Parser(object):
         self.scanner = Scanner(text)
 
     def alpaca(self):
-        entries = []
-        entries.append(self.entry())
+        defns = []
+        defns.append(self.defn())
         while self.scanner.consume(';'):
-            entries.append(self.entry())
+            defns.append(self.defn())
         if self.scanner.consume('begin'):
             # XXX read playfield
             pass
         else:
             self.scanner.expect('.')
-        return entries
+        return AST('Alpaca', defns)
 
-    def entry(self):
+    def defn(self):
         if self.scanner.on('state'):
             return self.state_defn()
         elif self.scanner.on('class'):
@@ -99,22 +102,30 @@ class Parser(object):
 
     def rules(self):
         r = []
-        r.append(self.rule())
-        while self.scanner.consume(','):
+        if self.scanner.on('to'):
             r.append(self.rule())
+            while self.scanner.consume(','):
+                r.append(self.rule())
         return r
 
     def rule(self):
         self.scanner.expect('to')
         s = self.state_ref()
-        self.scanner.expect('when')
-        e = self.expression()
+        e = AST('BoolLit', value='true')
+        if self.scanner.consume('when'):
+            e = self.expression()
         return AST('Rule', [s, e])
 
     def state_ref(self):
-        # XXX arrows, too
-        id = self.scanner.consume_type('identifier')
-        return AST('StateRef', value=id)
+        if self.scanner.on_type('identifier'):
+            id = self.scanner.consume_type('identifier')
+            return AST('StateRefEq', value=id)
+        elif self.scanner.on_type('arrow chain'):
+            rel = self.scanner.consume_type('arrow chain')
+            # XXX analyze rel to see if it is redundant
+            return AST('StateRefRel', value=rel)
+        self.scanner.expect('me')
+        return AST('StateRefMe')
 
     def expression(self):
         e = self.term()
@@ -128,7 +139,9 @@ class Parser(object):
         if self.scanner.on_type('integer literal'):
             count = self.scanner.consume_type('integer literal')
             # XXX in neighbourhood
-            # XXX class_ref
+            if self.scanner.consume('is'):
+                classid = self.scanner.consume_type('identifier')
+                return AST('AdjacencyClass', value=classid)
             s = self.state_ref()
             return AST('Adjacency', [s], value=count)
         elif self.scanner.consume('('):
@@ -142,5 +155,10 @@ class Parser(object):
             lit = self.scanner.consume_type('boolean literal')
             return AST('BoolLit', value=lit)
         else:
-            # XXX relationalfunc
-            pass
+            s1 = self.state_ref()
+            self.scanner.consume('=')  # optional
+            if self.scanner.consume('is'):
+                classid = self.scanner.consume_type('identifier')
+                return AST('RelationalClass', [s1], value=classid)
+            s2 = self.state_ref()
+            return AST('Relational', [s2])
