@@ -1,3 +1,4 @@
+from alpaca.ast import AST
 from alpaca.scanner import Scanner
 
 """
@@ -47,7 +48,7 @@ class Parser(object):
     def __init__(self, text):
         self.scanner = Scanner(text)
 
-    def program(self):
+    def alpaca(self):
         entries = []
         entries.append(self.entry())
         while self.scanner.consume(';'):
@@ -73,13 +74,13 @@ class Parser(object):
     def state_defn(self):
         self.scanner.expect('state')
         id = self.scanner.consume_type('identifier')
-        # while it's a quoted string or... something else,
-        # consume that
+        # XXX todo alternate representations
+        repr = self.scanner.consume_type('string literal')
         classes = []
         while self.scanner.consume('is'):
             classes.append(self.scanner.consume_type('identifier'))
         rules = self.rules()
-        return AST('StateDefn', value=id, rules)
+        return AST('StateDefn', rules, value=id)
 
     def class_defn(self):
         self.scanner.expect('class')
@@ -88,13 +89,13 @@ class Parser(object):
         while self.scanner.consume('is'):
             classes.append(self.scanner.consume_type('identifier'))
         rules = self.rules()
-        return AST('ClassDefn', value=id, rules)
+        return AST('ClassDefn', rules, value=id)
 
     def neighbourhood_defn(self):
         self.scanner.expect('neighbourhood')
         id = self.scanner.consume_type('identifier')
         n = self.neighbourhood()
-        return AST('NeighbourhoodDefn', value=id, [n])
+        return AST('NeighbourhoodDefn', [n], value=id)
 
     def rules(self):
         r = []
@@ -109,3 +110,8 @@ class Parser(object):
         self.scanner.expect('when')
         e = self.bool_expr()
         return AST('Rule', [s, e])
+
+    def state_ref(self):
+        # XXX arrows, too
+        id = self.scanner.consume_type('identifier')
+        return AST('StateRef', value=id)

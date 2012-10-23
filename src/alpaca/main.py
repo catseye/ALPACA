@@ -9,7 +9,7 @@ version 1.0-PRE.
 from optparse import OptionParser
 import sys
 
-from alpaca import ast, scanner
+from alpaca import ast, scanner, parser
 
 
 def main(argv):
@@ -32,10 +32,10 @@ def main(argv):
     file = open(args[0])
     text = file.read()
     file.close()
-    #p = Parser(text)
-    #prog = p.program()
-    #if options.show_ast:
-    #    from pprint import pprint
-    #    pprint(prog)
-    #    sys.exit(0)
+    p = parser.Parser(text)
+    ast = p.alpaca()
+    if options.show_ast:
+        from pprint import pprint
+        pprint(ast)
+        sys.exit(0)
     sys.exit(0)

@@ -17,6 +17,7 @@ class Scanner(object):
             self.type = type
             self.token = match.group(token_group)
             self.text = match.group(rest_group)
+            #print self.type, self.token
             return True
 
     def scan(self):
@@ -37,7 +38,7 @@ class Scanner(object):
         if self.scan_pattern(r'\"(.*?)\"', 'string literal',
                              token_group=2, rest_group=3):
             return
-        if self.scan_pattern(r'[a-zA-Z][a-zA-Z0-9]?\%', 'identifier'):
+        if self.scan_pattern(r'[a-zA-Z][a-zA-Z0-9]*', 'identifier'):
             return
         if self.scan_pattern(r'.', 'unknown character'):
             return
@@ -73,3 +74,11 @@ class Scanner(object):
             return True
         else:
             return False
+
+    def consume_type(self, type):
+        if self.on_type(type):
+            token = self.token
+            self.scan()
+            return token
+        else:
+            return None
