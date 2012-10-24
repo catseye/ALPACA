@@ -9,7 +9,7 @@ version 1.0-PRE.
 from optparse import OptionParser
 import sys
 
-from alpaca import ast, scanner, parser
+from alpaca import ast, scanner, parser, eval
 
 
 def main(argv):

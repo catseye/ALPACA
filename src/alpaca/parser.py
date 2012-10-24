@@ -135,10 +135,10 @@ class Parser(object):
             return AST('StateRefEq', value=id)
         elif self.scanner.on_type('arrow chain'):
             rel = self.scanner.consume_type('arrow chain')
-            # XXX analyze rel to see if it is redundant
-            return AST('StateRefRel', value=rel)
+            (dx, dy) = resolve_arrow_chain(rel)
+            return AST('StateRefRel', value=(dx, dy))
         self.scanner.expect('me')
-        return AST('StateRefMe')
+        return AST('StateRefRel', value=(0, 0))
 
     def expression(self):
         e = self.term()
@@ -175,3 +175,22 @@ class Parser(object):
                 return AST('RelationalClass', [s1], value=classid)
             s2 = self.state_ref()
             return AST('Relational', [s2])
+
+
+def resolve_arrow_chain(s):
+    dx = 0
+    dy = 0
+    for c in s:
+        if c == '<':
+            dx -= 1
+        elif c == '>':
+            dx += 1
+        elif c == '^':
+            dy -= 1
+        elif c == 'v':
+            dy += 1
+        else:
+            raise ValueError
+    # XXX produce warning if the len of s is longer than
+    # is necessary to get dx, dy
+    return (dx, dy)
