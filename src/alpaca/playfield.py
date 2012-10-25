@@ -1,7 +1,7 @@
 class Playfield(object):
-    def __init__(self):
+    def __init__(self, default):
         self.store = {}
-        self.default = ' '
+        self.default = default
         self.min_x = None
         self.min_y = None
         self.max_x = None
@@ -21,13 +21,19 @@ class Playfield(object):
     def get(self, x, y):
         return self.store.get((x, y), self.default)
 
+    def represent(self, name):
+        # XXX hardcoded
+        if name == 'Alive':
+            return '*'
+        return ' '
+
     def __str__(self):
         s = ''
         y = self.min_y
         while y <= self.max_y:
             x = self.min_x
             while x <= self.max_x:
-                s += self.get(x, y)
+                s += self.represent(self.get(x, y))
                 x += 1
             y += 1
             s += '\n'

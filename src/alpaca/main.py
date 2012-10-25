@@ -39,18 +39,18 @@ def main(argv):
         from pprint import pprint
         pprint(ast)
         sys.exit(0)
-    pf = Playfield()
-    pf.set(0, 0, '*')
-    pf.set(0, 1, '*')
-    pf.set(0, 2, '*')
-    pf.set(1, 2, '*')
-    pf.set(2, 1, '*')
+    pf = Playfield('Dead')
+    pf.set(0, 0, 'Alive')
+    pf.set(0, 1, 'Alive')
+    pf.set(0, 2, 'Alive')
+    pf.set(1, 2, 'Alive')
+    pf.set(2, 1, 'Alive')
     maxiter = 5
     count = 0
     print str(pf)
     print "-----"
     while count < maxiter:
-        new_pf = Playfield()
+        new_pf = Playfield('Dead')
         evolve_playfield(pf, new_pf, ast)
         pf = new_pf
         print str(pf)

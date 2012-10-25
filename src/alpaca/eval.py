@@ -67,28 +67,35 @@ def eval_rules(playfield, x, y, ast):
         s = rule.children[0]
         e = rule.children[1]
         if eval_expr(playfield, x, y, e):
-            return s
+            return eval_state_ref(playfield, x, y, s)
     return playfield.get(x, y)
 
 
-def find_state_defn(state_sym, ast):
+def find_state_defn(state_id, ast):
+    assert isinstance(state_id, basestring), \
+      "why is %r not a string?" % state_id
     assert ast.type == 'Alpaca'
     defns = ast.children[0]
     for defn in defns:
         if defn.type == 'StateDefn':
-            if state_sym == defn.children[0]:
+            if state_id == defn.value:
                 return defn
     raise KeyError, "No such state '%s'" % state_sym
 
 
 def evolve_playfield(playfield, new_pf, ast):
-    y = playfield.min_y
-    while y <= playfield.max_y:
-        x = playfield.min_x
-        while x <= playfield.max_x:
-            state = playfield.get(x, y)
-            state_ast = find_state_defn(state, ast)
-            new_state = eval_rules(playfield, x, y, state_ast.children[3])
-            new_pf.set(x, y, new_state)
+    # XXX TODO + 1, - 1's in here should reflect the maximum
+    # neighbourhood used by any rule
+    y = playfield.min_y - 1
+    while y <= playfield.max_y + 1:
+        x = playfield.min_x - 1
+        while x <= playfield.max_x + 1:
+            state_id = playfield.get(x, y)
+            #print "state at (%d,%d): %s" % (x, y, state_id)
+            state_ast = find_state_defn(state_id, ast)
+            #print " => %r" % state_ast
+            new_state_id = eval_rules(playfield, x, y, state_ast.children[3])
+            #print "new state: %s" % new_state_id
+            new_pf.set(x, y, new_state_id)
             x += 1
         y += 1
