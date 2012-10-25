@@ -19,6 +19,10 @@ def main(argv):
     optparser.add_option("-a", "--show-ast",
                          action="store_true", dest="show_ast", default=False,
                          help="show parsed AST instead of evaluating")
+    optparser.add_option("-g", "--generations",
+                         dest="generations", default=None, type='int',
+                         help="evolve CA for only the given number of "
+                              "generations")
     optparser.add_option("-t", "--test",
                          action="store_true", dest="test", default=False,
                          help="run test cases and exit")
@@ -45,15 +49,18 @@ def main(argv):
     pf.set(0, 2, 'Alive')
     pf.set(1, 2, 'Alive')
     pf.set(2, 1, 'Alive')
-    maxiter = 5
     count = 0
     print str(pf)
     print "-----"
-    while count < maxiter:
+    while True:
         new_pf = Playfield('Dead')
         evolve_playfield(pf, new_pf, ast)
         pf = new_pf
         print str(pf)
         print "-----"
         count += 1
+        if (options.generations is not None and
+            count >= options.generations):
+            break
+            
     sys.exit(0)
