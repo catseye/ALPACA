@@ -119,7 +119,7 @@ class Parser(object):
             r.append(self.rule())
             while self.scanner.consume(','):
                 r.append(self.rule())
-        return r
+        return AST('Rules', r)
 
     def rule(self):
         self.scanner.expect('to')

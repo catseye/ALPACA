@@ -1,3 +1,8 @@
+"""
+Direct evaluator of ALPACA AST nodes.
+
+"""
+
 from alpaca.ast import AST
 
 
@@ -49,28 +54,16 @@ def eval_expr(playfield, x, y, ast):
         raise NotImplementedError
 
 
-def eval_state(playfield, x, y, ast):
-    """Given a playfield and a position within it, and a boolean expression,
-    return what the expression evaluates to at that position.
+def eval_rules(playfield, x, y, ast):
+    """Given a playfield and a position within it, and a set of rules,
+    return the "to" state for the rule that applies.
     
     """
-    if ast.type == 'BoolOp':
-        lhs = eval_expr(playfield, x, y, ast.children[0])
-        rhs = eval_expr(playfield, x, y, ast.children[1])
-        if op == 'and':
-            return lhs and rhs
-        elif op == 'or':
-            return lhs or rhs
-        elif op == 'xor':
-            return not (lhs == rhs)
-    elif ast.type == 'BoolLit':
-        if ast.value == 'true':
-            return True
-        elif ast.value == 'false':
-            return False
-        elif ast.value == 'guess':
-            return False  # XXX randomly true or false
-        else:
-            raise NotImplementedError
-    else:
-        raise NotImplementedError
+    assert ast.type == 'Rules'
+    for rule in ast.children:
+        assert rule.type == 'Rule'
+        s = rule.children[0]
+        e = rule.children[1]
+        if eval_expr(playfield, x, y, e):
+            return s
+    return playfield.get(x, y)
