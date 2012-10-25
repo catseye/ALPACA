@@ -151,12 +151,17 @@ class Parser(object):
     def term(self):
         if self.scanner.on_type('integer literal'):
             count = self.scanner.consume_type('integer literal')
-            # XXX in neighbourhood
+            nb = None  # XXX default Moore neighbourhood
+            if self.scanner.consume('in'):
+                if self.scanner.on_type('identifier'):
+                    nb = self.scanner.consume('identifier')
+                else:
+                    nb = self.neighbourhood()
             if self.scanner.consume('is'):
                 classid = self.scanner.consume_type('identifier')
                 return AST('AdjacencyClass', value=classid)
             s = self.state_ref()
-            return AST('Adjacency', [s], value=count)
+            return AST('Adjacency', [s, nb], value=count)
         elif self.scanner.consume('('):
             e = self.expression()
             self.scanner.expect(')')
