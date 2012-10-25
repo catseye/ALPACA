@@ -23,6 +23,7 @@ def eval_expr(playfield, x, y, ast):
     if ast.type == 'BoolOp':
         lhs = eval_expr(playfield, x, y, ast.children[0])
         rhs = eval_expr(playfield, x, y, ast.children[1])
+        op = ast.value
         if op == 'and':
             return lhs and rhs
         elif op == 'or':
@@ -34,7 +35,8 @@ def eval_expr(playfield, x, y, ast):
     elif ast.type == 'Adjacency':
         state = eval_state_ref(playfield, x, y, ast.children[0])
         #nb = ast.children[1]
-        nb = set((0, -1), (-1, -1), (1, -1), (-1, 0), (1, 0), (0, 1), (-1, 1), (1, 1))
+        nb = set(((0, -1), (-1, -1), (1, -1), (-1, 0), (1, 0), (0, 1), (-1, 1), (1, 1)))
+        count = 0
         for (dx, dy) in nb:
             if playfield.get(x + dx, y + dx) == state:
                 count += 1
@@ -67,3 +69,26 @@ def eval_rules(playfield, x, y, ast):
         if eval_expr(playfield, x, y, e):
             return s
     return playfield.get(x, y)
+
+
+def find_state_defn(state_sym, ast):
+    assert ast.type == 'Alpaca'
+    defns = ast.children[0]
+    for defn in defns:
+        if defn.type == 'StateDefn':
+            if state_sym == defn.children[0]:
+                return defn
+    raise KeyError, "No such state '%s'" % state_sym
+
+
+def evolve_playfield(playfield, new_pf, ast):
+    y = playfield.min_y
+    while y <= playfield.max_y:
+        x = playfield.min_x
+        while x <= playfield.max_x:
+            state = playfield.get(x, y)
+            state_ast = find_state_defn(state, ast)
+            new_state = eval_rules(playfield, x, y, state_ast.children[3])
+            new_pf.set(x, y, new_state)
+            x += 1
+        y += 1

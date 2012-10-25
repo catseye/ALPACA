@@ -20,3 +20,15 @@ class Playfield(object):
 
     def get(self, x, y):
         return self.store.get((x, y), self.default)
+
+    def __str__(self):
+        s = ''
+        y = self.min_y
+        while y <= self.max_y:
+            x = self.min_x
+            while x <= self.max_x:
+                s += self.get(x, y)
+                x += 1
+            y += 1
+            s += '\n'
+        return s
