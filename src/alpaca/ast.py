@@ -16,3 +16,9 @@ class AST(object):
         if not self.children:
             return 'AST(%r,value=%r)' % (self.type, self.value)
         return 'AST(%r,%r,value=%r)' % (self.type, self.children, self.value)
+
+    def check(self):
+        for child in self.children:
+            assert isinstance(child, AST), \
+              "child %r of %r is not an AST node" % (child, self)
+            child.check()

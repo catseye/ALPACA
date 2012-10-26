@@ -43,6 +43,7 @@ def main(argv):
     text = file.read()
     file.close()
     ast = Parser(text).alpaca()
+    ast.check()
     if options.show_ast:
         from pprint import pprint
         pprint(ast)

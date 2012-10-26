@@ -53,7 +53,7 @@ class Parser(object):
 
     def alpaca(self):
         defns = []
-        playfield = None
+        playfield = AST('Playfield', value=None)
         defns.append(self.defn())
         while self.scanner.consume(';'):
             defns.append(self.defn())
@@ -61,7 +61,7 @@ class Parser(object):
             playfield = self.scanner.read_playfield()
         else:
             self.scanner.expect('.')
-        return AST('Alpaca', [defns, playfield])
+        return AST('Alpaca', [AST('Definitions', defns), playfield])
 
     def defn(self):
         if self.scanner.on('state'):
@@ -79,15 +79,18 @@ class Parser(object):
         self.scanner.expect('state')
         id = self.scanner.consume_type('identifier')
         attrs = []
-        char_repr = self.scanner.consume_type('string literal')
+        char_repr = AST('CharRepr',
+                        value=self.scanner.consume_type('string literal'))
         if self.scanner.consume('{'):
             attrs.append(self.tagged_datum())
             while self.scanner.consume(','):
                 attrs.append(self.tagged_datum())
             self.scanner.expect('}')
+        attrs = AST('ReprAttrs', attrs)
         classes = []
         while self.scanner.consume('is'):
             classes.append(self.scanner.consume_type('identifier'))
+        classes = AST('Membership', classes)
         rules = self.rules()
         return AST('StateDefn', [char_repr, attrs, classes, rules],
                    value=id)
@@ -151,7 +154,7 @@ class Parser(object):
     def term(self):
         if self.scanner.on_type('integer literal'):
             count = self.scanner.consume_type('integer literal')
-            nb = None  # XXX default Moore neighbourhood
+            nb = AST('Neighbourhood', value='Moore')
             if self.scanner.consume('in'):
                 if self.scanner.on_type('identifier'):
                     nb = self.scanner.consume('identifier')
