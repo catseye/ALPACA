@@ -1,7 +1,19 @@
 class Playfield(object):
-    def __init__(self, default):
+    def __init__(self, default, map):
         self.store = {}
         self.default = default
+        self.recalculate_limits()
+        self.map = map
+        self._inverted_map = dict([(v, k) for (k, v) in map.iteritems()])
+
+    def load(self, f):
+        y = 0
+        for line in f:
+            x = 0
+            for c in line.rstrip('\r\n'):
+                self.set(x, y, self.map[c])
+                x += 1
+            y += 1
         self.recalculate_limits()
 
     def recalculate_limits(self):
@@ -36,10 +48,7 @@ class Playfield(object):
         return self.store.get((x, y), self.default)
 
     def represent(self, name):
-        # XXX hardcoded
-        if name == 'Alive':
-            return '*'
-        return ' '
+        return self._inverted_map[name]
 
     def __str__(self):
         s = ''

@@ -1,5 +1,5 @@
 """
-alpaca [-at] description.alp
+alpaca [-agt] description.alp [form.ca]
 
 Reference implementation of the ALPACA cellular automaton definition language,
 version 1.0-PRE.
@@ -43,22 +43,23 @@ def main(argv):
         from pprint import pprint
         pprint(ast)
         sys.exit(0)
-    pf = Playfield('Dead')
-    pf.set(0, 0, 'Alive')
-    pf.set(0, 1, 'Alive')
-    pf.set(0, 2, 'Alive')
-    pf.set(1, 2, 'Alive')
-    pf.set(2, 1, 'Alive')
-    pf.recalculate_limits()
+
+    # XXX if has_own_defined_playfield(ast): pf = get_playfield_from(ast): else...
+    file = open(args[1])
+    map = {'*': 'Alive', ' ': 'Dead'}
+    pf = Playfield('Dead', map)
+    pf.load(file)
+    file.close()
+
     count = 0
     print str(pf)
     print "-----"
     while True:
-        new_pf = Playfield('Dead')
+        new_pf = Playfield('Dead', map)
         evolve_playfield(pf, new_pf, ast)
         new_pf.recalculate_limits()
         pf = new_pf
-        print str(pf)
+        print str(pf),
         print "-----"
         count += 1
         if (options.generations is not None and
