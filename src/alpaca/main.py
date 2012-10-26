@@ -9,7 +9,11 @@ version 1.0-PRE.
 from optparse import OptionParser
 import sys
 
-from alpaca.eval import evolve_playfield
+from alpaca.eval import (
+    evolve_playfield,
+    construct_representation_map,
+    get_default_state
+)
 from alpaca.parser import Parser
 from alpaca.playfield import Playfield
 
@@ -44,10 +48,12 @@ def main(argv):
         pprint(ast)
         sys.exit(0)
 
+    default_state = get_default_state(ast)
+    repr_map = construct_representation_map(ast)
+
     # XXX if has_own_defined_playfield(ast): pf = get_playfield_from(ast): else...
     file = open(args[1])
-    map = {'*': 'Alive', ' ': 'Dead'}
-    pf = Playfield('Dead', map)
+    pf = Playfield(default_state, repr_map)
     pf.load(file)
     file.close()
 
@@ -55,7 +61,7 @@ def main(argv):
     print str(pf)
     print "-----"
     while True:
-        new_pf = Playfield('Dead', map)
+        new_pf = Playfield(default_state, repr_map)
         evolve_playfield(pf, new_pf, ast)
         new_pf.recalculate_limits()
         pf = new_pf

@@ -84,6 +84,25 @@ def find_state_defn(state_id, ast):
     raise KeyError, "No such state '%s'" % state_sym
 
 
+def construct_representation_map(ast):
+    map = {}
+    assert ast.type == 'Alpaca'
+    defns = ast.children[0]
+    for defn in defns:
+        if defn.type == 'StateDefn':
+            map[defn.children[0]] = defn.value
+    return map
+
+
+def get_default_state(ast):
+    map = {}
+    assert ast.type == 'Alpaca'
+    defns = ast.children[0]
+    for defn in defns:
+        if defn.type == 'StateDefn':
+            return defn.value
+
+
 def evolve_playfield(playfield, new_pf, ast):
     # XXX TODO + 1, - 1's in here should reflect the maximum
     # neighbourhood used by any rule
