@@ -38,9 +38,9 @@ def eval_expr(playfield, x, y, ast):
         nb = set(((0, -1), (-1, -1), (1, -1), (-1, 0), (1, 0), (0, 1), (-1, 1), (1, 1)))
         count = 0
         for (dx, dy) in nb:
-            if playfield.get(x + dx, y + dx) == state:
+            if playfield.get(x + dx, y + dy) == state:
                 count += 1
-        print "(%d,%d) has %d neighbours that are %s" % (x, y, count, state)
+        #print "(%d,%d) has %d neighbours that are %s" % (x, y, count, state)
         return count >= int(ast.value)
     elif ast.type == 'Relational':
         raise NotImplementedError
@@ -96,7 +96,7 @@ def evolve_playfield(playfield, new_pf, ast):
             state_ast = find_state_defn(state_id, ast)
             #print " => %r" % state_ast
             new_state_id = eval_rules(playfield, x, y, state_ast.children[3])
-            print "new state: %s" % new_state_id
+            #print "new state: %s" % new_state_id
             new_pf.set(x, y, new_state_id)
             x += 1
         y += 1

@@ -49,12 +49,14 @@ def main(argv):
     pf.set(0, 2, 'Alive')
     pf.set(1, 2, 'Alive')
     pf.set(2, 1, 'Alive')
+    pf.recalculate_limits()
     count = 0
     print str(pf)
     print "-----"
     while True:
         new_pf = Playfield('Dead')
         evolve_playfield(pf, new_pf, ast)
+        new_pf.recalculate_limits()
         pf = new_pf
         print str(pf)
         print "-----"
