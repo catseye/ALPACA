@@ -282,10 +282,16 @@ is specified in ALPACA with a sequence of arrow chains inside parentheses.
 A neighbourhood definition associates a neighbourhood with a name, so that
 whereever a neighbourhood can be specified, the name can be used instead.
 
+A neighbourhood can be specified in an adjacency predicate.  If none is
+specified in an adjacency predicate, the Moore neighbourhood (as defined
+in the below example) is used.
+
 Example:
 
     neighbourhood Moore
       (< > ^ v ^> ^< v> v<);
+    neighbourhood vonNeumann
+      (^ v < >);
     state Space
       to Thing when 1 in Moore Thing;
     state Thing
