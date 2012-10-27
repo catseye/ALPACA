@@ -47,6 +47,24 @@ BoolPrimitive   ::= "true" | "false" | "guess".
 Neighbourhood   ::= "(" {arrow-chain} ")".
 """
 
+NB_VON_NEUMANN = AST('Neighbourhood', [
+    AST('StateRefRel', value=(0, -1)),
+    AST('StateRefRel', value=(0, 1)),
+    AST('StateRefRel', value=(-1, 0)),
+    AST('StateRefRel', value=(1, 0))
+])
+
+NB_MOORE = AST('Neighbourhood', [
+    AST('StateRefRel', value=(0, -1)),
+    AST('StateRefRel', value=(0, 1)),
+    AST('StateRefRel', value=(-1, 0)),
+    AST('StateRefRel', value=(-1, 1)),
+    AST('StateRefRel', value=(-1, -1)),
+    AST('StateRefRel', value=(1, 0)),
+    AST('StateRefRel', value=(1, 1)),
+    AST('StateRefRel', value=(1, -1)),
+])
+
 class Parser(object):
     def __init__(self, text):
         self.scanner = Scanner(text)
@@ -143,6 +161,14 @@ class Parser(object):
         self.scanner.expect('me')
         return AST('StateRefRel', value=(0, 0))
 
+    def neighbourhood(self):
+        self.scanner.expect('(')
+        refs = []
+        while self.scanner.on_type('arrow chain'):
+            refs.append(self.state_ref())
+        self.scanner.expect(')')
+        return AST('Neighbourhood', refs)
+
     def expression(self):
         e = self.term()
         while self.scanner.on_type('boolean operator'):
@@ -154,7 +180,7 @@ class Parser(object):
     def term(self):
         if self.scanner.on_type('integer literal'):
             count = self.scanner.consume_type('integer literal')
-            nb = AST('Neighbourhood', value='Moore')
+            nb = NB_MOORE
             if self.scanner.consume('in'):
                 if self.scanner.on_type('identifier'):
                     nb = self.scanner.consume('identifier')

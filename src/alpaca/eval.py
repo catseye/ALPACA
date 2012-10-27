@@ -34,8 +34,9 @@ def eval_expr(playfield, x, y, ast):
         return not eval_expr(playfield, x, y, ast.children[0])
     elif ast.type == 'Adjacency':
         state = eval_state_ref(playfield, x, y, ast.children[0])
-        #nb = ast.children[1]
-        nb = set(((0, -1), (-1, -1), (1, -1), (-1, 0), (1, 0), (0, 1), (-1, 1), (1, 1)))
+        nb = ast.children[1]
+        assert nb.type, 'Neighbourhood'
+        nb = set([node.value for node in nb.children])
         count = 0
         for (dx, dy) in nb:
             if playfield.get(x + dx, y + dy) == state:

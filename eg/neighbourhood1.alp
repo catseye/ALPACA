@@ -1,0 +1,3 @@
+state Space " "
+  to Block when 1 in (^ v < >) Block;
+state Block "*".
