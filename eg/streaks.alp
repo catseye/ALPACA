@@ -1,0 +1,6 @@
+state Space " "
+  to Thing when v> Thing;
+state Thing "*"
+begin
+*
+*

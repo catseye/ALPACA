@@ -47,7 +47,9 @@ def eval_expr(playfield, x, y, ast):
         #print "(%d,%d) has %d neighbours that are %s" % (x, y, count, state)
         return count >= int(ast.value)
     elif ast.type == 'Relational':
-        raise NotImplementedError
+        state0 = eval_state_ref(playfield, x, y, ast.children[0])
+        state1 = eval_state_ref(playfield, x, y, ast.children[1])
+        return state0 == state1
     elif ast.type == 'BoolLit':
         if ast.value == 'true':
             return True

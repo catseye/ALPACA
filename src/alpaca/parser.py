@@ -216,11 +216,11 @@ class Parser(object):
         else:
             s1 = self.state_ref()
             self.scanner.consume('=')  # optional
-            if self.scanner.consume('is'):
-                classid = self.scanner.consume_type('identifier')
-                return AST('RelationalClass', [s1], value=classid)
+            if self.scanner.on('is'):
+                c = self.class_decl()
+                return AST('RelationalClass', [s1, c])
             s2 = self.state_ref()
-            return AST('Relational', [s2])
+            return AST('Relational', [s1, s2])
 
 
 def resolve_arrow_chain(s):

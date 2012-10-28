@@ -175,6 +175,8 @@ will apply, which is no transition at all, i.e., remain in the same state.
 
 ##### State Referents #####
 
+    -> Tests for functionality "Evolve ALPACA CA one generation"
+
 A state referent may be:
 
 *   the name of a defined state, to refer to that state directly
@@ -182,16 +184,25 @@ A state referent may be:
 *   a chain of _arrows_, to refer to the state of the cell found at
     that relative position in the playfield
 
-Example: a somewhat less simple ALPACA description.  Here the states
-have transition rules that cause each cell to take on the state of the
-cell to the "north" (immediately above it.)  The effect would be to
-make any form in this cellular automaton "scroll downwards":
+Example: a somewhat less simple ALPACA description.  Here the (non-empty)
+states have transition rules that cause each cell to take on the state of one
+of its neighbours; `Up` cells take on the state of the cell to the "north"
+(immediately above it) while `Down` cells take on the state of the cell to
+the "south" (immediately below it.)  The effect in this example is for the
+cells to "swap places":
 
-    | state Space
+    | state Space " ";
+    | state Up "U"
     |   to ^ when true;
-    | state Thing
-    |   to ^ when true.
-    = ok
+    | state Down "D"
+    |   to v when true
+    | begin
+    | DDD
+    | UUU
+    = -----
+    = UUU
+    = DDD
+    = -----
 
 An arrow is either `^` (referring to one cell "north" or "above" the
 current cell,) `v` (one cell "south" or "below",) `<` (one cell "west"
@@ -204,12 +215,21 @@ when encountering a redundant arrow-chain.
 Example: an ALPACA description of a cellular automaton where `Thing`
 elements grow "streaks" to the northwest (diagonally up and to the left.)
 
-    | state Space
+    | state Space " "
     |   to Thing when v> Thing;
-    | state Thing.
-    = ok
+    | state Thing "*"
+    | begin
+    | *
+    | *
+    = -----
+    = * 
+    = **
+    =  *
+    = -----
 
 ##### Boolean Expressions #####
+
+    -> Tests for functionality "Parse ALPACA Description"
 
 The boolean expression may be:
 
