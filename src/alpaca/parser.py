@@ -2,59 +2,59 @@ from alpaca.ast import AST
 from alpaca.scanner import Scanner
 
 """
-Alpaca          ::= Definitions ("." | "begin" initial-configuration).
-Definitions     ::= Definition {";" Definition}.
-Definition      ::= StateDefinition
-                  | ClassDefinition
-                  | NeighbourhdDef.
-StateDefinition ::= "state" StateID [quoted-char] [ReprDecl]
+Alpaca          ::= Defns ("." | "begin" initial-configuration).
+Defns           ::= Defn {";" Defn}.
+Defn            ::= StateDefn
+                  | ClassDefn
+                  | NbhdDefn.
+StateDefn       ::= "state" StateID [quoted-char] [ReprDecl]
                     {MembershipDecl}
                     [Rules].
-ClassDefinition ::= "class" ClassID
+ClassDefn       ::= "class" ClassID
                     {MembershipDecl}
                     [Rules].
-NeighbourhdDef  ::= "neighbourhood" NeighbourhoodID
+NbhdDefn        ::= "neighbourhood" NbhdID
                     Neighbourhood.
 
 ClassID         ::= identifier.
 StateID         ::= identifier.
-NeighbourhoodID ::= identifier.
+NbhdID          ::= identifier.
 
-ReprDecl        ::= "{" TaggedDatum {"," TaggedDatum} "}".
-TaggedDatum     ::= identifier ":" quoted-string.
+ReprDecl        ::= "{" Attribute {"," Attribute} "}".
+Attribute       ::= identifier ":" quoted-string.
 
-MembershipDecl  ::= ClassReferent.
-ClassReferent   ::= "is" ClassID.
+MembershipDecl  ::= ClassRef.
+ClassRef        ::= "is" ClassID.
 
 Rules           ::= Rule {"," Rule}.
-Rule            ::= "to" StateReferent ["when" Expression].
+Rule            ::= "to" StateRef ["when" Expression].
 
-StateReferent   ::= StateID
+StateRef        ::= StateID
                   | arrow-chain
                   | "me".
 
 Expression      ::= Term {("and" | "or" | "xor") Term}.
-Term            ::= AdjacencyFunc
+Term            ::= AdjacencyPred
                   | "(" Expression ")"
                   | "not" Term
                   | BoolPrimitive
-                  | RelationalFunc.
-RelationalFunc  ::= StateReferent (["="] StateReferent | ClassReferent).
-AdjacencyFunc   ::= natural-number ["in" (Neigbourhood | NeighbourhoodID)]
-                    (StateReferent | ClassReferent).
+                  | RelationalPred.
+RelationalPred  ::= StateRef (["="] StateRef | ClassRef).
+AdjacencyPred   ::= natural-number ["in" (Neigbourhood | NbhdID)]
+                    (StateRef | ClassRef).
 BoolPrimitive   ::= "true" | "false" | "guess".
 
 Neighbourhood   ::= "(" {arrow-chain} ")".
 """
 
-NB_VON_NEUMANN = AST('Neighbourhood', [
+NBHD_VON_NEUMANN = AST('Neighbourhood', [
     AST('StateRefRel', value=(0, -1)),
     AST('StateRefRel', value=(0, 1)),
     AST('StateRefRel', value=(-1, 0)),
     AST('StateRefRel', value=(1, 0))
 ])
 
-NB_MOORE = AST('Neighbourhood', [
+NBHD_MOORE = AST('Neighbourhood', [
     AST('StateRefRel', value=(0, -1)),
     AST('StateRefRel', value=(0, 1)),
     AST('StateRefRel', value=(-1, 0)),
@@ -84,7 +84,7 @@ class Parser(object):
         else:
             self.scanner.expect('.')
         playfield = AST('Playfield', value=pf)
-        return AST('Alpaca', [AST('Definitions', defns), playfield])
+        return AST('Alpaca', [AST('Defns', defns), playfield])
 
     def defn(self):
         if self.scanner.on('state'):
@@ -92,7 +92,7 @@ class Parser(object):
         elif self.scanner.on('class'):
             return self.class_defn()
         elif self.scanner.on('neighbourhood'):
-            return self.neighbourhood_defn()
+            return self.nbhd_defn()
         else:
             raise SyntaxError("Expected 'state', 'class', or "
                               "'neighbourhood', but found "
@@ -105,20 +105,20 @@ class Parser(object):
         char_repr = AST('CharRepr',
                         value=self.scanner.consume_type('string literal'))
         if self.scanner.consume('{'):
-            attrs.append(self.tagged_datum())
+            attrs.append(self.attribute())
             while self.scanner.consume(','):
-                attrs.append(self.tagged_datum())
+                attrs.append(self.attribute())
             self.scanner.expect('}')
-        attrs = AST('ReprAttrs', attrs)
+        attrs = AST('ReprDecls', attrs)
         classes = []
         while self.scanner.consume('is'):
             classes.append(self.scanner.consume_type('identifier'))
-        classes = AST('Membership', classes)
+        classes = AST('MembershipDecls', classes)
         rules = self.rules()
         return AST('StateDefn', [char_repr, attrs, classes, rules],
                    value=id)
 
-    def tagged_datum(self):
+    def attribute(self):
         id = self.scanner.consume_type('identifier')
         self.scanner.expect(':')
         value = self.scanner.consume_type('string literal')
@@ -133,11 +133,11 @@ class Parser(object):
         rules = self.rules()
         return AST('ClassDefn', rules, value=id)
 
-    def neighbourhood_defn(self):
+    def nbhd_defn(self):
         self.scanner.expect('neighbourhood')
         id = self.scanner.consume_type('identifier')
         n = self.neighbourhood()
-        return AST('NeighbourhoodDefn', [n], value=id)
+        return AST('NbhdDefn', [n], value=id)
 
     def rules(self):
         r = []
@@ -185,7 +185,7 @@ class Parser(object):
     def term(self):
         if self.scanner.on_type('integer literal'):
             count = self.scanner.consume_type('integer literal')
-            nb = NB_MOORE
+            nb = NBHD_MOORE
             if self.scanner.consume('in'):
                 if self.scanner.on_type('identifier'):
                     nb = self.scanner.consume('identifier')

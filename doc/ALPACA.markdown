@@ -8,7 +8,20 @@ It is currently a work in progress.  Thus it is referred to as version
 The language described herein is mostly compatible with the version
 of the language which has existed until now (version 0.9x).  However, it
 extends it in some significant ways, and is backwards-incompatible with it
-in certain minor ways.  An implementation of 1.0-PRE does not yet exist.
+in certain minor ways.  An implementation of 1.0-PRE is underway.
+
+Abbreviations
+-------------
+
+The following abbreviations are used in this document (particularly in the
+grammar production rules) and the reference implementation.
+
+* _decl_ -- Declaration
+* _defn_ -- Definition
+* _nbhd_ -- Neighbourhood
+* _pred_ -- Predicate
+* _ref_  -- Referent
+* _repr_ -- Representation
 
 Encoding
 --------
@@ -44,13 +57,14 @@ for the state.
 
 A representation declaration consists of an optional single printable ASCII
 character enclosed in double quotes, followed by an optional comma-separated
-list of _tagged data_ enclosed in curly braces.
+list of _attributes_ enclosed in curly braces.
 
-In a tagged datum, the tag declares the purpose and/or the intended
-interpretation of the datum, which is a double-quoted string literal.  The
-tag may be drawn from a set defined by this specification, or it may be
-implementation-defined.  The datum may consist of essentially arbitrary data,
-and may refer to a character, a colour, a graphic image, or anything else.
+An attribute consists of a _key_ and a _value_.  The key declares the purpose
+and/or the intended interpretation of the value, which is a double-quoted
+string literal.  The key may be drawn from a set TBD by this specification,
+or it may be implementation-defined.  The value may consist of essentially
+arbitrary string data, and may refer to a character, a colour, a graphic
+image, or anything else.
 
 Representation declarations are not required.  If omitted, representation
 information can be supplied by the implementation, or can be defined with
@@ -67,14 +81,14 @@ declarations:
     state Space " ";
     state Thing "*".
 
-Example: a trivial ALPACA description with tagged-data representation
-declarations:
+Example: a trivial ALPACA description with representation declarations
+composed of attributes:
 
     state Space { colour: "black" };
     state Thing { image:  "http://example.com/thing.gif" }.
 
 Example: a trivial ALPACA description with both single character and
-tagged-data representation declarations:
+attribute representation declarations:
 
     state Space " " { color:  "black" };
     state Thing "x" { image:  "http://example.com/thing.gif",
@@ -149,10 +163,8 @@ Example: an ALPACA description of a cellular automaton where `Thing`
 elements grow "streaks" to the northwest (diagonally up and to the left.)
 
     state Space
-      to Thing when v> Thing,
-      to Space when true;
-    state Thing
-      to Thing when true.
+      to Thing when v> Thing;
+    state Thing.
 
 ##### Boolean Expressions #####
 
@@ -161,9 +173,9 @@ The boolean expression may be:
 *   the constant `true` or the constant `false`
 *   the nullary function `guess`, which randomly evaluates to either
     `true` or `false` (50% chance of each) each time it is evaluated
-*   a _state comparison_, described below
-*   a _class-inclusion comparison_, described below
-*   an _adjacency comparison_, described below
+*   a _state predicate_, described below
+*   a _class-inclusion predicate_, described below
+*   an _adjacency predicate_, described below
 *   a boolean expression preceded by the prefix operator `not`, which
     has its usual meaning
 *   two boolean expressions joined by one of the infix operators
@@ -173,35 +185,34 @@ The boolean expression may be:
 Please refer to the grammar for the associativeness and precedence of the
 boolean operators.
 
-A state comparison is an expression consisting of a state referent
+A state predicate is an expression consisting of a state referent
 and another state referent.  It evaluates to true if the two state
 referents refer to the same state.
 
 Example: a cellular automaton where `Thing`s become `Spaces` only
 if the cell to the east is a `Thing`:
 
-    state Space
-      to Space when true;
+    state Space;
     state Thing
-      to Space when > Thing,
-      to Thing when true.
+      to Space when > Thing.
 
 For more clarity, an equals sign may occur between the two state referents.
 
 Example: a cellular automaton where `Thing`s become `Space`s only
 if the cell to the north and the cell to the south are the same state:
 
-    state Space
-      to Space when true;
+    state Space;
     state Thing
-      to Space when ^ = v,
-      to Thing when true.
+      to Space when ^ = v.
 
-A class-inclusion comparison is similar to a state comparison, but instead
+A class-inclusion predicate is similar to a state predicate, but instead
 of a state referent, the second term is a class referent.  An example will
 be given under "Classes", below.
 
-An adjacency comparison is an expression consisting of an integer greater
+State predicates and class-inclusion predicates are collectively known as
+_relational predicates_.
+
+An adjacency predicate is an expression consisting of an integer greater
 than or equal to 1, followed by an optional neighbourhood specifier,
 followed by a state or class referent.  It evaluates to true only if the
 cell has at least that many neighbours of that state or class, in that
@@ -212,8 +223,7 @@ section.
 Example: a cellular automaton where `Thing`s become `Space`s only if they
 are not adjacent to three other `Thing`s.
 
-    state Space
-      to Space when true;
+    state Space;
     state Thing
       to Space when not 3 Thing.
 
@@ -228,8 +238,7 @@ of the same class.  `Cat` and `Dog` will behave differently when there is
 a state of the other type to the north, but they will both turn into
 `Space` when there is a `Space` to the east.
 
-    state Space
-      to Space when true;
+    state Space;
     class Animal
       to Space when > Space;
     state Dog is Animal
@@ -257,7 +266,7 @@ always remain `Three`s.
     state Three is BetaType is AlphaType
       to Three when true.
 
-In a transition rule, a class-inclusion comparison may be used by
+In a transition rule, a class-inclusion predicate may be used by
 giving a state referent, the token `is`, and the name of a class.
 This expression evaluates to true if the state so referred to is a
 member of that class.
@@ -326,46 +335,46 @@ Grammar
 Whitespace is ignored between tokens, and comments extend from
 `/*` to `*/` and do not nest.
 
-    Alpaca          ::= Definitions ("." | "begin" initial-configuration).
-    Definitions     ::= Definition {";" Definition}.
-    Definition      ::= StateDefinition
-                      | ClassDefinition
-                      | NeighbourhdDef.
-    StateDefinition ::= "state" StateID [quoted-char] [ReprDecl]
+    Alpaca          ::= Defns ("." | "begin" initial-configuration).
+    Defns           ::= Defn {";" Defn}.
+    Defn            ::= StateDefn
+                      | ClassDefn
+                      | NbhdDefn.
+    StateDefn       ::= "state" StateID [quoted-char] [ReprDecl]
                         {MembershipDecl}
                         [Rules].
-    ClassDefinition ::= "class" ClassID
+    ClassDefn       ::= "class" ClassID
                         {MembershipDecl}
                         [Rules].
-    NeighbourhdDef  ::= "neighbourhood" NeighbourhoodID
+    NbhdDefn        ::= "neighbourhood" NbhdID
                         Neighbourhood.
 
     ClassID         ::= identifier.
     StateID         ::= identifier.
-    NeighbourhoodID ::= identifier.
+    NbhdID          ::= identifier.
 
-    ReprDecl        ::= "{" TaggedDatum {"," TaggedDatum} "}".
-    TaggedDatum     ::= identifier ":" quoted-string.
+    ReprDecl        ::= "{" Attribute {"," Attribute} "}".
+    Attribute       ::= identifier ":" quoted-string.
 
-    MembershipDecl  ::= ClassReferent.
-    ClassReferent   ::= "is" ClassID.
+    MembershipDecl  ::= ClassRef.
+    ClassRef        ::= "is" ClassID.
 
     Rules           ::= Rule {"," Rule}.
-    Rule            ::= "to" StateReferent ["when" Expression].
+    Rule            ::= "to" StateRef ["when" Expression].
 
-    StateReferent   ::= StateID
+    StateRef        ::= StateID
                       | arrow-chain
                       | "me".
 
     Expression      ::= Term {("and" | "or" | "xor") Term}.
-    Term            ::= AdjacencyFunc
+    Term            ::= AdjacencyPred
                       | "(" Expression ")"
                       | "not" Term
                       | BoolPrimitive
-                      | RelationalFunc.
-    RelationalFunc  ::= StateReferent (["="] StateReferent | ClassReferent).
-    AdjacencyFunc   ::= natural-number ["in" (Neigbourhood | NeighbourhoodID)]
-                        (StateReferent | ClassReferent).
+                      | RelationalPred.
+    RelationalPred  ::= StateRef (["="] StateRef | ClassRef).
+    AdjacencyPred   ::= natural-number ["in" (Neigbourhood | NbhdID)]
+                        (StateRef | ClassRef).
     BoolPrimitive   ::= "true" | "false" | "guess".
 
     Neighbourhood   ::= "(" {arrow-chain} ")".
@@ -381,6 +390,7 @@ The following are token definitions, not productions.
     digit           ::= [0-9].
     arrow-chain     ::= arrow {arrow}.
     arrow           ::= [^v<>].
+    initial-config  ::= <<the remainder of the file>>.
 
 Semantics
 ---------
@@ -422,7 +432,7 @@ way in which that could happen.
 Differences between ALPACA 1.0 and Previous Versions
 ----------------------------------------------------
 
-Previous versions of ALPACA did not support tagged-datum representation
+Previous versions of ALPACA did not support attribute representation
 declarations, or multiple representation declarations; they supported only
 a single quoted character to be used as the "appearance".
 
@@ -434,7 +444,7 @@ This is no longer supported.  However, a future version might introduce a
 more "readable" alternative state referent syntax.
 
 Previous versions of ALPACA always assumed a Moore neighbourhood when making
-an adjacency comparison.
+an adjacency predicate.
 
 Previous versions of ALPACA did not support giving an initial configuration
 for the cellular automaton.
