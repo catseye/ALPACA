@@ -104,6 +104,37 @@ Representation declarations generally specify a visual representation.
 However, to drive home that this is not necessarily the case, the
 verbiage "visual" and "appearance" has been avoided in this specification.
 
+#### Aside: Initial Configuration ####
+
+    -> Tests for functionality "Evolve ALPACA CA one generation"
+
+We describe the initial configuration now, as it will be useful for
+demonstrating the meanings of things in the core ALPACA description in
+the examples to follow.
+
+The list of definitions may end either with a period or the token
+`begin`.  If it is the token `begin`, the remainder of the file is
+assumed to contain an initial configuration for the cellular automton
+now defined.
+
+`begin` should be followed by a newline.  Each subsequent line of text
+contains characters which map to cells of the playfield in the initial
+configuration.
+
+Example:
+
+    | state Space " ";
+    | state Thing "*"
+    | begin
+    |  *
+    | ***
+    |  *
+    = -----
+    =  * 
+    = ***
+    =  * 
+    = -----
+
 #### Class Memberships ####
 
 Any number of classes may be named after the representation declarations,
@@ -111,6 +142,8 @@ with the name of each class preceded by `is`.  More information on this
 will be given in the "Classes" section below.
 
 #### Transition Rules ####
+
+    -> Tests for functionality "Parse ALPACA Description"
 
 Each transition rule begins with `to`, gives a _state referent_ which
 specifes the state to which to transition, optionally followed by `when` and
@@ -322,16 +355,7 @@ Example:
     |   to Space when 3 in (^ v < >) Space.
     = ok
 
-### Initial Configuration ###
-
-The list of definitions may end either with a period or the token
-`begin`.  If it is the token `begin`, the remainder of the file is
-assumed to contain an initial configuration for the cellular automton
-now defined.
-
-`begin` should be followed by a newline.  Each subsequent line of text
-contains characters which map to cells of the playfield in the initial
-configuration.
+(TODO: the following example is out of place)
 
 Example: a glider, pointed northeast, in John Conway's Game of Life
 automaton:

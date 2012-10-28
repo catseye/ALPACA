@@ -1,5 +1,5 @@
 """
-alpaca [-agpt] description.alp [form.ca]
+alpaca [-agIpt] description.alp [form.ca]
 
 Reference implementation of the ALPACA cellular automaton definition language,
 version 1.0-PRE.
@@ -28,6 +28,10 @@ def main(argv):
                          dest="generations", default=None, type='int',
                          help="evolve CA for only the given number of "
                               "generations")
+    optparser.add_option("-I", "--hide-initial",
+                         action="store_false", dest="show_initial",
+                         default=True,
+                         help="don't show initial configuration")
     optparser.add_option("-p", "--parse-only",
                          action="store_true", dest="parse_only",
                          default=False,
@@ -66,8 +70,10 @@ def main(argv):
         file.close()
 
     count = 0
-    print str(pf)
     print "-----"
+    if options.show_initial:
+        print str(pf),
+        print "-----"
     while True:
         new_pf = Playfield(default_state, repr_map)
         evolve_playfield(pf, new_pf, ast)
