@@ -111,8 +111,8 @@ class Parser(object):
             self.scanner.expect('}')
         attrs = AST('ReprDecls', attrs)
         classes = []
-        while self.scanner.consume('is'):
-            classes.append(self.scanner.consume_type('identifier'))
+        while self.scanner.on('is'):
+            classes.append(self.class_decl())
         classes = AST('MembershipDecls', classes)
         rules = self.rules()
         return AST('StateDefn', [char_repr, attrs, classes, rules],
@@ -122,19 +122,25 @@ class Parser(object):
         id = self.scanner.consume_type('identifier')
         self.scanner.expect(':')
         value = self.scanner.consume_type('string literal')
-        return AST('Attribute', [id, value])
+        return AST('Attribute', value=(id, value))
+
+    def class_decl(self):
+        self.scanner.expect('is')
+        id = self.scanner.consume_type('identifier')
+        return AST('ClassDecl', value=id)
 
     def class_defn(self):
         self.scanner.expect('class')
         id = self.scanner.consume_type('identifier')
         classes = []
-        while self.scanner.consume('is'):
-            classes.append(self.scanner.consume_type('identifier'))
+        while self.scanner.on('is'):
+            classes.append(self.class_decl())
         rules = self.rules()
-        return AST('ClassDefn', rules, value=id)
+        return AST('ClassDefn', [rules], value=id)
 
     def nbhd_defn(self):
         self.scanner.expect('neighbourhood')
+        self.scanner.check_type('identifier')
         id = self.scanner.consume_type('identifier')
         n = self.neighbourhood()
         return AST('NbhdDefn', [n], value=id)

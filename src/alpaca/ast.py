@@ -6,6 +6,7 @@ class AST(object):
             self.children = children
         else:
             self.children = []
+        assert isinstance(self.children, list)
 
     def add_child(self, item):
         self.children.append(item)
