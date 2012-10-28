@@ -52,6 +52,25 @@ class Scanner(object):
             raise ValueError("this should never happen, "
                              "self.text=(%s)" % self.text)
 
+    def scan_playfield(self):
+        """Called when the token which introduces the playfield has
+        already just been scanned.
+
+        """
+        self.scan_pattern(r'[ \t]*', 'whitespace')
+        self.scan_pattern(r'[\n\r]', 'eol')
+        elems = []
+        y = 0
+        while self.text:
+            x = 0
+            while self.scan_pattern(r'[^\n\r]', 'arbitrary character'):
+                #print repr((x, y, self.token))
+                elems.append((x, y, self.token))
+                x += 1
+            self.scan_pattern(r'[\n\r]', 'eol')
+            y += 1
+        return elems
+
     def expect(self, token):
         if self.token == token:
             self.scan()

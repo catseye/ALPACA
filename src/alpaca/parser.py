@@ -71,14 +71,19 @@ class Parser(object):
 
     def alpaca(self):
         defns = []
-        playfield = AST('Playfield', value=None)
         defns.append(self.defn())
+        pf = None
         while self.scanner.consume(';'):
             defns.append(self.defn())
-        if self.scanner.consume('begin'):
-            playfield = self.scanner.read_playfield()
+        # we shan't consume() this token, lest the scanner jump
+        # ahead assuming that the next token is normal.  If the
+        # scanner is already on this token, the rest of the scanner
+        # text is the playfield; so we just check on() here.
+        if self.scanner.on('begin'):
+            pf = self.scanner.scan_playfield()
         else:
             self.scanner.expect('.')
+        playfield = AST('Playfield', value=pf)
         return AST('Alpaca', [AST('Definitions', defns), playfield])
 
     def defn(self):

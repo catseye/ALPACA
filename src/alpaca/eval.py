@@ -1,9 +1,12 @@
 """
 Direct evaluator of ALPACA AST nodes.
 
+XXX move some of these out into alpaca.analysis
+
 """
 
 from alpaca.ast import AST
+from alpaca.playfield import Playfield
 
 
 def eval_state_ref(playfield, x, y, ast):
@@ -100,7 +103,6 @@ def construct_representation_map(ast):
 
 
 def get_default_state(ast):
-    map = {}
     assert ast.type == 'Alpaca'
     defns = ast.children[0]
     assert defns.type == 'Definitions'
@@ -109,9 +111,23 @@ def get_default_state(ast):
             return defn.value
 
 
+def get_defined_playfield(ast):
+    assert ast.type == 'Alpaca'
+    playast = ast.children[1]
+    assert playast.type == 'Playfield'
+    repr_map = construct_representation_map(ast)
+    pf = Playfield(get_default_state(ast), repr_map)
+    for (x, y, ch) in playast.value:
+        pf.set(x, y, repr_map[ch])
+    pf.recalculate_limits()
+    return pf
+
+
 def evolve_playfield(playfield, new_pf, ast):
     # XXX TODO + 1, - 1's in here should reflect the maximum
     # neighbourhood used by any rule
+    if playfield.min_y is None:
+        return
     y = playfield.min_y - 1
     while y <= playfield.max_y + 1:
         x = playfield.min_x - 1

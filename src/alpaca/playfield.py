@@ -6,6 +6,16 @@ class Playfield(object):
         self.map = map
         self._inverted_map = dict([(v, k) for (k, v) in map.iteritems()])
 
+    def copy(self, pf):
+        y = pf.min_y
+        while y <= pf.max_y:
+            x = pf.min_x
+            while x <= pf.max_x:
+                self.set(x, y, pf.get(x, y))
+                x += 1
+            y += 1
+        self.recalculate_limits()
+
     def load(self, f):
         y = 0
         for line in f:
@@ -53,6 +63,8 @@ class Playfield(object):
     def __str__(self):
         s = ''
         y = self.min_y
+        if y is None:
+            return ''
         while y <= self.max_y:
             x = self.min_x
             while x <= self.max_x:

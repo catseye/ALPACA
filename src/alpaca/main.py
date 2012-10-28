@@ -12,7 +12,8 @@ import sys
 from alpaca.eval import (
     evolve_playfield,
     construct_representation_map,
-    get_default_state
+    get_default_state,
+    get_defined_playfield,
 )
 from alpaca.parser import Parser
 from alpaca.playfield import Playfield
@@ -52,11 +53,12 @@ def main(argv):
     default_state = get_default_state(ast)
     repr_map = construct_representation_map(ast)
 
-    # XXX if has_own_defined_playfield(ast): pf = get_playfield_from(ast): else...
-    file = open(args[1])
-    pf = Playfield(default_state, repr_map)
-    pf.load(file)
-    file.close()
+    pf = get_defined_playfield(ast)
+    if pf is None:
+        file = open(args[1])
+        pf = Playfield(default_state, repr_map)
+        pf.load(file)
+        file.close()
 
     count = 0
     print str(pf)
