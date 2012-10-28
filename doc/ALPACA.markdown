@@ -33,6 +33,8 @@ descriptions are typically encoded in UTF-8 and contained in text files.
 Syntax
 ------
 
+    -> Tests for functionality "Parse ALPACA Description"
+
 An ALPACA description consists of a list of one or more _definitions_,
 optionally followed by an _initial configuration_.
 
@@ -43,8 +45,9 @@ with either a period (if no initial configuration is given) or the token
 
 Example: a trivial ALPACA description with two states:
 
-    state Space;
-    state Thing.
+    | state Space;
+    | state Thing.
+    = ok
 
 ### States ###
 
@@ -78,21 +81,24 @@ using the single ASCII character representation declarations of the states.
 Example: a trivial ALPACA description with single character representation
 declarations:
 
-    state Space " ";
-    state Thing "*".
+    | state Space " ";
+    | state Thing "*".
+    = ok
 
 Example: a trivial ALPACA description with representation declarations
 composed of attributes:
 
-    state Space { colour: "black" };
-    state Thing { image:  "http://example.com/thing.gif" }.
+    | state Space { colour: "black" };
+    | state Thing { image:  "http://example.com/thing.gif" }.
+    = ok
 
 Example: a trivial ALPACA description with both single character and
 attribute representation declarations:
 
-    state Space " " { color:  "black" };
-    state Thing "x" { image:  "http://example.com/thing.gif",
-                      border: "1px solid green" }.
+    | state Space " " { color:  "black" };
+    | state Thing "x" { image:  "http://example.com/thing.gif",
+    |                   border: "1px solid green" }.
+    = ok
 
 Representation declarations generally specify a visual representation.
 However, to drive home that this is not necessarily the case, the
@@ -115,15 +121,17 @@ Example: a simple ALPACA description where the states have trivial
 transition rules.  The result is an automaton where all cells toggle their
 state from `Space` to `Thing` on every tick.
 
-    state Space
-      to Thing when true;
-    state Thing
-      to Space when true.
+    | state Space
+    |   to Thing when true;
+    | state Thing
+    |   to Space when true.
+    = ok
 
 If `when` is omitted, `when true` is assumed, so the above example could
 also be written:
 
-    state Space to Thing; state Thing to Space.
+    | state Space to Thing; state Thing to Space.
+    = ok
 
 During evolution of the cellular automaton, transition rules are evaluated
 in source-code order; as soon as one transition rule is found to apply, the
@@ -146,10 +154,11 @@ have transition rules that cause each cell to take on the state of the
 cell to the "north" (immediately above it.)  The effect would be to
 make any form in this cellular automaton "scroll downwards":
 
-    state Space
-      to ^ when true;
-    state Thing
-      to ^ when true.
+    | state Space
+    |   to ^ when true;
+    | state Thing
+    |   to ^ when true.
+    = ok
 
 An arrow is either `^` (referring to one cell "north" or "above" the
 current cell,) `v` (one cell "south" or "below",) `<` (one cell "west"
@@ -162,9 +171,10 @@ when encountering a redundant arrow-chain.
 Example: an ALPACA description of a cellular automaton where `Thing`
 elements grow "streaks" to the northwest (diagonally up and to the left.)
 
-    state Space
-      to Thing when v> Thing;
-    state Thing.
+    | state Space
+    |   to Thing when v> Thing;
+    | state Thing.
+    = ok
 
 ##### Boolean Expressions #####
 
@@ -192,18 +202,20 @@ referents refer to the same state.
 Example: a cellular automaton where `Thing`s become `Spaces` only
 if the cell to the east is a `Thing`:
 
-    state Space;
-    state Thing
-      to Space when > Thing.
+    | state Space;
+    | state Thing
+    |   to Space when > Thing.
+    = ok
 
 For more clarity, an equals sign may occur between the two state referents.
 
 Example: a cellular automaton where `Thing`s become `Space`s only
 if the cell to the north and the cell to the south are the same state:
 
-    state Space;
-    state Thing
-      to Space when ^ = v.
+    | state Space;
+    | state Thing
+    |   to Space when ^ = v.
+    = ok
 
 A class-inclusion predicate is similar to a state predicate, but instead
 of a state referent, the second term is a class referent.  An example will
@@ -223,9 +235,10 @@ section.
 Example: a cellular automaton where `Thing`s become `Space`s only if they
 are not adjacent to three other `Thing`s.
 
-    state Space;
-    state Thing
-      to Space when not 3 Thing.
+    | state Space;
+    | state Thing
+    |   to Space when not 3 Thing.
+    = ok
 
 ### Classes ###
 
@@ -238,13 +251,14 @@ of the same class.  `Cat` and `Dog` will behave differently when there is
 a state of the other type to the north, but they will both turn into
 `Space` when there is a `Space` to the east.
 
-    state Space;
-    class Animal
-      to Space when > Space;
-    state Dog is Animal
-      to Cat when ^ Cat;
-    state Cat is Animal
-      to Dog when ^ Dog.
+    | state Space;
+    | class Animal
+    |   to Space when > Space;
+    | state Dog is Animal
+    |   to Cat when ^ Cat;
+    | state Cat is Animal
+    |   to Dog when ^ Dog.
+    = ok
 
 Each state can belong to zero or more classes.  When it belongs to more
 than one, class the transition rules for each class are applied in order
@@ -257,14 +271,15 @@ states are members of both classes, but they inherit in different orders.
 In it, `One`s always remain `One`s, `Two`s always remain `Two`s, and `Three`s
 always remain `Three`s.
 
-    class AlphaType
-      to One when true;
-    class BetaType
-      to Two when true;
-    state One is AlphaType is BetaType;
-    state Two is BetaType is AlphaType;
-    state Three is BetaType is AlphaType
-      to Three when true.
+    | class AlphaType
+    |   to One when true;
+    | class BetaType
+    |   to Two when true;
+    | state One is AlphaType is BetaType;
+    | state Two is BetaType is AlphaType;
+    | state Three is BetaType is AlphaType
+    |   to Three when true.
+    = ok
 
 In a transition rule, a class-inclusion predicate may be used by
 giving a state referent, the token `is`, and the name of a class.
@@ -275,14 +290,14 @@ Example: a cellular automaton where `Dog`s and `Cat`s (both `Animal`s)
 switch to the other when the cell to the north is not an `Animal` and turn
 to `Space` when the cell to the east is an `Animal`.
 
-    state Space
-      to Space when true;
-    class Animal
-      to Space when > is Animal;
-    state Dog is Animal
-      to Cat when not ^ is Animal;
-    state Cat is Animal
-      to Dog when not ^ is Animal.
+    | state Space;
+    | class Animal
+    |   to Space when > is Animal;
+    | state Dog is Animal
+    |   to Cat when not ^ is Animal;
+    | state Cat is Animal
+    |   to Dog when not ^ is Animal.
+    = ok
 
 ### Neighbourhoods ###
 
@@ -297,14 +312,15 @@ in the below example) is used.
 
 Example:
 
-    neighbourhood Moore
-      (< > ^ v ^> ^< v> v<);
-    neighbourhood vonNeumann
-      (^ v < >);
-    state Space
-      to Thing when 1 in Moore Thing;
-    state Thing
-      to Space when 3 in (^ v < >) Space.
+    | neighbourhood Moore
+    |   (< > ^ v ^> ^< v> v<);
+    | neighbourhood vonNeumann
+    |   (^ v < >);
+    | state Space
+    |   to Thing when 1 in Moore Thing;
+    | state Thing
+    |   to Space when 3 in (^ v < >) Space.
+    = ok
 
 ### Initial Configuration ###
 
@@ -320,14 +336,15 @@ configuration.
 Example: a glider, pointed northeast, in John Conway's Game of Life
 automaton:
 
-    state Dead  " "
-      to Alive when 3 Alive and 5 Dead;
-    state Alive "*"
-      to Dead when 4 Alive or 7 Dead
-    begin
-     **
-    * *
-      *
+    | state Dead  " "
+    |   to Alive when 3 Alive and 5 Dead;
+    | state Alive "*"
+    |   to Dead when 4 Alive or 7 Dead
+    | begin
+    |  **
+    | * *
+    |   *
+    = ok
 
 Grammar
 -------

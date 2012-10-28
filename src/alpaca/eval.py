@@ -81,7 +81,7 @@ def find_state_defn(state_id, ast):
       "why is %r not a string?" % state_id
     assert ast.type == 'Alpaca'
     defns = ast.children[0]
-    assert defns.type == 'Definitions'
+    assert defns.type == 'Defns'
     for defn in defns.children:
         if defn.type == 'StateDefn':
             if state_id == defn.value:
@@ -93,7 +93,7 @@ def construct_representation_map(ast):
     map = {}
     assert ast.type == 'Alpaca'
     defns = ast.children[0]
-    assert defns.type == 'Definitions'
+    assert defns.type == 'Defns'
     for defn in defns.children:
         if defn.type == 'StateDefn':
             repr = defn.children[0]
@@ -105,7 +105,7 @@ def construct_representation_map(ast):
 def get_default_state(ast):
     assert ast.type == 'Alpaca'
     defns = ast.children[0]
-    assert defns.type == 'Definitions'
+    assert defns.type == 'Defns'
     for defn in defns.children:
         if defn.type == 'StateDefn':
             return defn.value

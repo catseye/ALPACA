@@ -1,5 +1,5 @@
 """
-alpaca [-agt] description.alp [form.ca]
+alpaca [-agpt] description.alp [form.ca]
 
 Reference implementation of the ALPACA cellular automaton definition language,
 version 1.0-PRE.
@@ -28,6 +28,10 @@ def main(argv):
                          dest="generations", default=None, type='int',
                          help="evolve CA for only the given number of "
                               "generations")
+    optparser.add_option("-p", "--parse-only",
+                         action="store_true", dest="parse_only",
+                         default=False,
+                         help="parse the ALPACA description only and exit")
     optparser.add_option("-t", "--test",
                          action="store_true", dest="test", default=False,
                          help="run test cases and exit")
@@ -45,6 +49,8 @@ def main(argv):
     file.close()
     ast = Parser(text).alpaca()
     ast.check()
+    if options.parse_only:
+        sys.exit(0)
     if options.show_ast:
         from pprint import pprint
         pprint(ast)
