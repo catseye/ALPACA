@@ -314,7 +314,7 @@ Example:
 
     | neighbourhood Moore
     |   (< > ^ v ^> ^< v> v<);
-    | neighbourhood vonNeumann
+    | neighbourhood VonNeumann
     |   (^ v < >);
     | state Space
     |   to Thing when 1 in Moore Thing;
@@ -445,6 +445,14 @@ An ALPACA description consisting only of classes and/or neighbourhoods is
 valid, but somewhat meaningless by itself.  It might be used as a "module"
 by some other description, however, this spec does not define a standard
 way in which that could happen.
+
+`arrow-chain` and `identifier` tokens overlap; tokens beginning with a
+series of `v`s (lower-case letter "vee"s) will be interpreted as an `arrow-chain`.
+Thus, the text `vonNeumann` will be scanned as the arrow-chain `v` followed
+by the identifier `onNeumann`.  Until such time as this is addressed, avoid
+giving states, classes, and neighbourhoods names which begin with a lowercase
+`v`.  (Convention says to start these identifiers with uppercase letters
+anyhow.)
 
 Differences between ALPACA 1.0 and Previous Versions
 ----------------------------------------------------

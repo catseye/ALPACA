@@ -194,7 +194,8 @@ class Parser(object):
             nb = NBHD_MOORE
             if self.scanner.consume('in'):
                 if self.scanner.on_type('identifier'):
-                    nb = self.scanner.consume('identifier')
+                    nb = AST('NbhdRef',
+                             value=self.scanner.consume_type('identifier'))
                 else:
                     nb = self.neighbourhood()
             if self.scanner.consume('is'):

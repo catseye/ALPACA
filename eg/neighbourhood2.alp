@@ -1,8 +1,8 @@
 neighbourhood Moore
   (< > ^ v ^> ^< v> v<);
-neighbourhood vonNeumann
+neighbourhood Foo
   (^ v < >);
 state Space
   to Thing when 1 in Moore Thing;
 state Thing
-  to Space when 3 in (^ v < >) Space.
+  to Space when 3 Space.

@@ -7,9 +7,9 @@ class AST(object):
         else:
             self.children = []
         assert isinstance(self.children, list)
-
-    def add_child(self, item):
-        self.children.append(item)
+        for child in self.children:
+            assert isinstance(child, AST), \
+              "child %r of %r is not an AST node" % (child, self)        
 
     def __repr__(self):
         if self.value is None:
@@ -17,9 +17,3 @@ class AST(object):
         if not self.children:
             return 'AST(%r,value=%r)' % (self.type, self.value)
         return 'AST(%r,%r,value=%r)' % (self.type, self.children, self.value)
-
-    def check(self):
-        for child in self.children:
-            assert isinstance(child, AST), \
-              "child %r of %r is not an AST node" % (child, self)
-            child.check()

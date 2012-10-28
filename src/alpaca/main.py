@@ -48,7 +48,6 @@ def main(argv):
     text = file.read()
     file.close()
     ast = Parser(text).alpaca()
-    ast.check()
     if options.parse_only:
         sys.exit(0)
     if options.show_ast:
