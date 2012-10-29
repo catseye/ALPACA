@@ -229,8 +229,6 @@ elements grow "streaks" to the northwest (diagonally up and to the left.)
 
 ##### Boolean Expressions #####
 
-    -> Tests for functionality "Parse ALPACA Description"
-
 The boolean expression may be:
 
 *   the constant `true` or the constant `false`
@@ -255,20 +253,32 @@ referents refer to the same state.
 Example: a cellular automaton where `Thing`s become `Spaces` only
 if the cell to the east is a `Thing`:
 
-    | state Space;
-    | state Thing
-    |   to Space when > Thing.
-    = ok
+    | state Space " ";
+    | state Thing "*"
+    |   to Space when > Thing
+    | begin
+    | *
+    | **
+    = -----
+    = * 
+    =  *
+    = -----
 
 For more clarity, an equals sign may occur between the two state referents.
 
 Example: a cellular automaton where `Thing`s become `Space`s only
 if the cell to the north and the cell to the south are the same state:
 
-    | state Space;
-    | state Thing
-    |   to Space when ^ = v.
-    = ok
+    | state Space " ";
+    | state Thing "*"
+    |   to Space when ^ = v
+    | begin
+    | *
+    | **
+    = -----
+    = *
+    = *
+    = -----
 
 A class-inclusion predicate is similar to a state predicate, but instead
 of a state referent, the second term is a class referent.  An example will
@@ -288,10 +298,16 @@ section.
 Example: a cellular automaton where `Thing`s become `Space`s only if they
 are not adjacent to three other `Thing`s.
 
-    | state Space;
-    | state Thing
-    |   to Space when not 3 Thing.
-    = ok
+    | state Space " ";
+    | state Thing "*"
+    |   to Space when not 3 Thing
+    | begin
+    | *
+    | **
+    | *
+    = -----
+    = **
+    = -----
 
 ### Classes ###
 
@@ -304,14 +320,20 @@ of the same class.  `Cat` and `Dog` will behave differently when there is
 a state of the other type to the north, but they will both turn into
 `Space` when there is a `Space` to the east.
 
-    | state Space;
+    | state Space " ";
     | class Animal
     |   to Space when > Space;
-    | state Dog is Animal
+    | state Dog "d" is Animal
     |   to Cat when ^ Cat;
-    | state Cat is Animal
-    |   to Dog when ^ Dog.
-    = ok
+    | state Cat "c" is Animal
+    |   to Dog when ^ Dog
+    | begin
+    | ccd
+    | dcc
+    = -----
+    = dc
+    = cc
+    = -----
 
 Each state can belong to zero or more classes.  When it belongs to more
 than one, class the transition rules for each class are applied in order
@@ -324,15 +346,20 @@ states are members of both classes, but they inherit in different orders.
 In it, `One`s always remain `One`s, `Two`s always remain `Two`s, and `Three`s
 always remain `Three`s.
 
+    | state Space " ";
     | class AlphaType
     |   to One when true;
     | class BetaType
     |   to Two when true;
-    | state One is AlphaType is BetaType;
-    | state Two is BetaType is AlphaType;
-    | state Three is BetaType is AlphaType
-    |   to Three when true.
-    = ok
+    | state One "1" is AlphaType is BetaType;
+    | state Two "2" is BetaType is AlphaType;
+    | state Three "3" is BetaType is AlphaType
+    |   to Three when true
+    | begin
+    | 123
+    = -----
+    = 123
+    = -----
 
 In a transition rule, a class-inclusion predicate may be used by
 giving a state referent, the token `is`, and the name of a class.
@@ -343,16 +370,22 @@ Example: a cellular automaton where `Dog`s and `Cat`s (both `Animal`s)
 switch to the other when the cell to the north is not an `Animal` and turn
 to `Space` when the cell to the east is an `Animal`.
 
-    | state Space;
+    | state Space " ";
     | class Animal
     |   to Space when > is Animal;
-    | state Dog is Animal
+    | state Dog "d" is Animal
     |   to Cat when not ^ is Animal;
-    | state Cat is Animal
-    |   to Dog when not ^ is Animal.
-    = ok
+    | state Cat "c" is Animal
+    |   to Dog when not ^ is Animal
+    | begin
+    | dcdc
+    = -----
+    = dcdc
+    = -----
 
 ### Neighbourhoods ###
+
+    -> Tests for functionality "Parse ALPACA Description"
 
 A neighbourhood is a set of positions relative to a cell.  A neighbourhood
 is specified in ALPACA with a sequence of arrow chains inside parentheses.
