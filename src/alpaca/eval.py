@@ -66,7 +66,9 @@ def eval_expr(playfield, x, y, ast):
 def eval_rules(playfield, x, y, ast):
     """Given a playfield and a position within it, and a set of rules,
     return the "to" state for the rule that applies.
-    
+
+    If no rule applies, None is returned.
+
     """
     assert ast.type == 'Rules'
     for rule in ast.children:
@@ -75,20 +77,26 @@ def eval_rules(playfield, x, y, ast):
         e = rule.children[1]
         if eval_expr(playfield, x, y, e):
             return eval_state_ref(playfield, x, y, s)
-    return playfield.get(x, y)
+    return None
 
 
-def find_state_defn(state_id, ast):
-    assert isinstance(state_id, basestring), \
-      "why is %r not a string?" % state_id
+def find_defn(type, id, ast):
+    assert isinstance(id, basestring)
     assert ast.type == 'Alpaca'
     defns = ast.children[0]
     assert defns.type == 'Defns'
     for defn in defns.children:
-        if defn.type == 'StateDefn':
-            if state_id == defn.value:
-                return defn
-    raise KeyError, "No such state '%s'" % state_sym
+        if defn.type == type and defn.value == id:
+            return defn
+    raise KeyError, "No such %s '%s'" % (type, id)
+  
+
+def find_state_defn(state_id, ast):
+    return find_defn('StateDefn', state_id, ast)
+
+
+def find_class_defn(class_id, ast):
+    return find_defn('ClassDefn', class_id, ast)
 
 
 def construct_representation_map(ast):
@@ -139,6 +147,17 @@ def evolve_playfield(playfield, new_pf, ast):
             state_ast = find_state_defn(state_id, ast)
             #print " => %r" % state_ast
             new_state_id = eval_rules(playfield, x, y, state_ast.children[3])
+            class_decls = state_ast.children[2]
+            assert class_decls.type == 'MembershipDecls'
+            for class_decl in class_decls.children:
+                assert class_decl.type == 'ClassDecl'
+                if new_state_id is not None:
+                    break
+                class_id = class_decl.value
+                class_ast = find_class_defn(class_id, ast)
+                new_state_id = eval_rules(playfield, x, y, class_ast.children[0])
+            if new_state_id is None:
+                new_state_id = playfield.get(x, y)
             #print "new state: %s" % new_state_id
             new_pf.set(x, y, new_state_id)
             x += 1

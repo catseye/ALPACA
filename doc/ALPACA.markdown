@@ -331,8 +331,8 @@ a state of the other type to the north, but they will both turn into
     | ccd
     | dcc
     = -----
-    = dc
-    = cc
+    = cc 
+    = ccd
     = -----
 
 Each state can belong to zero or more classes.  When it belongs to more
@@ -343,22 +343,24 @@ are considered.
 
 Example: a cellular automaton with three states and two classes, where all
 states are members of both classes, but they inherit in different orders.
-In it, `One`s always remain `One`s, `Two`s always remain `Two`s, and `Three`s
-always remain `Three`s.
+In it, `One`s and always become `Four`s, `Two`s always become `Five`s,
+and `Three`s always remain `Three`s.
 
     | state Space " ";
     | class AlphaType
-    |   to One when true;
+    |   to Four when true;
     | class BetaType
-    |   to Two when true;
+    |   to Five when true;
     | state One "1" is AlphaType is BetaType;
     | state Two "2" is BetaType is AlphaType;
     | state Three "3" is BetaType is AlphaType
-    |   to Three when true
+    |   to Three when true;
+    | state Four "4";
+    | state Five "5"
     | begin
     | 123
     = -----
-    = 123
+    = 453
     = -----
 
 In a transition rule, a class-inclusion predicate may be used by
