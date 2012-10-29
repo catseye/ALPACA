@@ -50,6 +50,14 @@ def eval_expr(playfield, x, y, ast):
         state0 = eval_state_ref(playfield, x, y, ast.children[0])
         state1 = eval_state_ref(playfield, x, y, ast.children[1])
         return state0 == state1
+    elif ast.type == 'RelationalClass':
+        state_id = eval_state_ref(playfield, x, y, ast.children[0])
+        # XXX damn.  should we transform the ast to something
+        # easier to work with?  or just pass the program ast?
+        program_ast = 'damn'
+        state_ast = find_state_defn(state_id, program_ast)
+        class_id = ast.children[1].value
+        return state_defn_is_a(state_ast, class_id)
     elif ast.type == 'BoolLit':
         if ast.value == 'true':
             return True
@@ -97,6 +105,16 @@ def find_state_defn(state_id, ast):
 
 def find_class_defn(class_id, ast):
     return find_defn('ClassDefn', class_id, ast)
+
+
+def state_defn_is_a(state_ast, class_id):
+    class_decls = state_ast.children[2]
+    assert class_decls.type == 'MembershipDecls'
+    for class_decl in class_decls.children:
+        assert class_decl.type == 'ClassDecl'
+        if class_id == class_decl.value:
+            return True
+    return False
 
 
 def construct_representation_map(ast):
