@@ -1,12 +1,13 @@
 """
 Direct evaluator of ALPACA AST nodes.
 
-XXX move some of these out into alpaca.analysis
-
 """
 
 from alpaca.ast import AST
 from alpaca.playfield import Playfield
+from alpaca.analysis import (
+    find_state_defn, find_class_defn, state_defn_is_a,
+)
 
 
 def eval_state_ref(playfield, x, y, ast):
@@ -18,14 +19,14 @@ def eval_state_ref(playfield, x, y, ast):
         raise NotImplementedError
 
 
-def eval_expr(playfield, x, y, ast):
+def eval_expr(alpaca, playfield, x, y, ast):
     """Given a playfield and a position within it, and a boolean expression,
     return what the expression evaluates to at that position.
     
     """
     if ast.type == 'BoolOp':
-        lhs = eval_expr(playfield, x, y, ast.children[0])
-        rhs = eval_expr(playfield, x, y, ast.children[1])
+        lhs = eval_expr(alpaca, playfield, x, y, ast.children[0])
+        rhs = eval_expr(alpaca, playfield, x, y, ast.children[1])
         op = ast.value
         if op == 'and':
             return lhs and rhs
@@ -34,7 +35,7 @@ def eval_expr(playfield, x, y, ast):
         elif op == 'xor':
             return not (lhs == rhs)
     elif ast.type == 'Not':
-        return not eval_expr(playfield, x, y, ast.children[0])
+        return not eval_expr(alpaca, playfield, x, y, ast.children[0])
     elif ast.type == 'Adjacency':
         state = eval_state_ref(playfield, x, y, ast.children[0])
         nb = ast.children[1]
@@ -52,10 +53,7 @@ def eval_expr(playfield, x, y, ast):
         return state0 == state1
     elif ast.type == 'RelationalClass':
         state_id = eval_state_ref(playfield, x, y, ast.children[0])
-        # XXX damn.  should we transform the ast to something
-        # easier to work with?  or just pass the program ast?
-        program_ast = 'damn'
-        state_ast = find_state_defn(state_id, program_ast)
+        state_ast = find_state_defn(alpaca, state_id)
         class_id = ast.children[1].value
         return state_defn_is_a(state_ast, class_id)
     elif ast.type == 'BoolLit':
@@ -71,7 +69,7 @@ def eval_expr(playfield, x, y, ast):
         raise NotImplementedError
 
 
-def eval_rules(playfield, x, y, ast):
+def eval_rules(alpaca, playfield, x, y, ast):
     """Given a playfield and a position within it, and a set of rules,
     return the "to" state for the rule that applies.
 
@@ -83,75 +81,12 @@ def eval_rules(playfield, x, y, ast):
         assert rule.type == 'Rule'
         s = rule.children[0]
         e = rule.children[1]
-        if eval_expr(playfield, x, y, e):
+        if eval_expr(alpaca, playfield, x, y, e):
             return eval_state_ref(playfield, x, y, s)
     return None
 
 
-def find_defn(type, id, ast):
-    assert isinstance(id, basestring)
-    assert ast.type == 'Alpaca'
-    defns = ast.children[0]
-    assert defns.type == 'Defns'
-    for defn in defns.children:
-        if defn.type == type and defn.value == id:
-            return defn
-    raise KeyError, "No such %s '%s'" % (type, id)
-  
-
-def find_state_defn(state_id, ast):
-    return find_defn('StateDefn', state_id, ast)
-
-
-def find_class_defn(class_id, ast):
-    return find_defn('ClassDefn', class_id, ast)
-
-
-def state_defn_is_a(state_ast, class_id):
-    class_decls = state_ast.children[2]
-    assert class_decls.type == 'MembershipDecls'
-    for class_decl in class_decls.children:
-        assert class_decl.type == 'ClassDecl'
-        if class_id == class_decl.value:
-            return True
-    return False
-
-
-def construct_representation_map(ast):
-    map = {}
-    assert ast.type == 'Alpaca'
-    defns = ast.children[0]
-    assert defns.type == 'Defns'
-    for defn in defns.children:
-        if defn.type == 'StateDefn':
-            repr = defn.children[0]
-            assert repr.type == 'CharRepr'
-            map[repr.value] = defn.value
-    return map
-
-
-def get_default_state(ast):
-    assert ast.type == 'Alpaca'
-    defns = ast.children[0]
-    assert defns.type == 'Defns'
-    for defn in defns.children:
-        if defn.type == 'StateDefn':
-            return defn.value
-
-
-def get_defined_playfield(ast):
-    assert ast.type == 'Alpaca'
-    playast = ast.children[1]
-    assert playast.type == 'Playfield'
-    repr_map = construct_representation_map(ast)
-    pf = Playfield(get_default_state(ast), repr_map)
-    for (x, y, ch) in playast.value:
-        pf.set(x, y, repr_map[ch])
-    pf.recalculate_limits()
-    return pf
-
-
-def evolve_playfield(playfield, new_pf, ast):
+def evolve_playfield(playfield, new_pf, alpaca):
     # XXX TODO + 1, - 1's in here should reflect the maximum
     # neighbourhood used by any rule
     if playfield.min_y is None:
@@ -162,9 +97,9 @@ def evolve_playfield(playfield, new_pf, ast):
         while x <= playfield.max_x + 1:
             state_id = playfield.get(x, y)
             #print "state at (%d,%d): %s" % (x, y, state_id)
-            state_ast = find_state_defn(state_id, ast)
+            state_ast = find_state_defn(alpaca, state_id)
             #print " => %r" % state_ast
-            new_state_id = eval_rules(playfield, x, y, state_ast.children[3])
+            new_state_id = eval_rules(alpaca, playfield, x, y, state_ast.children[3])
             class_decls = state_ast.children[2]
             assert class_decls.type == 'MembershipDecls'
             for class_decl in class_decls.children:
@@ -172,8 +107,8 @@ def evolve_playfield(playfield, new_pf, ast):
                 if new_state_id is not None:
                     break
                 class_id = class_decl.value
-                class_ast = find_class_defn(class_id, ast)
-                new_state_id = eval_rules(playfield, x, y, class_ast.children[0])
+                class_ast = find_class_defn(alpaca, class_id)
+                new_state_id = eval_rules(alpaca, playfield, x, y, class_ast.children[0])
             if new_state_id is None:
                 new_state_id = playfield.get(x, y)
             #print "new state: %s" % new_state_id

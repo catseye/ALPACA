@@ -381,8 +381,10 @@ to `Space` when the cell to the east is an `Animal`.
     |   to Dog when not ^ is Animal
     | begin
     | dcdc
+    | dcdc 
     = -----
-    = dcdc
+    = cdcd
+    =    c
     = -----
 
 ### Neighbourhoods ###

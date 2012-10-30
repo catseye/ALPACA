@@ -9,12 +9,12 @@ version 1.0-PRE.
 from optparse import OptionParser
 import sys
 
-from alpaca.eval import (
-    evolve_playfield,
+from alpaca.analysis import (
     construct_representation_map,
     get_default_state,
     get_defined_playfield,
 )
+from alpaca.eval import evolve_playfield
 from alpaca.parser import Parser
 from alpaca.playfield import Playfield
 
