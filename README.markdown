@@ -55,3 +55,17 @@ We are currently working on a more formal specification for ALPACA
 version 1.0.  The Perl compiler will likely be deprecated.  A new
 compiler and/or interpreter will be developed, likely in some other
 language.
+
+Tested
+------
+
+The new implementation of ALPACA in Python (TODO: update the above!)
+has been tested with:
+
+* Game of Life
+* Wireworld
+* Circute
+* Jaccia and Jacciata
+* Braktif
+
+...and so far seems to handle all of them correctly.

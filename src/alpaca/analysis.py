@@ -61,6 +61,8 @@ def get_defined_playfield(alpaca):
     assert alpaca.type == 'Alpaca'
     playast = alpaca.children[1]
     assert playast.type == 'Playfield'
+    if playast.value is None:
+        return None
     repr_map = construct_representation_map(alpaca)
     pf = Playfield(get_default_state(alpaca), repr_map)
     for (x, y, ch) in playast.value:
