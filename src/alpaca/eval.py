@@ -64,9 +64,9 @@ def eval_expr(alpaca, playfield, x, y, ast):
         elif ast.value == 'guess':
             return False  # XXX randomly true or false
         else:
-            raise NotImplementedError
+            raise NotImplementedError(repr(ast))
     else:
-        raise NotImplementedError
+        raise NotImplementedError(repr(ast))
 
 
 def eval_rules(alpaca, playfield, x, y, ast):

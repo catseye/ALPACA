@@ -7,7 +7,7 @@ definition language.
 ALPACA is an acronym for **a** **l**anguage for the **p**ithy
 **a**rticulation of **c**ellular **a**utomata.  It is capable of
 succinctly expressing the rules of a 1- or 2-dimensional cellular
-automaton.
+automaton with an arbitrary neighbourhood.
 
 As an example, here is John Conway's Game of Life automaton, expressed
 in ALPACA (it's short):
@@ -20,9 +20,23 @@ in ALPACA (it's short):
 See the file `ALPACA.markdown` in the `doc` directory for a complete
 description of the ALPACA language.
 
-This distribution also contains a compiler for ALPACA, written in Perl.
-It is `alpaca.pl` in the `src` directory.  It is subject to move, be
-updated, or deprecated, as we define the next version of the language.
+This distribution also contains the reference implementation of ALPACA,
+written in Python.  Its source is in the `src` directory and `bin/alpaca` is
+a script to start it from the command line (no installation is required.)
+
+This implementation can evolve a cellular automaton, given its rules as
+described in ALPACA, plus an initial configuration (which may be supplied
+by the ALPACA description.)  
+
+In the future this implementation may also be able to animate a cellular
+automaton (probably in a terminal, using curses) and may be able to compile
+an ALPACA description into the rules for evolving the cellular automaton as
+code in a high-level programming language such as Python or Javascript.
+
+This distribution also contains a compiler for an older version (v0.9x) of
+ALPACA, which is written in Perl and which compiles ALPACA descriptions
+to Perl.  It can be found in the `impl/alpaca.pl` directory.  It is no longer
+maintained.
 
 History
 -------
@@ -52,9 +66,12 @@ state) as input, in the form of an ASCII text file, and animates it
 based on the rules of the defined cellular automaton.
 
 We are currently working on a more formal specification for ALPACA
-version 1.0.  The Perl compiler will likely be deprecated.  A new
-compiler and/or interpreter will be developed, likely in some other
-language.
+version 1.0.  It is almost complete, and adds several new features to the
+language, such as user-defined neighbourhoods, representations outside
+the realm of ASCII characters, and allowing a pre-defined CA configuration
+to be included with the CA description (making ALPACA Turing-complete.)
+For this language update, a new reference implementation was written, in
+Python.
 
 Tested
 ------
@@ -69,3 +86,5 @@ has been tested with:
 * Braktif
 
 ...and so far seems to handle all of them correctly.
+
+TODO: implement AdjacencyClass, for REDGREEN.
