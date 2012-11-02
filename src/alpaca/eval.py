@@ -49,13 +49,14 @@ def eval_expr(alpaca, playfield, x, y, ast):
         return count >= int(ast.value)
     elif ast.type == 'Relational':
         state0 = eval_state_ref(playfield, x, y, ast.children[0])
-        state1 = eval_state_ref(playfield, x, y, ast.children[1])
-        return state0 == state1
-    elif ast.type == 'RelationalClass':
-        state_id = eval_state_ref(playfield, x, y, ast.children[0])
-        state_ast = find_state_defn(alpaca, state_id)
-        class_id = ast.children[1].value
-        return state_defn_is_a(state_ast, class_id)
+        rel = ast.children[1]
+        if rel.type == 'ClassDecl':
+            class_id = rel.value
+            state_ast = find_state_defn(alpaca, state0)
+            return state_defn_is_a(state_ast, class_id)
+        else:
+            state1 = eval_state_ref(playfield, x, y, rel)
+            return state0 == state1
     elif ast.type == 'BoolLit':
         if ast.value == 'true':
             return True

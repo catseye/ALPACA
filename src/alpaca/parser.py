@@ -135,8 +135,9 @@ class Parser(object):
         classes = []
         while self.scanner.on('is'):
             classes.append(self.class_decl())
+        classes = AST('MembershipDecls', classes)
         rules = self.rules()
-        return AST('ClassDefn', [rules], value=id)
+        return AST('ClassDefn', [rules, classes], value=id)
 
     def nbhd_defn(self):
         self.scanner.expect('neighbourhood')
@@ -198,11 +199,11 @@ class Parser(object):
                              value=self.scanner.consume_type('identifier'))
                 else:
                     nb = self.neighbourhood()
-            if self.scanner.consume('is'):
-                classid = self.scanner.consume_type('identifier')
-                return AST('AdjacencyClass', value=classid)
-            s = self.state_ref()
-            return AST('Adjacency', [s, nb], value=count)
+            if self.scanner.on('is'):
+                rel = self.class_decl()
+            else:
+                rel = self.state_ref()
+            return AST('Adjacency', [rel, nb], value=count)
         elif self.scanner.consume('('):
             e = self.expression()
             self.scanner.expect(')')
@@ -214,13 +215,13 @@ class Parser(object):
             lit = self.scanner.consume_type('boolean literal')
             return AST('BoolLit', value=lit)
         else:
-            s1 = self.state_ref()
-            self.scanner.consume('=')  # optional
+            sr = self.state_ref()
             if self.scanner.on('is'):
-                c = self.class_decl()
-                return AST('RelationalClass', [s1, c])
-            s2 = self.state_ref()
-            return AST('Relational', [s1, s2])
+                rel = self.class_decl()
+            else:
+                self.scanner.consume('=')  # optional
+                rel = self.state_ref()
+            return AST('Relational', [sr, rel])
 
 
 def resolve_arrow_chain(s):
