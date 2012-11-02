@@ -87,4 +87,12 @@ has been tested with:
 
 ...and so far seems to handle all of them correctly.
 
-TODO: implement AdjacencyClass, for REDGREEN.
+TODO (implementation)
+---------------------
+
+* implement classes in Adjacency, for REDGREEN.
+* tests for, then implement, deep inheritance (class is a class)
+* clean up / document AST
+* compile to Javascript
+* compiler backend framework to allow compiling to other formats
+* compile to legacy Perl
