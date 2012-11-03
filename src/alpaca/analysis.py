@@ -31,13 +31,28 @@ def find_class_defn(alpaca, class_id):
     return find_defn(alpaca, 'ClassDefn', class_id)
 
 
-def state_defn_is_a(state_ast, class_id):
+# This is not right!
+# We actually need to check all the *child* classes, not their parents.
+def state_defn_is_a(alpaca, state_ast, class_id):
+    print "is %s a member of %s?" % (state_ast.value, class_id)
     class_decls = state_ast.children[2]
     assert class_decls.type == 'MembershipDecls'
     for class_decl in class_decls.children:
         assert class_decl.type == 'ClassDecl'
         if class_id == class_decl.value:
+            print "yes"
             return True
+        class_ast = find_class_defn(alpaca, class_id)
+        parents_ast = class_ast.children[1]
+        print repr(class_ast)
+        assert parents_ast.type == 'MembershipDecls'
+        for parent_class_decl in parents_ast.children:
+            print "parent class %r" % parent_class_decl
+            assert parent_class_decl.type == 'ClassDecl'
+            if state_defn_is_a(alpaca, state_ast, parent_class_decl.value):
+                print "parent yes"
+                return True
+    print "no"
     return False
 
 

@@ -28,7 +28,7 @@ def eval_relation(alpaca, playfield, x, y, state_id, ast):
     if ast.type == 'ClassDecl':
         class_id = ast.value
         state_ast = find_state_defn(alpaca, state_id)
-        return state_defn_is_a(state_ast, class_id)
+        return state_defn_is_a(alpaca, state_ast, class_id)
     elif ast.type in ('StateRefEq', 'StateRefRel'):
         pf_state_id = eval_state_ref(playfield, x, y, ast)
         return state_id == pf_state_id

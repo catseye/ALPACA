@@ -391,11 +391,11 @@ Class-inclusion predicates can also be used as part of adjacency
 predicates.
 
     | state Space " ";
-    | class Solid;
-    | state Granite "*" is Solid;
-    | state Iron "#" is Solid;
+    | class Mineral;
+    | state Granite "*" is Mineral;
+    | state Iron "#" is Mineral;
     | state Wood "&"
-    |   to Space when not 3 is Solid
+    |   to Space when not 3 is Mineral
     | begin
     | #  * 
     | #&&&*
@@ -404,6 +404,26 @@ predicates.
     = #  * 
     = #& &*
     = *   #
+    = -----
+
+Class memership is transitive.
+
+    | state Space " ";
+    | class Animal;
+    | class Mammal is Animal;
+    | state Dog "d" is Mammal;
+    | state Wood "&"
+    |   to Space when not 3 is Animal;
+    | state Food "."
+    |   to Space when ^ is Animal
+    | begin
+    | d .
+    | d&&
+    | .dd
+    = -----
+    = d .
+    = d& 
+    =  dd
     = -----
 
 ### Neighbourhoods ###
