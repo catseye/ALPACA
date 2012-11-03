@@ -387,6 +387,25 @@ to `Space` when the cell to the east is an `Animal`.
     =    c
     = -----
 
+Class-inclusion predicates can also be used as part of adjacency
+predicates.
+
+    | state Space " ";
+    | class Solid;
+    | state Granite "*" is Solid;
+    | state Iron "#" is Solid;
+    | state Wood "&"
+    |   to Space when not 3 is Solid
+    | begin
+    | #  * 
+    | #&&&*
+    | *   #
+    = -----
+    = #  * 
+    = #& &*
+    = *   #
+    = -----
+
 ### Neighbourhoods ###
 
     -> Tests for functionality "Parse ALPACA Description"

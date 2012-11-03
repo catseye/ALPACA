@@ -19,6 +19,21 @@ def eval_state_ref(playfield, x, y, ast):
         raise NotImplementedError
 
 
+def eval_relation(alpaca, playfield, x, y, state_id, ast):
+    """state_id is the ID of a state (possibly from the playfield)
+    that we want to check.  ast is either a StateRef or a ClassDecl.
+    Returns true iff the state_id satisfies the StateRef or ClassDecl.
+
+    """
+    if ast.type == 'ClassDecl':
+        class_id = ast.value
+        state_ast = find_state_defn(alpaca, state_id)
+        return state_defn_is_a(state_ast, class_id)
+    elif ast.type in ('StateRefEq', 'StateRefRel'):
+        pf_state_id = eval_state_ref(playfield, x, y, ast)
+        return state_id == pf_state_id
+
+
 def eval_expr(alpaca, playfield, x, y, ast):
     """Given a playfield and a position within it, and a boolean expression,
     return what the expression evaluates to at that position.
@@ -37,26 +52,21 @@ def eval_expr(alpaca, playfield, x, y, ast):
     elif ast.type == 'Not':
         return not eval_expr(alpaca, playfield, x, y, ast.children[0])
     elif ast.type == 'Adjacency':
-        state = eval_state_ref(playfield, x, y, ast.children[0])
+        rel = ast.children[0]
         nb = ast.children[1]
         assert nb.type, 'Neighbourhood'
         nb = set([node.value for node in nb.children])
         count = 0
         for (dx, dy) in nb:
-            if playfield.get(x + dx, y + dy) == state:
+            pf_state_id = playfield.get(x + dx, y + dy)
+            if eval_relation(alpaca, playfield, x, y, pf_state_id, rel):
                 count += 1
         #print "(%d,%d) has %d neighbours that are %s" % (x, y, count, state)
         return count >= int(ast.value)
     elif ast.type == 'Relational':
-        state0 = eval_state_ref(playfield, x, y, ast.children[0])
+        state_id = eval_state_ref(playfield, x, y, ast.children[0])
         rel = ast.children[1]
-        if rel.type == 'ClassDecl':
-            class_id = rel.value
-            state_ast = find_state_defn(alpaca, state0)
-            return state_defn_is_a(state_ast, class_id)
-        else:
-            state1 = eval_state_ref(playfield, x, y, rel)
-            return state0 == state1
+        return eval_relation(alpaca, playfield, x, y, state_id, rel)
     elif ast.type == 'BoolLit':
         if ast.value == 'true':
             return True
