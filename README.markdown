@@ -90,9 +90,11 @@ has been tested with:
 TODO (implementation)
 ---------------------
 
-* implement classes in Adjacency, for REDGREEN.
-* tests for, then implement, deep inheritance (class is a class)
-* clean up / document AST
 * compile to Javascript
 * compiler backend framework to allow compiling to other formats
 * compile to legacy Perl
+* option to not display intervening generations
+* option to use pycurses
+* option to halt when playfield comes to a fixed point
+* option to halt under other, more complex circumstances
+* tests for diamond inheritance, etc

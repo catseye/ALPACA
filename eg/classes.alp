@@ -1,0 +1,12 @@
+state Space " ";
+class Animal;
+class Mammal is Animal;
+state Dog "d" is Mammal;
+state Wood "&"
+  to Space when not 3 is Animal;
+state Food "."
+  to Space when ^ is Animal
+begin
+d .
+d&&
+.dd
