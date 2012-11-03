@@ -84,6 +84,7 @@ has been tested with:
 * Circute
 * Jaccia and Jacciata
 * Braktif
+* REDGREEN
 
 ...and so far seems to handle all of them correctly.
 

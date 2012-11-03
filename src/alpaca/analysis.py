@@ -38,7 +38,7 @@ def state_defn_is_a(alpaca, state_ast, class_id):
         assert class_decl.type == 'ClassDecl'
         if class_id == class_decl.value:
             return True
-        class_ast = find_class_defn(alpaca, class_id)
+        class_ast = find_class_defn(alpaca, class_decl.value)
         if class_defn_is_a(alpaca, class_ast, class_id):
             return True
     return False
