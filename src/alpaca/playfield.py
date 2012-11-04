@@ -16,6 +16,22 @@ class Playfield(object):
             y += 1
         self.recalculate_limits()
 
+    def equals(self, pf):
+        if (self.min_y != pf.min_y or
+            self.max_y != pf.max_y or
+            self.min_x != pf.min_x or
+            self.max_x != pf.max_x):
+            return False
+        y = pf.min_y
+        while y <= pf.max_y:
+            x = pf.min_x
+            while x <= pf.max_x:
+                if self.get(x, y) != pf.get(x, y):
+                    return False
+                x += 1
+            y += 1
+        return True
+
     def load(self, f):
         y = 0
         for line in f:

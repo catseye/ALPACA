@@ -94,6 +94,9 @@ TODO (implementation)
 * compile to Javascript
 * compile to legacy Perl
 * option to use pycurses
-* option to halt when playfield comes to a fixed point
-* option to halt under other, more complex circumstances
+* nontrivial fixpoint detection: if playfield matches any of the last n
+  playfields, then halt
+* option to halt under other, even more complex circumstances
+* option to display generation # in divider string
 * tests for diamond inheritance, etc
+* tests for >Moore neighbourhoods

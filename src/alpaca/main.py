@@ -1,5 +1,5 @@
 """
-alpaca [-agIJpt] [-c backend] [-d string] description.alp [form.ca]
+alpaca [-afgIJpt] [-c backend] [-d string] description.alp [form.ca]
 
 Reference implementation of the ALPACA cellular automaton definition language,
 version 1.0-PRE.
@@ -33,6 +33,11 @@ def main(argv):
                          dest="divider", default="-----",
                          help="set the string shown between generations "
                               "(default: '-----')")
+    optparser.add_option("-f", "--halt-at-fixpoint",
+                         action="store_true", dest="halt_at_fixpoint",
+                         default=False,
+                         help="stop evolving CA when it comes to a trivial "
+                              "fixed point (playfield = previous playfield)")
     optparser.add_option("-g", "--generations", metavar='COUNT',
                          dest="generations", default=None, type='int',
                          help="evolve CA for only the given number of "
@@ -109,8 +114,13 @@ def main(argv):
         new_pf = Playfield(default_state, repr_map)
         evolve_playfield(pf, new_pf, ast)
         new_pf.recalculate_limits()
+        if options.halt_at_fixpoint:
+            if pf.equals(new_pf):
+                break
         pf = new_pf
-        if count == options.generations - 1 or options.show_intermediate:
+        if (options.show_intermediate or
+            (options.generations is not None and
+             count == options.generations - 1)):
             print str(pf),
             print_divider()
         count += 1
