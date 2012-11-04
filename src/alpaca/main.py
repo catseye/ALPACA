@@ -1,5 +1,5 @@
 """
-alpaca [-agIpt] description.alp [form.ca]
+alpaca [-agIJpt] [-d string] description.alp [form.ca]
 
 Reference implementation of the ALPACA cellular automaton definition language,
 version 1.0-PRE.
@@ -24,7 +24,11 @@ def main(argv):
     optparser.add_option("-a", "--show-ast",
                          action="store_true", dest="show_ast", default=False,
                          help="show parsed AST instead of evaluating")
-    optparser.add_option("-g", "--generations",
+    optparser.add_option("-d", "--divider", metavar='STRING',
+                         dest="divider", default="-----",
+                         help="set the string shown between generations "
+                              "(default: '-----')")
+    optparser.add_option("-g", "--generations", metavar='COUNT',
                          dest="generations", default=None, type='int',
                          help="evolve CA for only the given number of "
                               "generations")
@@ -32,6 +36,11 @@ def main(argv):
                          action="store_false", dest="show_initial",
                          default=True,
                          help="don't show initial configuration")
+    optparser.add_option("-J", "--hide-intermediate",
+                         action="store_false", dest="show_intermediate",
+                         default=True,
+                         help="don't show intermediate configurations "
+                              "(only show final configuration)")
     optparser.add_option("-p", "--parse-only",
                          action="store_true", dest="parse_only",
                          default=False,
@@ -69,21 +78,28 @@ def main(argv):
         pf.load(file)
         file.close()
 
+    def print_divider():
+        # TODO: allow formatting string in the divider, esp.
+        # to show the # of this generation
+        if options.divider != '':
+            print options.divider
+
     count = 0
-    print "-----"
+    print_divider()
     if options.show_initial:
         print str(pf),
-        print "-----"
+        print_divider()
     while True:
         new_pf = Playfield(default_state, repr_map)
         evolve_playfield(pf, new_pf, ast)
         new_pf.recalculate_limits()
         pf = new_pf
-        print str(pf),
-        print "-----"
+        if count == options.generations - 1 or options.show_intermediate:
+            print str(pf),
+            print_divider()
         count += 1
         if (options.generations is not None and
             count >= options.generations):
             break
-            
+
     sys.exit(0)
