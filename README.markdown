@@ -92,7 +92,6 @@ TODO (implementation)
 ---------------------
 
 * compile to Javascript
-* compiler backend framework to allow compiling to other formats
 * compile to legacy Perl
 * option to use pycurses
 * option to halt when playfield comes to a fixed point

@@ -1,5 +1,5 @@
 """
-alpaca [-agIJpt] [-d string] description.alp [form.ca]
+alpaca [-agIJpt] [-c backend] [-d string] description.alp [form.ca]
 
 Reference implementation of the ALPACA cellular automaton definition language,
 version 1.0-PRE.
@@ -24,6 +24,11 @@ def main(argv):
     optparser.add_option("-a", "--show-ast",
                          action="store_true", dest="show_ast", default=False,
                          help="show parsed AST instead of evaluating")
+    optparser.add_option("-c", "--compile-to", metavar='BACKEND',
+                         dest="compile_to", default=None,
+                         help="compile to given backend code instead "
+                              "of evaluating directly (available backends: "
+                              "javascript)")
     optparser.add_option("-d", "--divider", metavar='STRING',
                          dest="divider", default="-----",
                          help="set the string shown between generations "
@@ -70,6 +75,17 @@ def main(argv):
 
     default_state = get_default_state(ast)
     repr_map = construct_representation_map(ast)
+
+    if options.compile_to is not None:
+        # XXX generalize
+        if options.compile_to == 'javascript':
+            from alpaca.backends.javascript import compile
+            success = compile(ast, sys.stdout)
+            if success:
+                sys.exit(0)
+        else:
+            print "unsupported backend '%s'" % options.compile_to
+        sys.exit(1)
 
     pf = get_defined_playfield(ast)
     if pf is None:
