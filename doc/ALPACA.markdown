@@ -64,10 +64,12 @@ list of _attributes_ enclosed in curly braces.
 
 An attribute consists of a _key_ and a _value_.  The key declares the purpose
 and/or the intended interpretation of the value, which is a double-quoted
-string literal.  The key may be drawn from a set TBD by this specification,
-or it may be implementation-defined.  The value may consist of essentially
-arbitrary string data, and may refer to a character, a colour, a graphic
-image, or anything else.
+string literal.  The key may be drawn from a set defined by ALPACA, or it may
+be implementation-defined.  The value may consist of essentially arbitrary
+string data, and may refer to a character, a colour, a graphic image, or
+anything else.  (Note that this version of the ALPACA specification does not
+yet define any keys, leaving them all to be implementation defined; however,
+it is likely that a near-future revision, possibly 1.1, will define some.)
 
 Representation declarations are not required.  If omitted, representation
 information can be supplied by the implementation, or can be defined with
@@ -406,7 +408,7 @@ predicates.
     = *   #
     = -----
 
-Class memership is transitive.
+Class membership is transitive.
 
     | state Space " ";
     | class Animal;
@@ -425,6 +427,10 @@ Class memership is transitive.
     = d& 
     =  dd
     = -----
+
+(TODO: explain that diamond inheritance is not in practice a problem, as
+classes cannot contain any of their own state, which is what makes diamond
+inheritance a problem in most languages with MI.)
 
 ### Neighbourhoods ###
 
@@ -451,7 +457,32 @@ Example:
     |   to Space when 3 in (^ v < >) Space.
     = ok
 
-(TODO: the following example is out of place)
+    -> Tests for functionality "Evolve ALPACA CA one generation"
+
+Note that, unlike previous version of ALPACA, ALPACA 1.0 allows essentially
+arbitrary neighbourhoods -- they may extend beyond the Moore neighbourhood.
+Implementations must take care to check for all possible transitions inside
+the defined neighbourhood, even when it extends into the "empty space"
+surrounding the defined configuration.
+
+    | neighbourhood Distant
+    |   (<<< >>> ^^^ vvv);
+    | state Space " "
+    |   to Thing when 1 in Distant Thing;
+    | state Thing "#"
+    | begin
+    | #
+    = -----
+    =    #   
+    =        
+    =        
+    = #  #  #
+    =        
+    =        
+    =    #   
+    = -----
+
+(TODO: the following example is out of place.  where to put it?)
 
 Example: a glider, pointed northeast, in John Conway's Game of Life
 automaton:
@@ -464,7 +495,11 @@ automaton:
     |  **
     | * *
     |   *
-    = ok
+    = -----
+    = ** 
+    =  **
+    = *  
+    = -----
 
 Grammar
 -------
@@ -589,7 +624,10 @@ This is no longer supported.  However, a future version might introduce a
 more "readable" alternative state referent syntax.
 
 Previous versions of ALPACA always assumed a Moore neighbourhood when making
-an adjacency predicate.
+an adjacency predicate.  Other neighbourhoods could not be defined, and
+needed to be constructed in a tedious piecemeal fashion (see the Jaccia and
+Jacciata descriptions for an example of this for the von Neumann
+neighbourhood.)
 
 Previous versions of ALPACA did not support giving an initial configuration
 for the cellular automaton.
