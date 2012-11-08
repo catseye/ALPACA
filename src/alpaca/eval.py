@@ -7,6 +7,7 @@ from alpaca.ast import AST
 from alpaca.playfield import Playfield
 from alpaca.analysis import (
     find_state_defn, find_class_defn, state_defn_is_a,
+    BoundingBox, fit_bounding_box,
 )
 
 
@@ -97,15 +98,17 @@ def eval_rules(alpaca, playfield, x, y, ast):
     return None
 
 
+# TODO: encapsulate this in an object to keep some state
+# and reduce the number of recomputations each time
 def evolve_playfield(playfield, new_pf, alpaca):
-    # XXX TODO + 1, - 1's in here should reflect the maximum
-    # neighbourhood used by any rule
     if playfield.min_y is None:
         return
-    y = playfield.min_y - 1
-    while y <= playfield.max_y + 1:
-        x = playfield.min_x - 1
-        while x <= playfield.max_x + 1:
+    bb = BoundingBox(0, 0, 0, 0)
+    fit_bounding_box(alpaca, bb)
+    y = playfield.min_y + bb.min_dy
+    while y <= playfield.max_y + bb.max_dy:
+        x = playfield.min_x + bb.min_dx
+        while x <= playfield.max_x + bb.max_dx:
             state_id = playfield.get(x, y)
             #print "state at (%d,%d): %s" % (x, y, state_id)
             state_ast = find_state_defn(alpaca, state_id)

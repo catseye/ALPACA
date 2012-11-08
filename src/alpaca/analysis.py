@@ -87,3 +87,38 @@ def get_defined_playfield(alpaca):
         pf.set(x, y, repr_map[ch])
     pf.recalculate_limits()
     return pf
+
+
+class BoundingBox(object):
+    def __init__(self, min_dx, min_dy, max_dx, max_dy):
+        self.min_dx = min_dx
+        self.min_dy = min_dy
+        self.max_dx = max_dx
+        self.max_dy = max_dy
+
+    def expand_to_contain(self, dx, dy):
+        if dx < self.min_dx:
+            self.min_dx = dx
+        if dx > self.max_dx:
+            self.max_dx = dx
+        if dy < self.min_dy:
+            self.min_dy = dy
+        if dy > self.max_dy:
+            self.max_dy = dy
+
+    def __repr__(self):
+        return "BoundingBox(%d, %d, %d, %d)" % (
+            self.min_dx, self.min_dy, self.max_dx, self.max_dy
+        )
+
+
+def fit_bounding_box(ast, bb):
+    """Given an ALPACA AST, expand the given bounding box to
+    encompass all relative references used within th AST.
+
+    """
+    if ast.type == 'StateRefRel':
+        (dx, dy) = ast.value
+        bb.expand_to_contain(dx, dy)
+    for child in ast.children:
+        fit_bounding_box(child, bb=bb)

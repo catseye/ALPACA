@@ -1,0 +1,7 @@
+neighbourhood Distant
+  (<<< >>> ^^^ vvv);
+state Space " "
+  to Thing when 1 in Distant Thing;
+state Thing "#"
+begin
+#
