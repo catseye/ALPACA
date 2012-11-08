@@ -107,10 +107,10 @@ def evolve_playfield(playfield, new_pf, alpaca):
         return
     bb = BoundingBox(0, 0, 0, 0)
     fit_bounding_box(alpaca, bb)
-    y = playfield.min_y + bb.min_dy
-    while y <= playfield.max_y + bb.max_dy:
-        x = playfield.min_x + bb.min_dx
-        while x <= playfield.max_x + bb.max_dx:
+    y = playfield.min_y - bb.max_dy
+    while y <= playfield.max_y - bb.min_dy:
+        x = playfield.min_x - bb.max_dx
+        while x <= playfield.max_x - bb.min_dx:
             state_id = playfield.get(x, y)
             #print "state at (%d,%d): %s" % (x, y, state_id)
             state_ast = find_state_defn(alpaca, state_id)
