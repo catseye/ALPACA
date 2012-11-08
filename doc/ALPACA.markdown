@@ -67,9 +67,19 @@ and/or the intended interpretation of the value, which is a double-quoted
 string literal.  The key may be drawn from a set defined by ALPACA, or it may
 be implementation-defined.  The value may consist of essentially arbitrary
 string data, and may refer to a character, a colour, a graphic image, or
-anything else.  (Note that this version of the ALPACA specification does not
-yet define any keys, leaving them all to be implementation defined; however,
-it is likely that a near-future revision, possibly 1.1, will define some.)
+anything else.
+
+Note that this version of the ALPACA specification does not yet define any
+keys.  However, it reserves the following key names for future definition
+(possibly in version 1.1).
+
+    colour
+    image
+    border
+    any key beginning with "alpaca_"
+
+Implementations which define their own keys are encouraged to prefix them
+with something likely to be unique.
 
 Representation declarations are not required.  If omitted, representation
 information can be supplied by the implementation, or can be defined with
@@ -79,6 +89,9 @@ prevent an implementation from overriding them with some other representation.
 
 However, if an initial configuration is included, it will be interpreted
 using the single ASCII character representation declarations of the states.
+
+(TODO: this limits us to 95 states.  Either allow multiple characters to
+represent a state, or move to Unicode, or both.)
 
 Example: a trivial ALPACA description with single character representation
 declarations:
@@ -482,7 +495,10 @@ surrounding the defined configuration.
     =    #   
     = -----
 
-(TODO: the following example is out of place.  where to put it?)
+Some More Realistic Examples
+----------------------------
+
+This section is not normative.
 
 Example: a glider, pointed northeast, in John Conway's Game of Life
 automaton:

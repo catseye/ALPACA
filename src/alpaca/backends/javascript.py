@@ -5,40 +5,83 @@ CURRENTLY JUST A STUB.
 
 """
 
-from alpaca.ast import AST
+class Compiler(object):
+    def __init__(self, alpaca, file):
+        """alpaca is an ALPACA description in AST form.  file is a file-like
+        object to which the compiled code will be written.
 
+        """
+        self.alpaca = alpaca
+        self.file = file
 
-def compile(alpaca, file):
-    """alpaca is an ALPACA description in AST form.  file is a file-like
-    object to which the compiled code will be written.
-
-    """
-    file.write("""
+    def compile(self):
+        self.file.write("""\
 /*
  * This file was AUTOMATICALLY generated from an ALPACA description.
  * EDIT AT YOUR OWN RISK!
  */
 """)
-    defns = alpaca.children[0]
-    for defn in defns.children:
-        if defn.type == 'StateDefn':
-            compile_state_defn(alpaca, defn, file)
-        elif defn.type == 'ClassDefn':
-            pass
-        elif defn.type == 'NbhdDefn':
-            pass
+        defns = self.alpaca.children[0]
+        for defn in defns.children:
+            if defn.type == 'StateDefn':
+                self.compile_state_defn(defn)
+            elif defn.type == 'ClassDefn':
+                pass
+            elif defn.type == 'NbhdDefn':
+                pass
+            else:
+                raise NotImplementedError(repr(defn))
+
+    def compile_state_defn(self, defn):
+        char_repr = defn.children[0]
+        repr_decls = defn.children[1]
+        membership = defn.children[2]
+        rules = defn.children[3]
+        self.file.write("function eval_%s(pf, x, y) {\n" % defn.value);
+        for rule in rules.children:
+            dest = rule.children[0]
+            expr = rule.children[1]
+            self.file.write("if (")
+            self.compile_expr(expr)
+            self.file.write(") {\n  return ")
+            self.compile_state_ref(dest)
+            self.file.write(";\n}\n" % (dest))
+        self.file.write("return '%s';\n}\n\n" % defn.value)
+
+    def compile_state_ref(self, ref):
+        # compare to eval_state_ref
+        if ref.type == 'StateRefEq':
+            self.file.write("'%s'" % ref.value)
+        elif ref.type == 'StateRefRel':
+            self.file.write("pf.get(x+%d,y+%d)" % (ref.value[0], ref.value[1]))
         else:
-            raise NotImplementedError(repr(defn))
+            raise NotImplementedError(repr(expr))
 
-
-def compile_state_defn(alpaca, defn, file):
-    char_repr = defn.children[0]
-    repr_decls = defn.children[1]
-    membership = defn.children[2]
-    rules = defn.children[3]
-    file.write("function eval_%s() {\n" % defn.value);
-    for rule in rules.children:
-        dest = rule.children[0]
-        expr = rule.children[1]
-        file.write("if (/*%r*/) { state = /*%r*/; }\n" % (expr, dest))
-    file.write("}\n\n")
+    def compile_expr(self, expr):
+        if expr.type == 'BoolOp':
+            self.file.write('(')
+            self.compile_expr(expr.children[0])
+            self.file.write({
+                'or': '||',
+                'and': '&&',
+                'xor': '^^',  # XXX yes yes I know this does not work
+            }[expr.value])
+            self.compile_expr(expr.children[1])
+            self.file.write(')')
+        elif expr.type == 'Not':
+            self.file.write('!(')
+            self.compile_expr(expr.children[0])
+            self.file.write(')')
+        elif expr.type == 'BoolLit':
+            self.file.write(expr.value)
+        elif expr.type == 'Relational':
+            # XXX todo: class membership
+            self.file.write('(')
+            self.compile_state_ref(expr.children[0])
+            self.file.write('===')
+            self.compile_state_ref(expr.children[1])
+            self.file.write(')')
+        elif expr.type == 'Adjacency':
+            self.file.write('/* ADJACENCY */')
+        else:
+            raise NotImplementedError(repr(expr))

@@ -84,8 +84,9 @@ def main(argv):
     if options.compile_to is not None:
         # XXX generalize
         if options.compile_to == 'javascript':
-            from alpaca.backends.javascript import compile
-            success = compile(ast, sys.stdout)
+            from alpaca.backends.javascript import Compiler
+            compiler = Compiler(ast, sys.stdout)
+            success = compiler.compile()
             if success:
                 sys.exit(0)
         else:
