@@ -64,7 +64,7 @@ class Compiler(object):
             self.file.write({
                 'or': '||',
                 'and': '&&',
-                'xor': '^^',  # XXX yes yes I know this does not work
+                'xor': '!==',
             }[expr.value])
             self.compile_expr(expr.children[1])
             self.file.write(')')
@@ -82,6 +82,18 @@ class Compiler(object):
             self.compile_state_ref(expr.children[1])
             self.file.write(')')
         elif expr.type == 'Adjacency':
-            self.file.write('/* ADJACENCY */')
+            # XXX todo: class membership
+            count = expr.value
+            rel = expr.children[0]
+            nb = expr.children[1]
+            if nb.type == 'NbhdRef':
+                nb = find_nbhd_defn(self.alpaca, nb.value).children[0]
+            self.file.write('(in_nbhd(pf, x, y, ')
+            self.compile_state_ref(rel)
+            self.file.write(', [')
+            self.file.write(','.join(
+                ['[%d,%d]' % child.value for child in nb.children]
+            ))
+            self.file.write(']) >= %d)' % int(count))
         else:
             raise NotImplementedError(repr(expr))

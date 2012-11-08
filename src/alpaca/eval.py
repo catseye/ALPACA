@@ -49,7 +49,7 @@ def eval_expr(alpaca, playfield, x, y, ast):
         elif op == 'or':
             return lhs or rhs
         elif op == 'xor':
-            return not (lhs == rhs)
+            return lhs != rhs
     elif ast.type == 'Not':
         return not eval_expr(alpaca, playfield, x, y, ast.children[0])
     elif ast.type == 'Adjacency':

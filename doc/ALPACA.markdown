@@ -324,6 +324,37 @@ are not adjacent to three other `Thing`s.
     = **
     = -----
 
+Example: boolean operators.
+
+    | state Space " ";
+    | state Thing "*";
+    | state Charge "X";
+    | state One "1"
+    |   to Thing when ^ Charge and > Charge;
+    | state Two "2"
+    |   to Thing when ^ Charge or > Charge;
+    | state Three "3"
+    |   to Thing when ^ Charge xor > Charge
+    | begin
+    | X  X
+    | 1X 1 1X 1
+    | 
+    | X  X
+    | 2X 2 2X 2
+    | 
+    | X  X
+    | 3X 3 3X 3
+    = -----
+    = X  X     
+    = *X 1 1X 1
+    =          
+    = X  X     
+    = *X * *X 2
+    =          
+    = X  X     
+    = 3X * *X 3
+    = -----
+
 ### Classes ###
 
 A class declaration defines the general behaviour of a number of states.
