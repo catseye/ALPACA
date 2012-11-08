@@ -31,6 +31,10 @@ def find_class_defn(alpaca, class_id):
     return find_defn(alpaca, 'ClassDefn', class_id)
 
 
+def find_nbhd_defn(alpaca, nbhd_id):
+    return find_defn(alpaca, 'NbhdDefn', nbhd_id)
+
+
 def state_defn_is_a(alpaca, state_ast, class_id):
     class_decls = state_ast.children[2]
     assert class_decls.type == 'MembershipDecls'

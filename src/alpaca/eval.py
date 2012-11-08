@@ -6,7 +6,7 @@ Direct evaluator of ALPACA AST nodes.
 from alpaca.ast import AST
 from alpaca.playfield import Playfield
 from alpaca.analysis import (
-    find_state_defn, find_class_defn, state_defn_is_a,
+    find_state_defn, find_class_defn, find_nbhd_defn, state_defn_is_a,
     BoundingBox, fit_bounding_box,
 )
 
@@ -55,14 +55,16 @@ def eval_expr(alpaca, playfield, x, y, ast):
     elif ast.type == 'Adjacency':
         rel = ast.children[0]
         nb = ast.children[1]
-        assert nb.type, 'Neighbourhood'
+        if nb.type == 'NbhdRef':
+            nb = find_nbhd_defn(alpaca, nb.value).children[0]
+        assert nb.type == 'Neighbourhood'
         nb = set([node.value for node in nb.children])
         count = 0
         for (dx, dy) in nb:
             pf_state_id = playfield.get(x + dx, y + dy)
             if eval_relation(alpaca, playfield, x, y, pf_state_id, rel):
                 count += 1
-        #print "(%d,%d) has %d neighbours that are %s" % (x, y, count, state)
+        #print "(%d,%d) has %d neighbours that are %r" % (x, y, count, rel)
         return count >= int(ast.value)
     elif ast.type == 'Relational':
         state_id = eval_state_ref(playfield, x, y, ast.children[0])
