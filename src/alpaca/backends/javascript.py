@@ -38,6 +38,7 @@ class Compiler(object):
         membership = defn.children[2]
         rules = defn.children[3]
         self.file.write("function eval_%s(pf, x, y) {\n" % defn.value);
+        # XXX todo: superclasses' rules first
         for rule in rules.children:
             dest = rule.children[0]
             expr = rule.children[1]
@@ -55,7 +56,20 @@ class Compiler(object):
         elif ref.type == 'StateRefRel':
             self.file.write("pf.get(x+%d,y+%d)" % (ref.value[0], ref.value[1]))
         else:
-            raise NotImplementedError(repr(expr))
+            raise NotImplementedError(repr(ref))
+
+    def compile_relation(self, ref, ast):
+        if ast.type == 'ClassDecl':
+            # XXX this is rather handwavy
+            self.file.write('is_member(')
+            self.compile_state_ref(ref)
+            self.file.write(", '%s')" % ast.value)
+        else:
+            self.file.write('(')
+            self.compile_state_ref(ref)
+            self.file.write('===')
+            self.compile_state_ref(ast)
+            self.file.write(')')
 
     def compile_expr(self, expr):
         if expr.type == 'BoolOp':
@@ -75,12 +89,7 @@ class Compiler(object):
         elif expr.type == 'BoolLit':
             self.file.write(expr.value)
         elif expr.type == 'Relational':
-            # XXX todo: class membership
-            self.file.write('(')
-            self.compile_state_ref(expr.children[0])
-            self.file.write('===')
-            self.compile_state_ref(expr.children[1])
-            self.file.write(')')
+            self.compile_relation(expr.children[0], expr.children[1])
         elif expr.type == 'Adjacency':
             # XXX todo: class membership
             count = expr.value
@@ -88,8 +97,12 @@ class Compiler(object):
             nb = expr.children[1]
             if nb.type == 'NbhdRef':
                 nb = find_nbhd_defn(self.alpaca, nb.value).children[0]
-            self.file.write('(in_nbhd(pf, x, y, ')
-            self.compile_state_ref(rel)
+            if rel.type == 'ClassDecl':
+                # XXX this is rather handwavy
+                self.file.write("(in_nbhd_member(pf, x, y, '%s'" % rel.value)
+            else:
+                self.file.write('(in_nbhd(pf, x, y, ')
+                self.compile_state_ref(rel)
             self.file.write(', [')
             self.file.write(','.join(
                 ['[%d,%d]' % child.value for child in nb.children]
