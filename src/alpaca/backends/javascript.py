@@ -1,7 +1,5 @@
 """
-Compile ALPACA AST to Javascript.
-
-CURRENTLY JUST A STUB.
+Backend for compiling ALPACA AST to Javascript.  Not yet complete.
 
 """
 
@@ -23,22 +21,16 @@ class Compiler(object):
 """)
         defns = self.alpaca.children[0]
         for defn in defns.children:
+            if defn.type == 'ClassDefn':
+                self.compile_class_defn(defn)
+        for defn in defns.children:
             if defn.type == 'StateDefn':
                 self.compile_state_defn(defn)
-            elif defn.type == 'ClassDefn':
-                pass
-            elif defn.type == 'NbhdDefn':
-                pass
-            else:
-                raise NotImplementedError(repr(defn))
 
-    def compile_state_defn(self, defn):
-        char_repr = defn.children[0]
-        repr_decls = defn.children[1]
-        membership = defn.children[2]
-        rules = defn.children[3]
-        self.file.write("function eval_%s(pf, x, y) {\n" % defn.value);
-        # XXX todo: superclasses' rules first
+    def compile_class_defn(self, defn):
+        membership = defn.children[1]
+        rules = defn.children[0]
+        self.file.write("function evalClass_%s(pf, x, y) {\nvar id;\n" % defn.value);
         for rule in rules.children:
             dest = rule.children[0]
             expr = rule.children[1]
@@ -47,6 +39,28 @@ class Compiler(object):
             self.file.write(") {\n  return ")
             self.compile_state_ref(dest)
             self.file.write(";\n}\n" % (dest))
+        for superclass in membership.children:
+            self.file.write("id = evalClass_%s(pf, x, y);\n" % superclass.value)
+            self.file.write("if (id !=== undefined) return id;\n")
+        self.file.write("return undefined;\n}\n\n")
+
+    def compile_state_defn(self, defn):
+        char_repr = defn.children[0]
+        repr_decls = defn.children[1]
+        membership = defn.children[2]
+        rules = defn.children[3]
+        self.file.write("function eval_%s(pf, x, y) {\nvar id;\n" % defn.value);
+        for rule in rules.children:
+            dest = rule.children[0]
+            expr = rule.children[1]
+            self.file.write("if (")
+            self.compile_expr(expr)
+            self.file.write(") {\n  return ")
+            self.compile_state_ref(dest)
+            self.file.write(";\n}\n" % (dest))
+        for superclass in membership.children:
+            self.file.write("id = evalClass_%s(pf, x, y);\n" % superclass.value)
+            self.file.write("if (id !=== undefined) return id;\n")
         self.file.write("return '%s';\n}\n\n" % defn.value)
 
     def compile_state_ref(self, ref):
