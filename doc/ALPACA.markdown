@@ -409,6 +409,48 @@ and `Three`s always remain `Three`s.
     = 453
     = -----
 
+Example: deep inheritance.
+
+    | state Space " ";
+    | state Thing "*";
+    | class Animal
+    |   to Thing when > Thing;
+    | class Mammal is Animal
+    |   to Thing when ^ Thing;
+    | state Cat "c" is Mammal
+    |   to Thing when v Thing
+    | begin
+    |    *
+    | c  c  c*  c
+    | *
+    = -----
+    =    *       
+    = *  *  **  c
+    = *          
+    = -----
+
+Example: overriding deep inheritance at a class level.
+
+    | state Space " ";
+    | state Thing "*";
+    | class Animal
+    |   to Thing when > Thing;
+    | class Mammal is Animal
+    |   to Space when > Thing;
+    | state Cat "c" is Mammal
+    |   to Thing when v Thing
+    | begin
+    |    *
+    | c  c  c*
+    | *
+    = -----
+    =    *    
+    = *  c   *
+    = *       
+    = -----
+
+#### Membership ####
+
 In a transition rule, a class-inclusion predicate may be used by
 giving a state referent, the token `is`, and the name of a class.
 This expression evaluates to true if the state so referred to is a

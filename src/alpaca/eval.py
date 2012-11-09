@@ -115,19 +115,35 @@ def evolve_playfield(playfield, new_pf, alpaca):
             #print "state at (%d,%d): %s" % (x, y, state_id)
             state_ast = find_state_defn(alpaca, state_id)
             #print " => %r" % state_ast
-            new_state_id = eval_rules(alpaca, playfield, x, y, state_ast.children[3])
-            class_decls = state_ast.children[2]
-            assert class_decls.type == 'MembershipDecls'
-            for class_decl in class_decls.children:
-                assert class_decl.type == 'ClassDecl'
-                if new_state_id is not None:
-                    break
-                class_id = class_decl.value
-                class_ast = find_class_defn(alpaca, class_id)
-                new_state_id = eval_rules(alpaca, playfield, x, y, class_ast.children[0])
+            classes = state_ast.children[2]
+            rules = state_ast.children[3]
+            new_state_id = apply_rules(alpaca, playfield, x, y, rules, classes)
             if new_state_id is None:
-                new_state_id = playfield.get(x, y)
+                new_state_id = state_id
             #print "new state: %s" % new_state_id
             new_pf.set(x, y, new_state_id)
             x += 1
         y += 1
+
+
+def apply_rules(alpaca, playfield, x, y, rules, class_decls):
+    """Given a set of rules and a set of superclasses (for a given state or
+    class which is not given), try the rules; if none of them apply,
+    recursively apply this function with the rules and superclasses for each
+    given superclass.
+
+    """
+    new_state_id = eval_rules(alpaca, playfield, x, y, rules)
+    if new_state_id is not None:
+        return new_state_id
+    assert class_decls.type == 'MembershipDecls'
+    for class_decl in class_decls.children:
+        assert class_decl.type == 'ClassDecl'
+        class_id = class_decl.value
+        class_ast = find_class_defn(alpaca, class_id)
+        rules = class_ast.children[0]
+        classes = class_ast.children[1]
+        new_state_id = apply_rules(alpaca, playfield, x, y, rules, classes)        
+        if new_state_id is not None:
+            return new_state_id
+    return None
