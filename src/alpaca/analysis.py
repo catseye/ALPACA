@@ -63,6 +63,58 @@ def class_defn_is_a(alpaca, class_ast, class_id):
     return False
 
 
+def get_state_membership(alpaca, state_id):
+    """Given a state ID, return a set of IDs of all classes of which that
+    state is a member.
+
+    """
+    membership = set()
+    state_ast = find_state_defn(alpaca, state_id)
+    class_decls = state_ast.children[2]
+    assert class_decls.type == 'MembershipDecls'
+    for class_decl in class_decls.children:
+        assert class_decl.type == 'ClassDecl'
+        class_id = class_decl.value
+        membership.add(class_id)
+        membership.union(get_class_membership(alpaca, class_id))
+    return membership
+
+
+def get_class_membership(alpaca, class_id):
+    """Given a class ID, return a set of IDs of all classes of which that
+    class is a member.
+
+    """
+    membership = set()
+    class_ast = find_class_defn(alpaca, class_id)
+    class_decls = class_ast.children[1]
+    assert class_decls.type == 'MembershipDecls'
+    for class_decl in class_decls.children:
+        assert class_decl.type == 'ClassDecl'
+        class_id = class_decl.value
+        membership.add(class_id)
+        membership.union(get_class_membership(alpaca, class_id))
+    return membership
+
+
+def get_class_map(alpaca):
+    """Given an ALPACA description, return a dictionary where the keys are
+    the IDs of classes and the values are the sets of IDs of states which are
+    members of those classes.
+
+    """
+    defns = alpaca.children[0]
+    state_map = {}
+    for defn in defns.children:
+        if defn.type == 'StateDefn':
+            state_map[defn.value] = get_state_membership(alpaca, defn.value)
+    class_map = {}
+    for (state_id, class_set) in state_map.iteritems():
+        for class_id in class_set:
+            class_map.setdefault(class_id, set()).add(state_id)
+    return class_map
+
+
 def construct_representation_map(alpaca):
     map = {}
     for defn in get_defns(alpaca).children:

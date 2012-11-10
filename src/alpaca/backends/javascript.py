@@ -3,6 +3,9 @@ Backend for compiling ALPACA AST to Javascript.  Not yet complete.
 
 """
 
+from alpaca.analysis import get_class_map
+
+
 class Compiler(object):
     def __init__(self, alpaca, file):
         """alpaca is an ALPACA description in AST form.  file is a file-like
@@ -19,6 +22,13 @@ class Compiler(object):
  * EDIT AT YOUR OWN RISK!
  */
 """)
+        class_map = get_class_map(self.alpaca)
+        for (class_id, state_set) in class_map.iteritems():
+            self.file.write("function is_%s(st) {\n" % class_id)
+            self.file.write("  return ");
+            for state_id in state_set:
+                self.file.write("(st === '%s') || " % state_id)
+            self.file.write("0;\n}\n")
         defns = self.alpaca.children[0]
         for defn in defns.children:
             if defn.type == 'ClassDefn':
@@ -74,10 +84,9 @@ class Compiler(object):
 
     def compile_relation(self, ref, ast):
         if ast.type == 'ClassDecl':
-            # XXX this is rather handwavy
-            self.file.write('is_member(')
+            self.file.write('is_%s(' % ast.value)
             self.compile_state_ref(ref)
-            self.file.write(", '%s')" % ast.value)
+            self.file.write(")")
         else:
             self.file.write('(')
             self.compile_state_ref(ref)

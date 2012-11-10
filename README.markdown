@@ -110,11 +110,11 @@ The new implementation of ALPACA in Python has been tested with:
 
 ### TODO ###
 
-* compile to Javascript
+* compile to IR, optimize that IR, then output concrete code
+* compile to Javascript: write support functions
 * compile to legacy Perl
 * option to use pycurses
 * nontrivial fixpoint detection: if playfield matches any of the last n
   playfields, then halt
 * option to halt under other, even more complex circumstances
 * option to display generation #, coordinates, etc in divider string
-* implement >Moore neighbourhoods
