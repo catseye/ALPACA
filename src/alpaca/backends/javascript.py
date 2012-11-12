@@ -3,7 +3,7 @@ Backend for compiling ALPACA AST to Javascript.  Not yet complete.
 
 """
 
-from alpaca.analysis import get_class_map
+from alpaca.analysis import get_class_map, find_nbhd_defn
 
 
 class Compiler(object):
@@ -28,7 +28,7 @@ class Compiler(object):
             self.file.write("  return ");
             for state_id in state_set:
                 self.file.write("(st === '%s') || " % state_id)
-            self.file.write("0;\n}\n")
+            self.file.write("0;\n}\n\n")
         defns = self.alpaca.children[0]
         for defn in defns.children:
             if defn.type == 'ClassDefn':
@@ -55,8 +55,8 @@ class Compiler(object):
         self.file.write("return undefined;\n}\n\n")
 
     def compile_state_defn(self, defn):
-        char_repr = defn.children[0]
-        repr_decls = defn.children[1]
+        #char_repr = defn.children[0]
+        #repr_decls = defn.children[1]
         membership = defn.children[2]
         rules = defn.children[3]
         self.file.write("function eval_%s(pf, x, y) {\nvar id;\n" % defn.value);
@@ -114,17 +114,15 @@ class Compiler(object):
         elif expr.type == 'Relational':
             self.compile_relation(expr.children[0], expr.children[1])
         elif expr.type == 'Adjacency':
-            # XXX todo: class membership
             count = expr.value
             rel = expr.children[0]
             nb = expr.children[1]
             if nb.type == 'NbhdRef':
                 nb = find_nbhd_defn(self.alpaca, nb.value).children[0]
             if rel.type == 'ClassDecl':
-                # XXX this is rather handwavy
-                self.file.write("(in_nbhd_member(pf, x, y, '%s'" % rel.value)
+                self.file.write("(in_nbhd_pred(pf, x, y, is_%s" % rel.value)
             else:
-                self.file.write('(in_nbhd(pf, x, y, ')
+                self.file.write('(in_nbhd_eq(pf, x, y, ')
                 self.compile_state_ref(rel)
             self.file.write(', [')
             self.file.write(','.join(

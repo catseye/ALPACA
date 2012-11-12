@@ -4,7 +4,6 @@ given its AST.
 
 """
 
-from alpaca.ast import AST
 from alpaca.playfield import Playfield
 
 
@@ -21,7 +20,7 @@ def find_defn(alpaca, type, id):
         if defn.type == type and defn.value == id:
             return defn
     raise KeyError, "No such %s '%s'" % (type, id)
-  
+
 
 def find_state_defn(alpaca, state_id):
     return find_defn(alpaca, 'StateDefn', state_id)
@@ -63,21 +62,24 @@ def class_defn_is_a(alpaca, class_ast, class_id):
     return False
 
 
+def get_membership(alpaca, class_decls):
+    assert class_decls.type == 'MembershipDecls'
+    membership = set()
+    for class_decl in class_decls.children:
+        assert class_decl.type == 'ClassDecl'
+        class_id = class_decl.value
+        membership.add(class_id)
+        membership = membership.union(get_class_membership(alpaca, class_id))
+    return membership
+
+
 def get_state_membership(alpaca, state_id):
     """Given a state ID, return a set of IDs of all classes of which that
     state is a member.
 
     """
-    membership = set()
     state_ast = find_state_defn(alpaca, state_id)
-    class_decls = state_ast.children[2]
-    assert class_decls.type == 'MembershipDecls'
-    for class_decl in class_decls.children:
-        assert class_decl.type == 'ClassDecl'
-        class_id = class_decl.value
-        membership.add(class_id)
-        membership.union(get_class_membership(alpaca, class_id))
-    return membership
+    return get_membership(alpaca, state_ast.children[2])
 
 
 def get_class_membership(alpaca, class_id):
@@ -85,16 +87,8 @@ def get_class_membership(alpaca, class_id):
     class is a member.
 
     """
-    membership = set()
     class_ast = find_class_defn(alpaca, class_id)
-    class_decls = class_ast.children[1]
-    assert class_decls.type == 'MembershipDecls'
-    for class_decl in class_decls.children:
-        assert class_decl.type == 'ClassDecl'
-        class_id = class_decl.value
-        membership.add(class_id)
-        membership.union(get_class_membership(alpaca, class_id))
-    return membership
+    return get_membership(alpaca, class_ast.children[1])
 
 
 def get_class_map(alpaca):

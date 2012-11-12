@@ -3,8 +3,6 @@ Direct evaluator of ALPACA AST nodes.
 
 """
 
-from alpaca.ast import AST
-from alpaca.playfield import Playfield
 from alpaca.analysis import (
     find_state_defn, find_class_defn, find_nbhd_defn, state_defn_is_a,
     BoundingBox, fit_bounding_box,
