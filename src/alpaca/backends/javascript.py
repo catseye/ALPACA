@@ -3,7 +3,9 @@ Backend for compiling ALPACA AST to Javascript.  Not yet complete.
 
 """
 
-from alpaca.analysis import get_class_map, find_nbhd_defn
+from alpaca.analysis import (
+    get_class_map, find_nbhd_defn, BoundingBox, fit_bounding_box
+)
 
 
 class Compiler(object):
@@ -21,7 +23,35 @@ class Compiler(object):
  * This file was AUTOMATICALLY generated from an ALPACA description.
  * EDIT AT YOUR OWN RISK!
  */
+
+function in_nbhd_pred(pf, x, y, pred, nbhd) {
+    var count = 0;
+    for (var i = 0; i < len(nbhd); i++) {
+        if (pred(pf.get(x+nbhd[i][0], y+nbhd[i][1]))) {
+            count++;
+        }
+    }
+    return count;
+}
+
+function in_nbhd_eq(pf, x, y, stateId, nbhd) {
+    return in_nbhd_pred(pf, x, y, function(x) { return x === stateId; }, nbhd);
+}
 """)
+        bb = BoundingBox(0, 0, 0, 0)
+        fit_bounding_box(self.alpaca, bb)
+        self.file.write("""\
+function evolve_playfield(pf, new_pf) {
+    for (var y = pf.min_y - %d; y <= pf.max_y - %d; y++) {
+        for (var x = pf.min_x - %d; x <= pf.max_x - %d; x++) {
+            /*
+            new_state_id = evalState(pf, x, y)
+            new_pf.set(x, y, new_state_id)
+            */
+        }
+    }
+}
+""" % (bb.max_dy, bb.min_dy, bb.max_dx, bb.min_dx))
         class_map = get_class_map(self.alpaca)
         for (class_id, state_set) in class_map.iteritems():
             self.file.write("function is_%s(st) {\n" % class_id)
@@ -51,7 +81,7 @@ class Compiler(object):
             self.file.write(";\n}\n" % (dest))
         for superclass in membership.children:
             self.file.write("id = evalClass_%s(pf, x, y);\n" % superclass.value)
-            self.file.write("if (id !=== undefined) return id;\n")
+            self.file.write("if (id !== undefined) return id;\n")
         self.file.write("return undefined;\n}\n\n")
 
     def compile_state_defn(self, defn):
@@ -70,7 +100,7 @@ class Compiler(object):
             self.file.write(";\n}\n" % (dest))
         for superclass in membership.children:
             self.file.write("id = evalClass_%s(pf, x, y);\n" % superclass.value)
-            self.file.write("if (id !=== undefined) return id;\n")
+            self.file.write("if (id !== undefined) return id;\n")
         self.file.write("return '%s';\n}\n\n" % defn.value)
 
     def compile_state_ref(self, ref):
