@@ -38,21 +38,23 @@ Playfield = function() {
         return this._store[x+','+y];
     };
 
+    /* TODO: better bounds recalculation */
     this.put = function(x, y, value) {
+        if (value === undefined) {
+            delete this._store[x+','+y];
+            return;
+        }
         if (this.min_x === undefined || x < this.min_x) this.min_x = x;
         if (this.max_x === undefined || x > this.max_x) this.max_x = x;
         if (this.min_y === undefined || y < this.min_y) this.min_y = y;
         if (this.max_y === undefined || y > this.max_y) this.max_y = y;
-        if (value === undefined) {
-            delete this._store[x+','+y];
-        }
         this._store[x+','+y] = value;
     };
 };
 
 function in_nbhd_pred(pf, x, y, pred, nbhd) {
   var count = 0;
-  for (var i = 0; i < len(nbhd); i++) {
+  for (var i = 0; i < nbhd.length; i++) {
     if (pred(pf.get(x+nbhd[i][0], y+nbhd[i][1]))) {
       count++;
     }
@@ -67,7 +69,7 @@ function in_nbhd_eq(pf, x, y, stateId, nbhd) {
 function evolve_playfield(pf, new_pf) {
   for (var y = pf.min_y - %d; y <= pf.max_y - %d; y++) {
     for (var x = pf.min_x - %d; x <= pf.max_x - %d; x++) {
-      new_pf.set(x, y, evalState(pf, x, y))
+      new_pf.put(x, y, evalState(pf, x, y))
     }
   }
 }
@@ -92,7 +94,32 @@ function evolve_playfield(pf, new_pf) {
             self.file.write("pf = new Playfield();\n")
             for (x, y, c) in pf.iteritems():
                 self.file.write("pf.put(%d, %d, '%s');\n" % (x, y, c))
-            self.file.write('/* %r */' % pf.state_to_repr)
+            self.file.write("""
+function dump_playfield(pf) {
+  for (var y = pf.min_y; y <= pf.max_y; y++) {
+    var line = '';
+    for (var x = pf.min_x; x <= pf.max_x; x++) {
+      s = pf.get(x, y);
+      if (s === undefined) s = '%s';
+""" % pf.default)
+            for (state_id, char) in pf.state_to_repr.iteritems():
+                self.file.write("""
+      if (s === '%s') line += '%s';
+""" % (state_id, char))
+            self.file.write("""
+    }
+    console.log(line);
+  }
+}  
+""")
+            self.file.write("""
+new_pf = new Playfield();
+evolve_playfield(pf, new_pf);
+console.log('-----');
+dump_playfield(new_pf);
+console.log('-----');
+""");
+        return True
 
     def write_evalstate_function(self):
         self.file.write("""\
