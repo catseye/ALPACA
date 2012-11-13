@@ -24,32 +24,52 @@ class Compiler(object):
  * EDIT AT YOUR OWN RISK!
  */
 
-function in_nbhd_pred(pf, x, y, pred, nbhd) {
-    var count = 0;
-    for (var i = 0; i < len(nbhd); i++) {
-        if (pred(pf.get(x+nbhd[i][0], y+nbhd[i][1]))) {
-            count++;
+Playfield = function() {
+    this._store = {};
+    this.min_x = undefined;
+    this.min_y = undefined;
+    this.max_x = undefined;
+    this.max_y = undefined;
+
+    this.get = function(x, y) {
+        return this._store[x+','+y];
+    };
+
+    this.put = function(x, y, value) {
+        if (this.min_x === undefined || x < this.min_x) this.min_x = x;
+        if (this.max_x === undefined || x > this.max_x) this.max_x = x;
+        if (this.min_y === undefined || y < this.min_y) this.min_y = y;
+        if (this.max_y === undefined || y > this.max_y) this.max_y = y;
+        if (value === undefined) {
+            delete this._store[x+','+y];
         }
+        this._store[x+','+y] = value;
+    };
+};
+
+function in_nbhd_pred(pf, x, y, pred, nbhd) {
+  var count = 0;
+  for (var i = 0; i < len(nbhd); i++) {
+    if (pred(pf.get(x+nbhd[i][0], y+nbhd[i][1]))) {
+      count++;
     }
-    return count;
+  }
+  return count;
 }
 
 function in_nbhd_eq(pf, x, y, stateId, nbhd) {
-    return in_nbhd_pred(pf, x, y, function(x) { return x === stateId; }, nbhd);
+  return in_nbhd_pred(pf, x, y, function(x) { return x === stateId; }, nbhd);
 }
 """)
         bb = BoundingBox(0, 0, 0, 0)
         fit_bounding_box(self.alpaca, bb)
         self.file.write("""\
 function evolve_playfield(pf, new_pf) {
-    for (var y = pf.min_y - %d; y <= pf.max_y - %d; y++) {
-        for (var x = pf.min_x - %d; x <= pf.max_x - %d; x++) {
-            /*
-            new_state_id = evalState(pf, x, y)
-            new_pf.set(x, y, new_state_id)
-            */
-        }
+  for (var y = pf.min_y - %d; y <= pf.max_y - %d; y++) {
+    for (var x = pf.min_x - %d; x <= pf.max_x - %d; x++) {
+      new_pf.set(x, y, evalState(pf, x, y))
     }
+  }
 }
 """ % (bb.max_dy, bb.min_dy, bb.max_dx, bb.min_dx))
         class_map = get_class_map(self.alpaca)
@@ -66,6 +86,18 @@ function evolve_playfield(pf, new_pf) {
         for defn in defns.children:
             if defn.type == 'StateDefn':
                 self.compile_state_defn(defn)
+        self.file.write("""\
+function evalState(pf, x, y) {
+  var stateId = pf.get(x, y);
+""")
+        for defn in defns.children:
+            if defn.type == 'StateDefn':
+                self.file.write("""\
+  if (stateId === '%s') return eval_%s(pf, x, y);
+""" % (defn.value, defn.value));
+        self.file.write('}\n')
+        initpf = self.alpaca.children[1]
+        self.file.write("/* %r */\n" % initpf)
 
     def compile_class_defn(self, defn):
         membership = defn.children[1]
