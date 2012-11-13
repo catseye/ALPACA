@@ -4,7 +4,8 @@ Backend for compiling ALPACA AST to Javascript.  Not yet complete.
 """
 
 from alpaca.analysis import (
-    get_class_map, find_nbhd_defn, BoundingBox, fit_bounding_box
+    get_class_map, find_nbhd_defn, BoundingBox, fit_bounding_box,
+    get_defined_playfield
 )
 
 
@@ -18,6 +19,8 @@ class Compiler(object):
         self.file = file
 
     def compile(self):
+        bb = BoundingBox(0, 0, 0, 0)
+        fit_bounding_box(self.alpaca, bb)
         self.file.write("""\
 /*
  * This file was AUTOMATICALLY generated from an ALPACA description.
@@ -60,10 +63,7 @@ function in_nbhd_pred(pf, x, y, pred, nbhd) {
 function in_nbhd_eq(pf, x, y, stateId, nbhd) {
   return in_nbhd_pred(pf, x, y, function(x) { return x === stateId; }, nbhd);
 }
-""")
-        bb = BoundingBox(0, 0, 0, 0)
-        fit_bounding_box(self.alpaca, bb)
-        self.file.write("""\
+
 function evolve_playfield(pf, new_pf) {
   for (var y = pf.min_y - %d; y <= pf.max_y - %d; y++) {
     for (var x = pf.min_x - %d; x <= pf.max_x - %d; x++) {
@@ -86,18 +86,26 @@ function evolve_playfield(pf, new_pf) {
         for defn in defns.children:
             if defn.type == 'StateDefn':
                 self.compile_state_defn(defn)
+        self.write_evalstate_function()
+        pf = get_defined_playfield(self.alpaca)
+        if pf is not None:
+            self.file.write("pf = new Playfield();\n")
+            for (x, y, c) in pf.iteritems():
+                self.file.write("pf.put(%d, %d, '%s');\n" % (x, y, c))
+            self.file.write('/* %r */' % pf.state_to_repr)
+
+    def write_evalstate_function(self):
         self.file.write("""\
 function evalState(pf, x, y) {
   var stateId = pf.get(x, y);
 """)
+        defns = self.alpaca.children[0]
         for defn in defns.children:
             if defn.type == 'StateDefn':
                 self.file.write("""\
   if (stateId === '%s') return eval_%s(pf, x, y);
 """ % (defn.value, defn.value));
         self.file.write('}\n')
-        initpf = self.alpaca.children[1]
-        self.file.write("/* %r */\n" % initpf)
 
     def compile_class_defn(self, defn):
         membership = defn.children[1]

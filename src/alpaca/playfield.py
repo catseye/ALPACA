@@ -3,8 +3,20 @@ class Playfield(object):
         self.store = {}
         self.default = default
         self.recalculate_limits()
-        self.map = map
-        self._inverted_map = dict([(v, k) for (k, v) in map.iteritems()])
+        self.repr_to_state = map
+        self.state_to_repr = dict([(v, k) for (k, v) in map.iteritems()])
+
+    def iteritems(self):
+        y = self.min_y
+        while y <= self.max_y:
+            x = self.min_x
+            while x <= self.max_x:
+                c = self.get(x, y)
+                if c != self.default:
+                    yield (x, y, c)
+                x += 1
+            y += 1
+        raise StopIteration
 
     def copy(self, pf):
         y = pf.min_y
@@ -37,7 +49,7 @@ class Playfield(object):
         for line in f:
             x = 0
             for c in line.rstrip('\r\n'):
-                self.set(x, y, self.map[c])
+                self.set(x, y, self.repr_to_state[c])
                 x += 1
             y += 1
         self.recalculate_limits()
@@ -74,7 +86,7 @@ class Playfield(object):
         return self.store.get((x, y), self.default)
 
     def represent(self, name):
-        return self._inverted_map[name]
+        return self.state_to_repr[name]
 
     def __str__(self):
         s = ''
