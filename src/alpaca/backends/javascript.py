@@ -38,17 +38,33 @@ Playfield = function() {
         return this._store[x+','+y];
     };
 
-    /* TODO: better bounds recalculation */
     this.put = function(x, y, value) {
         if (value === undefined) {
             delete this._store[x+','+y];
-            return;
+        } else {
+            this._store[x+','+y] = value;
         }
-        if (this.min_x === undefined || x < this.min_x) this.min_x = x;
-        if (this.max_x === undefined || x > this.max_x) this.max_x = x;
-        if (this.min_y === undefined || y < this.min_y) this.min_y = y;
-        if (this.max_y === undefined || y > this.max_y) this.max_y = y;
-        this._store[x+','+y] = value;
+    };
+
+    this.recalculate_limits = function() {
+        this.min_x = undefined;
+        this.min_y = undefined;
+        this.max_x = undefined;
+        this.max_y = undefined;
+
+        for (var cell in this._store) {
+            var pos = cell.split(',');
+            var x = parseInt(pos[0], 10);
+            var y = parseInt(pos[1], 10);
+            if (this.min_x === undefined || this.min_x > x)
+                this.min_x = x;
+            if (this.max_x === undefined || this.max_x < x)
+                this.max_x = x;
+            if (this.min_y === undefined || this.min_y > y)
+                this.min_y = y;
+            if (this.max_y === undefined || this.max_y < y)
+                this.max_y = y;
+        }
     };
 };
 
@@ -69,9 +85,10 @@ function in_nbhd_eq(pf, x, y, stateId, nbhd) {
 function evolve_playfield(pf, new_pf) {
   for (var y = pf.min_y - %d; y <= pf.max_y - %d; y++) {
     for (var x = pf.min_x - %d; x <= pf.max_x - %d; x++) {
-      new_pf.put(x, y, evalState(pf, x, y))
+      new_pf.put(x, y, evalState(pf, x, y));
     }
   }
+  new_pf.recalculate_limits();
 }
 """ % (bb.max_dy, bb.min_dy, bb.max_dx, bb.min_dx))
         class_map = get_class_map(self.alpaca)
@@ -94,6 +111,7 @@ function evolve_playfield(pf, new_pf) {
             self.file.write("pf = new Playfield();\n")
             for (x, y, c) in pf.iteritems():
                 self.file.write("pf.put(%d, %d, '%s');\n" % (x, y, c))
+            self.file.write("pf.recalculate_limits();\n")
             self.file.write("""
 function dump_playfield(pf) {
   for (var y = pf.min_y; y <= pf.max_y; y++) {
