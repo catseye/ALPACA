@@ -33,13 +33,15 @@ Playfield = function() {
     this.min_y = undefined;
     this.max_x = undefined;
     this.max_y = undefined;
+    this.default = undefined;
 
     this.get = function(x, y) {
-        return this._store[x+','+y];
+        var state = this._store[x+','+y];
+        return state === undefined ? this.default : state;
     };
 
     this.put = function(x, y, value) {
-        if (value === undefined) {
+        if (value === this.default) {
             delete this._store[x+','+y];
         } else {
             this._store[x+','+y] = value;
@@ -108,7 +110,10 @@ function evolve_playfield(pf, new_pf) {
         self.write_evalstate_function()
         pf = get_defined_playfield(self.alpaca)
         if pf is not None:
-            self.file.write("pf = new Playfield();\n")
+            self.file.write("""
+pf = new Playfield();
+pf.default = '%s';
+""" % pf.default)
             for (x, y, c) in pf.iteritems():
                 self.file.write("pf.put(%d, %d, '%s');\n" % (x, y, c))
             self.file.write("pf.recalculate_limits();\n")
@@ -118,8 +123,7 @@ function dump_playfield(pf) {
     var line = '';
     for (var x = pf.min_x; x <= pf.max_x; x++) {
       s = pf.get(x, y);
-      if (s === undefined) s = '%s';
-""" % pf.default)
+""")
             for (state_id, char) in pf.state_to_repr.iteritems():
                 self.file.write("""
       if (s === '%s') line += '%s';
@@ -132,11 +136,12 @@ function dump_playfield(pf) {
 """)
             self.file.write("""
 new_pf = new Playfield();
+new_pf.default = '%s';
 evolve_playfield(pf, new_pf);
 console.log('-----');
 dump_playfield(new_pf);
 console.log('-----');
-""");
+""" % pf.default)
         return True
 
     def write_evalstate_function(self):
