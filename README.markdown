@@ -18,17 +18,18 @@ in ALPACA (it's short):
       to Dead when 4 Alive or 7 Dead.
 
 See the file `ALPACA.markdown` in the `doc` directory for a complete
-specification of the ALPACA language.  This document is written in
-[Falderal][] literate test suite format; the examples given in the spec
-are test cases, which can be run against an implementation.  The `test.sh`
-script does this.
+specification of the ALPACA language, version 1.0-PRE.  This document is
+written in [Falderal][] literate test suite format; the examples given in
+the spec are test cases, which can be run against an implementation.
+The `test.sh` script does this.
 
-This distribution also contains the reference implementation of ALPACA,
-written in Python.  Its source is in the `src` directory and `bin/alpaca` is
-a script to start it from the command line (no installation is required.)
-See below for more information on the reference implementation.
+This distribution also contains the reference implementation of ALPACA
+version 1.0-PRE, written in Python.  Its source is in the `src` directory
+and `bin/alpaca` is a script to start it from the command line (no
+installation is required.)  See below for more information on the reference
+implementation.
 
-This distribution also contains a compiler for an older version (v0.9x) of
+This distribution also contains a compiler for an older version (0.94) of
 ALPACA, which is written in Perl and which compiles ALPACA descriptions
 to Perl.  It can be found in the `impl/alpaca.pl` directory.  It is no longer
 maintained.
@@ -38,23 +39,25 @@ maintained.
 History
 -------
 
-While [RUBE](http://catseye.tc/node/RUBE.html) was being developed it became
-clear to the author that the "bully" approach to writing a complex cellular
-automaton would result in a program extremely difficult to understand and even
-worse to maintain.
+While [RUBE][] was being developed it became clear to the author that the
+"bully" approach to writing a complex cellular automaton would result in a
+program extremely difficult to understand and even worse to maintain.
 
 ALPACA was developed in order to have a terse, precise and readable
 language in which to express the rules for any given cellular automaton.
-It is in ALPACA, then, that [REDGREEN](http://catseye.tc/node/REDGEEN.html),
-a successor to RUBE, is written. Being described in ALPACA instead of C,
-the source code for REDGREEN is easily a hundred times clearer than the
-knotted mess that is RUBE.
+It is in ALPACA, then, that [REDGREEN][], a successor to RUBE, is written.
+Being described in ALPACA instead of C, the source code for REDGREEN is
+easily a hundred times clearer than the knotted mess that is RUBE.
+
+[RUBE]: http://catseye.tc/node/RUBE.html
+[REDGREEN]: http://catseye.tc/node/REDGEEN.html
 
 Other cellular automata that have been successfully described in ALPACA
-include John Conway's famous Game of Life automaton and the lesser-known
-WireWorld automaton.
+include John Conway's famous Game of Life automaton, the lesser-known
+WireWorld automaton, and all of Chris Pressey's later cellular automaton
+designs.
 
-The first version of the ALPACA compiler, v0.80 was written as an
+The first version, 0.80, of the ALPACA compiler was written as an
 attributed grammar in CoCo/R from which a C source file was generated.
 
 This was rewritten in version 0.90 to a hand-coded compiler in Perl 5
@@ -62,9 +65,10 @@ that produces a Perl program that accepts an automaton form (a start
 state) as input, in the form of an ASCII text file, and animates it
 based on the rules of the defined cellular automaton.
 
-Versions 0.93 and 0.94 succeeded version 0.90, but include any significant
-changes to the language, only to the reference implementation.  (Possibly
-versions 0.91 and 0.92 existed at some point as well, but they are lost.)
+Versions 0.93 and 0.94 succeeded version 0.90, but did not include any
+significant changes to the language, only to the reference implementation.
+Versions 0.91 and 0.92 possibly existed at some point as well, but they
+are now lost.
 
 Originally, the name ALPACA was an acronym for **a** **l**anguage for
 **p**rogramming **a**rbitrary **c**ellular **a**utomata.  However, as it
@@ -72,27 +76,27 @@ was recognized by the author that the cellular automata expressible in
 ALPACA were far from arbitrary (limited to two dimensions and the Moore
 neighbourhood), a new backronym was sought.
 
-We are currently working on a more formal specification for ALPACA
-version 1.0.  It is almost complete, and adds several new features to the
-language, such as user-defined neighbourhoods, representations outside
-the realm of ASCII characters, and allowing a pre-defined CA configuration
-to be included with the CA description.  (This last enhancement makes ALPACA
-CA-complete: almost the same as Turing-complete, but there is no way to
-define, in ALPACA, what it means for a cellular automaton to halt.)
-For this language update, a new reference implementation is being written
-in Python.
+The currrent version of the ALPACA language is 1.0-PRE.  It has, unlike
+previous versions, a relatively formal specification, including many
+examples which serve as test cases.  Version 1.0-PRE adds several new
+features to the language, such as user-defined neighbourhoods, representations
+outside the realm of ASCII characters, and allowing a pre-defined CA
+configuration to be included with the CA description.  (This last enhancement
+makes ALPACA CA-complete: almost the same as Turing-complete, but there is no
+way to define, in ALPACA, what it means for a cellular automaton to halt.)
+
+ALPACA 1.0-PRE has an entirely new reference implementation, rewritten from
+scratch in Python.
 
 Reference Implementation
 ------------------------
 
 The reference implementation, `bin/alpaca`, can evolve a cellular automaton,
 given its rules as described in ALPACA along with an initial configuration
-(which may be supplied by the ALPACA description.)  
-
-In the future this implementation may also be able to animate a cellular
-automaton (probably in a terminal, using curses) and may be able to compile
-an ALPACA description into the rules for evolving the cellular automaton as
-code in a high-level programming language such as Python or Javascript.
+(which may be supplied by the ALPACA description.)  It can also compile the
+ALPACA description to a program in Javascript that will evolve the cellular
+automaton, although this is more of a proof-of-concept at the moment.  (It
+passes all the test cases, but is not really well-developed or cleaned up.)
 
 ### Tested ###
 
@@ -108,13 +112,25 @@ The new implementation of ALPACA in Python has been tested with:
 
 ...and so far seems to handle all of them correctly.
 
-### TODO ###
+### Future Work ###
 
-* compile to IR, optimize that IR, then output concrete code
-* compile to Javascript: write support functions
-* compile to legacy Perl
-* option to use pycurses
-* nontrivial fixpoint detection: if playfield matches any of the last n
-  playfields, then halt
-* option to halt under other, even more complex circumstances
-* option to display generation #, coordinates, etc in divider string
+*   Generalize the compiler subsystem.  It should really compile to an
+    intermediate representation (IR) that looks like the AST of a generic
+    procedural language.  Then there should be an optimization pass which
+    eliminates obviously unnecessary code in the IR.  The final pass should
+    compile the IR to Javascript, Perl, or whatever else.
+*   Possibly improve the AST objects.  Currently they are very generic,
+    which was useful for development, but means that children must be
+    accessed by numeric index, which is not exactly self-documenting.
+*   Generally clean up and document the code more.
+*   Animate the given cellular automaton in the terminal, using curses.
+*   Implement non-trivial fixpoint detection: if playfield matches any of
+    the last _n_ playfields, then halt.
+*   Implement some option to halt under other, even more complex
+    circumstances, such as some portion of the playfield matching some
+    pattern.
+*   Possibly allow the halting predicate to be defined in the ALPACA
+    description itself somehow.  This would make ALPACA Turing-complete.
+*   Add the ability to display certain values (generation number,
+    coordinates of top-left corner, etc.) in divider string, by making
+    it a formatting string.
