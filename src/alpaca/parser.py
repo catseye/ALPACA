@@ -7,7 +7,7 @@ Defns           ::= Defn {";" Defn}.
 Defn            ::= StateDefn
                   | ClassDefn
                   | NbhdDefn.
-StateDefn       ::= "state" StateID [quoted-char] [ReprDecl]
+StateDefn       ::= "state" StateID [quoted-char]
                     {MembershipDecl}
                     [Rules].
 ClassDefn       ::= "class" ClassID
@@ -19,9 +19,6 @@ NbhdDefn        ::= "neighbourhood" NbhdID
 ClassID         ::= identifier.
 StateID         ::= identifier.
 NbhdID          ::= identifier.
-
-ReprDecl        ::= "{" Attribute {"," Attribute} "}".
-Attribute       ::= identifier ":" quoted-string.
 
 MembershipDecl  ::= ClassRef.
 ClassRef        ::= "is" ClassID.
@@ -104,25 +101,13 @@ class Parser(object):
         attrs = []
         char_repr = AST('CharRepr',
                         value=self.scanner.consume_type('string literal'))
-        if self.scanner.consume('{'):
-            attrs.append(self.attribute())
-            while self.scanner.consume(','):
-                attrs.append(self.attribute())
-            self.scanner.expect('}')
-        attrs = AST('ReprDecls', attrs)
         classes = []
         while self.scanner.on('is'):
             classes.append(self.class_decl())
         classes = AST('MembershipDecls', classes)
         rules = self.rules()
-        return AST('StateDefn', [char_repr, attrs, classes, rules],
+        return AST('StateDefn', [char_repr, AST('Unused'), classes, rules],
                    value=id)
-
-    def attribute(self):
-        id = self.scanner.consume_type('identifier')
-        self.scanner.expect(':')
-        value = self.scanner.consume_type('string literal')
-        return AST('Attribute', value=(id, value))
 
     def class_decl(self):
         self.scanner.expect('is')

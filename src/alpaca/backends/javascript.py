@@ -176,7 +176,6 @@ function evalState(pf, x, y) {
 
     def compile_state_defn(self, defn):
         #char_repr = defn.children[0]
-        #repr_decls = defn.children[1]
         membership = defn.children[2]
         rules = defn.children[3]
         self.file.write("function eval_%s(pf, x, y) {\nvar id;\n" % defn.value);

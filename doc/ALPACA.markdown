@@ -8,7 +8,9 @@ It is currently a work in progress.  Thus it is referred to as version
 The language described herein is mostly compatible with the version
 of the language which has existed until now (version 0.9x).  However, it
 extends it in some significant ways, and is backwards-incompatible with it
-in certain minor ways.  An implementation of 1.0-PRE is underway.
+in certain minor ways.  The reference implementation of 1.0-PRE that
+accompanies this specification is included in the ALPACA reference
+distribution.
 
 Abbreviations
 -------------
@@ -43,7 +45,22 @@ The definitions in the list are separated with semicolons, and the list ends
 with either a period (if no initial configuration is given) or the token
 `begin` (which introduces the initial configuration.)
 
-Example: a trivial ALPACA description with two states:
+Each definition associates a defined object with a _name_.  A name is an
+alphabetic character followed by zero or more alphanumeric characters with
+no other intervening characters.  A name may not be any of the 16 reserved
+keywords defined by ALPACA, which are:
+
+    and          neighbourhood
+    begin        not
+    class        or
+    false        state
+    guess        to
+    in           true
+    is           when
+    me           xor
+
+Example: a trivial ALPACA description with two states and no initial
+configuration:
 
     | state Space;
     | state Thing.
@@ -58,40 +75,32 @@ for the state.
 
 #### Representation Declaration ####
 
-A representation declaration consists of an optional single printable ASCII
-character enclosed in double quotes, followed by an optional comma-separated
-list of _attributes_ enclosed in curly braces.
+A representation declaration consists of a single non-combining Unicode
+character enclosed in double quotes.
 
-An attribute consists of a _key_ and a _value_.  The key declares the purpose
-and/or the intended interpretation of the value, which is a double-quoted
-string literal.  The key may be drawn from a set defined by ALPACA, or it may
-be implementation-defined.  The value may consist of essentially arbitrary
-string data, and may refer to a character, a colour, a graphic image, or
-anything else.
+A representation declaration is not required for any given state.  However,
+if an initial configuration is included in the ALPACA description, the
+characters in it will be mapped to states by using the representation
+declaration of each state.  Therefore, if a state has no representation
+declaration, no cell in that state can be present in the initial
+configuration.
 
-Note that this version of the ALPACA specification does not yet define any
-keys.  However, it reserves the following key names for future definition
-(possibly in version 1.1).
+No two states may have the same representation declaration.
 
-    colour
-    image
-    border
-    any key beginning with "alpaca_"
-
-Implementations which define their own keys are encouraged to prefix them
-with something likely to be unique.
-
-Representation declarations are not required.  If omitted, representation
-information can be supplied by the implementation, or can be defined with
-external configuration files ("skins" or "themes".)  Even if representation
-declarations are included in the ALPACA description, there is nothing to
+Informational: an implementation may use the representation declaration of
+a state to display (or otherwise communicate) that state to the user.  This
+is certainly a reasonable choice, and one expects many implementations will
+at least offer that as an option.  However, representation of states is
+ultimately implementation-defined.  Even if representation declarations are
+included for every state in the ALPACA description, there is nothing to
 prevent an implementation from overriding them with some other representation.
-
-However, if an initial configuration is included, it will be interpreted
-using the single ASCII character representation declarations of the states.
-
-(TODO: this limits us to 95 states.  Either allow multiple characters to
-represent a state, or move to Unicode, or both.)
+Earlier efforts at defining ALPACA 1.0 wished to include a more sophisticated
+mechanism for describing appearance of states, but this effort was abandoned
+under the argument of "separation of content and presentation".  If such an
+effort is again undertaken at some point, it will likely be in a form very
+similar to (perhaps even directly repurposing) W3C's Cascading Style Sheets.
+Embedding these into ALPACA descriptions is not out of the question, but
+should not be the default approach followed by this specification.
 
 Example: a trivial ALPACA description with single character representation
 declarations:
@@ -99,25 +108,6 @@ declarations:
     | state Space " ";
     | state Thing "*".
     = ok
-
-Example: a trivial ALPACA description with representation declarations
-composed of attributes:
-
-    | state Space { colour: "black" };
-    | state Thing { image:  "http://example.com/thing.gif" }.
-    = ok
-
-Example: a trivial ALPACA description with both single character and
-attribute representation declarations:
-
-    | state Space " " { color:  "black" };
-    | state Thing "x" { image:  "http://example.com/thing.gif",
-    |                   border: "1px solid green" }.
-    = ok
-
-Representation declarations generally specify a visual representation.
-However, to drive home that this is not necessarily the case, the
-verbiage "visual" and "appearance" has been avoided in this specification.
 
 #### Aside: Initial Configuration ####
 
@@ -601,7 +591,7 @@ Whitespace is ignored between tokens, and comments extend from
     Defn            ::= StateDefn
                       | ClassDefn
                       | NbhdDefn.
-    StateDefn       ::= "state" StateID [quoted-char] [ReprDecl]
+    StateDefn       ::= "state" StateID [quoted-char]
                         {MembershipDecl}
                         [Rules].
     ClassDefn       ::= "class" ClassID
@@ -613,9 +603,6 @@ Whitespace is ignored between tokens, and comments extend from
     ClassID         ::= identifier.
     StateID         ::= identifier.
     NbhdID          ::= identifier.
-
-    ReprDecl        ::= "{" Attribute {"," Attribute} "}".
-    Attribute       ::= identifier ":" quoted-string.
 
     MembershipDecl  ::= ClassRef.
     ClassRef        ::= "is" ClassID.
@@ -643,7 +630,6 @@ Whitespace is ignored between tokens, and comments extend from
 The following are token definitions, not productions.
 
     quoted-char     ::= quote printable-non-quote quote.
-    quoted-string   ::= quote {printable-non-quote} quote.
     identifier      ::= alpha {alpha | digit}.
     natural-number  ::= digit {digit}.
     quote           ::= ["].
