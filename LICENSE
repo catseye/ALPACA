@@ -60,8 +60,9 @@ license:
 -----------------------------------------------------------------------------
 
 The example ALPACA definitions of the Life and Wireworld automata written
-in ALPACA were written by Chris Pressey and are hereby placed in the public
-domain, as described in the following unlicense:
+in ALPACA, and all other example ALPACA sources in the `eg` directory, were
+written by Chris Pressey and are hereby placed in the public domain, as
+described in the following unlicense:
 
 -----------------------------------------------------------------------------
 

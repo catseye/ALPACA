@@ -2,7 +2,7 @@
 alpaca [-afgIJpt] [-c backend] [-d string] description.alp [form.ca]
 
 Reference implementation of the ALPACA cellular automaton definition language,
-version 1.0-PRE.
+version 1.0.
 
 """
 

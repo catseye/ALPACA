@@ -1,5 +1,5 @@
 """
-Backend for compiling ALPACA AST to Javascript.  Not yet complete.
+Backend for compiling ALPACA AST to Javascript.  Perhaps not complete.
 
 """
 

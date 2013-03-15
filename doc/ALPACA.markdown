@@ -1,16 +1,17 @@
 The ALPACA Cellular Automaton Definition Language
 =================================================
 
-This document aims to describe version 1.0 of the ALPACA language.
-It is currently a work in progress.  Thus it is referred to as version
-1.0-PRE.
+This document describes version 1.0 of ALPACA, a language for defining
+cellular automata.
 
 The language described herein is mostly compatible with the version
 of the language which has existed until now (version 0.9x).  However, it
 extends it in some significant ways, and is backwards-incompatible with it
-in certain minor ways.  The reference implementation of 1.0-PRE that
+in certain minor ways.  The reference implementation of version 1.0 that
 accompanies this specification is included in the ALPACA reference
 distribution.
+
+In the remainder of this document, ALPACA refers to ALPACA version 1.0.
 
 Abbreviations
 -------------
@@ -142,9 +143,9 @@ Example:
 
 #### Class Memberships ####
 
-Any number of classes may be named after the representation declarations,
-with the name of each class preceded by `is`.  More information on this
-will be given in the "Classes" section below.
+In a state definition, any number of classes may be named after the
+representation declaration, with the name of each class preceded by `is`.
+More information on this will be given in the "Classes" section below.
 
 #### Transition Rules ####
 
@@ -372,7 +373,7 @@ a state of the other type to the north, but they will both turn into
     = -----
 
 Each state can belong to zero or more classes.  When it belongs to more
-than one, class the transition rules for each class are applied in order
+than one class, the transition rules for each class are applied in the order
 the classes are listed in the state definition.  In addition, the transition
 rules for the state itself are always applied first, before any class rules
 are considered.
@@ -441,10 +442,9 @@ Example: overriding deep inheritance at a class level.
 
 #### Membership ####
 
-In a transition rule, a class-inclusion predicate may be used by
-giving a state referent, the token `is`, and the name of a class.
-This expression evaluates to true if the state so referred to is a
-member of that class.
+In a transition rule, a class-inclusion predicate may be used by giving a
+state referent, the token `is`, and the name of a class.  This expression
+evaluates to true if the state so referred to is a member of that class.
 
 Example: a cellular automaton where `Dog`s and `Cat`s (both `Animal`s)
 switch to the other when the cell to the north is not an `Animal` and turn
@@ -504,9 +504,10 @@ Class membership is transitive.
     =  dd
     = -----
 
-(TODO: explain that diamond inheritance is not in practice a problem, as
-classes cannot contain any of their own state, which is what makes diamond
-inheritance a problem in most languages with MI.)
+Informative: diamond inheritance is not in practice a problem, as classes do
+not defined or contain any state (information) which is not in the state
+itself, which is what makes diamond inheritance problematic in most languages
+with multiple inheritance.
 
 ### Neighbourhoods ###
 
@@ -677,26 +678,21 @@ by some other description, however, this spec does not define a standard
 way in which that could happen.
 
 `arrow-chain` and `identifier` tokens overlap; tokens beginning with a
-series of `v`s (lower-case letter "vee"s) will be interpreted as an `arrow-chain`.
-Thus, the text `vonNeumann` will be scanned as the arrow-chain `v` followed
-by the identifier `onNeumann`.  Until such time as this is addressed, avoid
-giving states, classes, and neighbourhoods names which begin with a lowercase
-`v`.  (Convention says to start these identifiers with uppercase letters
-anyhow.)
+series of `v`s (lower-case letter "vee"s) will be interpreted as an
+`arrow-chain`.  Thus, the text `vonNeumann` will be scanned as the arrow-chain
+`v` followed by the identifier `onNeumann`.  This may be addressed in a future
+version of ALPACA.  Until such time, avoid giving states, classes, and
+neighbourhoods names which begin with a lowercase `v`.  (Convention says to
+start these identifiers with uppercase letters anyhow.)
 
 Differences between ALPACA 1.0 and Previous Versions
 ----------------------------------------------------
 
-Previous versions of ALPACA did not support attribute representation
-declarations, or multiple representation declarations; they supported only
-a single quoted character to be used as the "appearance".
-
 Previous versions of ALPACA did not support arbitrary strings of arrows
 for state designators; instead, only arrow-chains in the set {`^`, `v`, `<`,
 `>`, `^<`, `^>`, `v<`, `v>`} were permitted.  In addition, previous versions
-supported eight compass directions (`n`, `ne`, etc) in place of arrow chains.
-This is no longer supported.  However, a future version might introduce a
-more "readable" alternative state referent syntax.
+supported eight compass direction abbreviations (`n`, `ne`, etc) in place of
+arrow chains.  This is no longer supported.
 
 Previous versions of ALPACA always assumed a Moore neighbourhood when making
 an adjacency predicate.  Other neighbourhoods could not be defined, and
