@@ -95,6 +95,10 @@ def main(argv):
 
     pf = get_defined_playfield(ast)
     if pf is None:
+        if len(args) < 2:
+            print "source file does not define an initial configuration,"
+            print "and no cellular automaton configuration file given"
+            sys.exit(1)
         file = open(args[1])
         pf = Playfield(default_state, repr_map)
         pf.load(file)
