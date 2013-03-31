@@ -58,6 +58,12 @@ def main(argv):
     optparser.add_option("-t", "--test",
                          action="store_true", dest="test", default=False,
                          help="run test cases and exit")
+    optparser.add_option("-y", "--include-yoob-playfield-inline",
+                         action="store_true",
+                         dest="include_yoob_playfield_inline", default=False,
+                         help="include yoob/playfield.js (from yoob.js) "
+                              "inline in generated Javascript (javascript "
+                              "backend only)")
     (options, args) = optparser.parse_args(argv[1:])
     if options.test:
         import doctest
@@ -85,7 +91,7 @@ def main(argv):
         # XXX generalize
         if options.compile_to == 'javascript':
             from alpaca.backends.javascript import Compiler
-            compiler = Compiler(ast, sys.stdout)
+            compiler = Compiler(ast, sys.stdout, options=options)
             success = compiler.compile()
             if success:
                 sys.exit(0)

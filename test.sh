@@ -17,7 +17,7 @@ if [ "x$1" = "xjs" ]; then
 
     -> Functionality "Evolve ALPACA CA one generation" is implemented by
     -> shell command
-    -> "./bin/alpaca -c javascript %(test-file) > ca.js && node ca.js"
+    -> "./bin/alpaca -y -c javascript %(test-file) > ca.js && node ca.js"
 EOF
 fi
 

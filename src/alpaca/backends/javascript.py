@@ -249,13 +249,14 @@ yoob.Playfield = function() {
 """
 
 class Compiler(object):
-    def __init__(self, alpaca, file):
+    def __init__(self, alpaca, file, options=None):
         """alpaca is an ALPACA description in AST form.  file is a file-like
         object to which the compiled code will be written.
 
         """
         self.alpaca = alpaca
         self.file = file
+        self.options = options
 
     def compile(self):
         bb = BoundingBox(0, 0, 0, 0)
@@ -267,7 +268,9 @@ class Compiler(object):
  */
 
 """)
-        self.file.write(YOOB_PLAYFIELD_JS)
+        if self.options is not None and \
+           self.options.include_yoob_playfield_inline:
+            self.file.write(YOOB_PLAYFIELD_JS)
         self.file.write("""
 function in_nbhd_pred(pf, x, y, pred, nbhd) {
   var count = 0;
