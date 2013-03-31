@@ -314,30 +314,17 @@ pf.setDefault('%s');
             for (x, y, c) in pf.iteritems():
                 self.file.write("pf.putDirty(%d, %d, '%s');\n" % (x, y, c))
             self.file.write("pf.recalculateBounds();\n")
-            # TODO: use pf.dump()
-            self.file.write("""
-function dump_playfield(pf) {
-  for (var y = pf.minY; y <= pf.maxY; y++) {
-    var line = '';
-    for (var x = pf.minX; x <= pf.maxX; x++) {
-      s = pf.get(x, y);
-""")
+            self.file.write("var dumper = function(s) {\n")
             for (state_id, char) in pf.state_to_repr.iteritems():
-                self.file.write("""
-      if (s === '%s') line += '%s';
-""" % (state_id, char))
-            self.file.write("""
-    }
-    console.log(line);
-  }
-}  
-""")
-            self.file.write("""
-new_pf = new yoob.Playfield();
-new_pf.setDefault('%s');
-evolve_playfield(pf, new_pf);
+                self.file.write("  if (s === '%s') return '%s';\n" %
+                                (state_id, char))
+            self.file.write("};\n")
+            self.file.write(r"""
+newPf = new yoob.Playfield();
+newPf.setDefault('%s');
+evolve_playfield(pf, newPf);
 console.log('-----');
-dump_playfield(new_pf);
+console.log(newPf.dump(dumper).replace(/\n$/, ""));
 console.log('-----');
 """ % pf.default)
         return True
