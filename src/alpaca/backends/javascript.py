@@ -5,7 +5,7 @@ Backend for compiling ALPACA AST to Javascript.  Perhaps not complete.
 
 from alpaca.analysis import (
     get_class_map, find_nbhd_defn, BoundingBox, fit_bounding_box,
-    get_defined_playfield
+    get_defined_playfield, construct_representation_map
 )
 
 
@@ -290,6 +290,21 @@ function evolve_playfield(pf, new_pf) {
   pf.map(new_pf, evalState, %d, %d, %d, %d);
 }
 """ % (-1 * bb.max_dx, -1 * bb.max_dy, -1 * bb.min_dx, -1 * bb.min_dy,))
+
+        # write the CA's load and dump mappers
+        repr_map = construct_representation_map(self.alpaca)
+        self.file.write("function loadMapper(c) {\n")
+        for (char, state_id) in repr_map.iteritems():
+            self.file.write("  if (c === '%s') return '%s';\n" %
+                            (char, state_id))
+        self.file.write("};\n")
+
+        self.file.write("function dumpMapper(s) {\n")
+        for (char, state_id) in repr_map.iteritems():
+            self.file.write("  if (s === '%s') return '%s';\n" %
+                            (state_id, char))
+        self.file.write("};\n")
+
         class_map = get_class_map(self.alpaca)
         for (class_id, state_set) in class_map.iteritems():
             self.file.write("function is_%s(st) {\n" % class_id)
@@ -314,17 +329,12 @@ pf.setDefault('%s');
             for (x, y, c) in pf.iteritems():
                 self.file.write("pf.putDirty(%d, %d, '%s');\n" % (x, y, c))
             self.file.write("pf.recalculateBounds();\n")
-            self.file.write("var dumper = function(s) {\n")
-            for (state_id, char) in pf.state_to_repr.iteritems():
-                self.file.write("  if (s === '%s') return '%s';\n" %
-                                (state_id, char))
-            self.file.write("};\n")
             self.file.write(r"""
 newPf = new yoob.Playfield();
 newPf.setDefault('%s');
 evolve_playfield(pf, newPf);
 console.log('-----');
-console.log(newPf.dump(dumper).replace(/\n$/, ""));
+console.log(newPf.dump(dumpMapper).replace(/\n$/, ""));
 console.log('-----');
 """ % pf.default)
         return True
