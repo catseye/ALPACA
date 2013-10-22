@@ -140,6 +140,19 @@ def get_defined_playfield(alpaca):
 
 
 class BoundingBox(object):
+    """
+    
+    >>> b = BoundingBox(-2, -3, 2, 3)
+    >>> b
+    BoundingBox(-2, -3, 2, 3)
+    >>> b.expand_to_contain(4, 1)
+    >>> b
+    BoundingBox(-2, -3, 4, 3)
+    >>> b.expand_to_contain(0, -4)
+    >>> b
+    BoundingBox(-2, -4, 4, 3)
+    
+    """
     def __init__(self, min_dx, min_dy, max_dx, max_dy):
         self.min_dx = min_dx
         self.min_dy = min_dy

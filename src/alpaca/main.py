@@ -9,6 +9,7 @@ version 1.0.
 from optparse import OptionParser
 import sys
 
+from alpaca import analysis
 from alpaca.analysis import (
     construct_representation_map,
     get_default_state,
@@ -58,6 +59,9 @@ def main(argv):
     optparser.add_option("-t", "--test",
                          action="store_true", dest="test", default=False,
                          help="run test cases and exit")
+    optparser.add_option("-v", "--verbose",
+                         action="store_true", dest="verbose", default=False,
+                         help="run verbosely (test cases only for now)")
     optparser.add_option("-y", "--include-yoob-playfield-inline",
                          action="store_true",
                          dest="include_yoob_playfield_inline", default=False,
@@ -67,7 +71,7 @@ def main(argv):
     (options, args) = optparser.parse_args(argv[1:])
     if options.test:
         import doctest
-        (fails, something) = doctest.testmod()
+        (fails, something) = doctest.testmod(analysis)
         if fails == 0:
             print "All tests passed."
             sys.exit(0)

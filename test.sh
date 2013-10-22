@@ -3,6 +3,8 @@
 # usage: ./test.sh [js]
 # js option will test compiling to Javascript (requires node.js.)
 
+bin/alpaca -t || exit 1
+
 cat >test_config <<EOF
     -> Functionality "Parse ALPACA Description" is implemented by shell command
     -> "./bin/alpaca -p %(test-file) && echo 'ok'"
