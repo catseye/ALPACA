@@ -25,5 +25,5 @@ fi
 
 falderal test_config doc/ALPACA.markdown
 EXITCODE=$?
-rm test_config
+rm -f test_config ca.js
 exit $EXITCODE
