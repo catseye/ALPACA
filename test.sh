@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# usage: ./test.sh [js]
-# js option will test compiling to Javascript (requires node.js.)
+# usage: ./test.sh
+# If node (node.js) is on path, will also test compiling to Javascript.
 
 bin/alpaca -t || exit 1
 
@@ -14,7 +14,7 @@ cat >test_config <<EOF
     -> "./bin/alpaca -I -g1 %(test-body-file)"
 EOF
 
-if [ "x$1" = "xjs" ]; then
+if [ x`which node` != "x" ]; then
     cat >>test_config <<EOF
 
     -> Functionality "Evolve ALPACA CA one generation" is implemented by

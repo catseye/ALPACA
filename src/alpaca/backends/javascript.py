@@ -363,7 +363,7 @@ function evalState(pf, x, y) {
             self.compile_expr(expr)
             self.file.write(") {\n  return ")
             self.compile_state_ref(dest)
-            self.file.write(";\n}\n" % (dest))
+            self.file.write(";\n}\n")
         for superclass in membership.children:
             self.file.write("id = evalClass_%s(pf, x, y);\n" % superclass.value)
             self.file.write("if (id !== undefined) return id;\n")
@@ -381,7 +381,7 @@ function evalState(pf, x, y) {
             self.compile_expr(expr)
             self.file.write(") {\n  return ")
             self.compile_state_ref(dest)
-            self.file.write(";\n}\n" % (dest))
+            self.file.write(";\n}\n")
         for superclass in membership.children:
             self.file.write("id = evalClass_%s(pf, x, y);\n" % superclass.value)
             self.file.write("if (id !== undefined) return id;\n")
