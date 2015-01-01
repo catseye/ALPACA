@@ -7,11 +7,11 @@ bin/alpaca -t || exit 1
 
 cat >test_config <<EOF
     -> Functionality "Parse ALPACA Description" is implemented by shell command
-    -> "./bin/alpaca -p %(test-file) && echo 'ok'"
+    -> "./bin/alpaca -p %(test-body-file) && echo 'ok'"
 
     -> Functionality "Evolve ALPACA CA one generation" is implemented by
     -> shell command
-    -> "./bin/alpaca -I -g1 %(test-file)"
+    -> "./bin/alpaca -I -g1 %(test-body-file)"
 EOF
 
 if [ "x$1" = "xjs" ]; then
@@ -19,7 +19,7 @@ if [ "x$1" = "xjs" ]; then
 
     -> Functionality "Evolve ALPACA CA one generation" is implemented by
     -> shell command
-    -> "./bin/alpaca -y -c javascript %(test-file) > ca.js && node ca.js"
+    -> "./bin/alpaca -y -c javascript %(test-body-file) > ca.js && node ca.js"
 EOF
 fi
 
