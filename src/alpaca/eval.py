@@ -8,6 +8,7 @@ from alpaca.analysis import (
     BoundingBox, fit_bounding_box,
 )
 
+import random
 
 def eval_state_ref(playfield, x, y, ast):
     if ast.type == 'StateRefEq':
@@ -74,7 +75,7 @@ def eval_expr(alpaca, playfield, x, y, ast):
         elif ast.value == 'false':
             return False
         elif ast.value == 'guess':
-            return False  # XXX randomly true or false
+            return bool(random.getrandbits(1))
         else:
             raise NotImplementedError(repr(ast))
     else:
