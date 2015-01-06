@@ -92,7 +92,7 @@ yoob.Playfield = function() {
         this.minX = undefined;
         this.minY = undefined;
         this.maxX = undefined;
-        this.maxX = undefined;
+        this.maxY = undefined;
 
         for (var cell in this._store) {
             var pos = cell.split(',');
@@ -113,7 +113,7 @@ yoob.Playfield = function() {
         this.minX = undefined;
         this.minY = undefined;
         this.maxX = undefined;
-        this.maxX = undefined;
+        this.maxY = undefined;
     };
 
     /*
@@ -424,7 +424,10 @@ function evalState(pf, x, y) {
             self.compile_expr(expr.children[0])
             self.file.write(')')
         elif expr.type == 'BoolLit':
-            self.file.write(expr.value)
+            if ast.value == 'guess':
+                self.file.write('(Math.random()<.5)')
+            else:
+                self.file.write(expr.value)
         elif expr.type == 'Relational':
             self.compile_relation(expr.children[0], expr.children[1])
         elif expr.type == 'Adjacency':
