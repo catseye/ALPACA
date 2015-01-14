@@ -424,7 +424,7 @@ function evalState(pf, x, y) {
             self.compile_expr(expr.children[0])
             self.file.write(')')
         elif expr.type == 'BoolLit':
-            if ast.value == 'guess':
+            if expr.value == 'guess':
                 self.file.write('(Math.random()<.5)')
             else:
                 self.file.write(expr.value)
