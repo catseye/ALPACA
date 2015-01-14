@@ -77,6 +77,11 @@ def main(argv):
             sys.exit(0)
         else:
             sys.exit(1)
+    if not args:
+        print "No input files."
+        print
+        print "Usage: " + __doc__.strip()
+        sys.exit(1)
     file = open(args[0])
     text = file.read()
     file.close()
