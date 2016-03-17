@@ -137,6 +137,11 @@ The new implementation of ALPACA in Python has been tested with:
     coordinates of top-left corner, etc.) in divider string, by making
     it a formatting string.
 
+### Contributors ###
+
+*   [Chris Pressey](https://github.com/cpressey) — bulk of the implementation
+*   [Xenon](https://github.com/cmura1) — implementation of the `guess` function
+
 Future Work
 -----------
 
