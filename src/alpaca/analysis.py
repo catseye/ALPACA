@@ -34,10 +34,12 @@ def find_nbhd_defn(alpaca, nbhd_id):
     return find_defn(alpaca, 'NbhdDefn', nbhd_id)
 
 
-def state_defn_is_a(alpaca, state_ast, class_id):
+def state_defn_is_a(alpaca, state_ast, class_id, verbose=False):
     class_decls = state_ast.children[2]
     assert class_decls.type == 'MembershipDecls'
     for class_decl in class_decls.children:
+        if verbose:
+            print " ===> checking for {} in {}".format(class_id, repr(class_decl))
         assert class_decl.type == 'ClassDecl'
         if class_id == class_decl.value:
             return True
