@@ -19,7 +19,7 @@ def eval_state_ref(playfield, x, y, ast):
         raise NotImplementedError
 
 
-def eval_relation(alpaca, playfield, x, y, state_id, ast):
+def eval_relation(alpaca, playfield, x, y, state_id, ast, verbose=False):
     """state_id is the ID of a state (possibly from the playfield)
     that we want to check.  ast is either a StateRef or a ClassDecl.
     Returns true iff the state_id satisfies the StateRef or ClassDecl.
@@ -27,21 +27,26 @@ def eval_relation(alpaca, playfield, x, y, state_id, ast):
     """
     if ast.type == 'ClassDecl':
         class_id = ast.value
+        print " => checking if {} is_a {}".format(state_id, class_id)
         state_ast = find_state_defn(alpaca, state_id)
-        return state_defn_is_a(alpaca, state_ast, class_id)
+        print " => state ast {}".format(repr(state_ast))
+        result = state_defn_is_a(alpaca, state_ast, class_id)
+        if verbose:
+            print " => state_defn_is_a={}".format(result)
+        return result
     elif ast.type in ('StateRefEq', 'StateRefRel'):
         pf_state_id = eval_state_ref(playfield, x, y, ast)
         return state_id == pf_state_id
 
 
-def eval_expr(alpaca, playfield, x, y, ast):
+def eval_expr(alpaca, playfield, x, y, ast, verbose=False):
     """Given a playfield and a position within it, and a boolean expression,
     return what the expression evaluates to at that position.
     
     """
     if ast.type == 'BoolOp':
-        lhs = eval_expr(alpaca, playfield, x, y, ast.children[0])
-        rhs = eval_expr(alpaca, playfield, x, y, ast.children[1])
+        lhs = eval_expr(alpaca, playfield, x, y, ast.children[0], verbose=verbose)
+        rhs = eval_expr(alpaca, playfield, x, y, ast.children[1], verbose=verbose)
         op = ast.value
         if op == 'and':
             return lhs and rhs
@@ -50,7 +55,7 @@ def eval_expr(alpaca, playfield, x, y, ast):
         elif op == 'xor':
             return lhs != rhs
     elif ast.type == 'Not':
-        return not eval_expr(alpaca, playfield, x, y, ast.children[0])
+        return not eval_expr(alpaca, playfield, x, y, ast.children[0], verbose=verbose)
     elif ast.type == 'Adjacency':
         rel = ast.children[0]
         nb = ast.children[1]
@@ -61,14 +66,14 @@ def eval_expr(alpaca, playfield, x, y, ast):
         count = 0
         for (dx, dy) in nb:
             pf_state_id = playfield.get(x + dx, y + dy)
-            if eval_relation(alpaca, playfield, x, y, pf_state_id, rel):
+            if eval_relation(alpaca, playfield, x, y, pf_state_id, rel, verbose=verbose):
                 count += 1
         #print "(%d,%d) has %d neighbours that are %r" % (x, y, count, rel)
         return count >= int(ast.value)
     elif ast.type == 'Relational':
         state_id = eval_state_ref(playfield, x, y, ast.children[0])
         rel = ast.children[1]
-        return eval_relation(alpaca, playfield, x, y, state_id, rel)
+        return eval_relation(alpaca, playfield, x, y, state_id, rel, verbose=verbose)
     elif ast.type == 'BoolLit':
         if ast.value == 'true':
             return True
@@ -82,7 +87,7 @@ def eval_expr(alpaca, playfield, x, y, ast):
         raise NotImplementedError(repr(ast))
 
 
-def eval_rules(alpaca, playfield, x, y, ast):
+def eval_rules(alpaca, playfield, x, y, ast, verbose=False):
     """Given a playfield and a position within it, and a set of rules,
     return the "to" state for the rule that applies.
 
@@ -94,7 +99,7 @@ def eval_rules(alpaca, playfield, x, y, ast):
         assert rule.type == 'Rule'
         s = rule.children[0]
         e = rule.children[1]
-        if eval_expr(alpaca, playfield, x, y, e):
+        if eval_expr(alpaca, playfield, x, y, e, verbose=verbose):
             return eval_state_ref(playfield, x, y, s)
     return None
 
@@ -118,7 +123,7 @@ def evolve_playfield(playfield, new_pf, alpaca, verbose=False):
                 print " => %r" % state_ast
             classes = state_ast.children[2]
             rules = state_ast.children[3]
-            new_state_id = apply_rules(alpaca, playfield, x, y, rules, classes)
+            new_state_id = apply_rules(alpaca, playfield, x, y, rules, classes, verbose=verbose)
             if new_state_id is None:
                 new_state_id = state_id
             if verbose:
@@ -128,14 +133,14 @@ def evolve_playfield(playfield, new_pf, alpaca, verbose=False):
         y += 1
 
 
-def apply_rules(alpaca, playfield, x, y, rules, class_decls):
+def apply_rules(alpaca, playfield, x, y, rules, class_decls, verbose=False):
     """Given a set of rules and a set of superclasses (for a given state or
     class which is not given), try the rules; if none of them apply,
     recursively apply this function with the rules and superclasses for each
     given superclass.
 
     """
-    new_state_id = eval_rules(alpaca, playfield, x, y, rules)
+    new_state_id = eval_rules(alpaca, playfield, x, y, rules, verbose=verbose)
     if new_state_id is not None:
         return new_state_id
     assert class_decls.type == 'MembershipDecls'
