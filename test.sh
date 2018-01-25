@@ -3,7 +3,7 @@
 # usage: ./test.sh
 # If node (node.js) is on path, will also test compiling to Javascript.
 
-bin/alpaca -t || exit 1
+bin/alpaca -t -v || exit 1
 
 cat >test_config <<EOF
     -> Functionality "Parse ALPACA Description" is implemented by shell command

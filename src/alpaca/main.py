@@ -61,7 +61,7 @@ def main(argv):
                          help="run test cases and exit")
     optparser.add_option("-v", "--verbose",
                          action="store_true", dest="verbose", default=False,
-                         help="run verbosely (test cases only for now)")
+                         help="run verbosely")
     optparser.add_option("-y", "--include-yoob-playfield-inline",
                          action="store_true",
                          dest="include_yoob_playfield_inline", default=False,
@@ -132,7 +132,7 @@ def main(argv):
         print_divider()
     while True:
         new_pf = Playfield(default_state, repr_map)
-        evolve_playfield(pf, new_pf, ast)
+        evolve_playfield(pf, new_pf, ast, verbose=options.verbose)
         new_pf.recalculate_limits()
         if options.halt_at_fixpoint:
             if pf.equals(new_pf):

@@ -101,7 +101,7 @@ def eval_rules(alpaca, playfield, x, y, ast):
 
 # TODO: encapsulate this in an object to keep some state
 # and reduce the number of recomputations each time
-def evolve_playfield(playfield, new_pf, alpaca):
+def evolve_playfield(playfield, new_pf, alpaca, verbose=False):
     if playfield.min_y is None:
         return
     bb = BoundingBox(0, 0, 0, 0)
@@ -111,15 +111,18 @@ def evolve_playfield(playfield, new_pf, alpaca):
         x = playfield.min_x - bb.max_dx
         while x <= playfield.max_x - bb.min_dx:
             state_id = playfield.get(x, y)
-            #print "state at (%d,%d): %s" % (x, y, state_id)
+            if verbose:
+                print "state at (%d,%d): %s" % (x, y, state_id)
             state_ast = find_state_defn(alpaca, state_id)
-            #print " => %r" % state_ast
+            if verbose:
+                print " => %r" % state_ast
             classes = state_ast.children[2]
             rules = state_ast.children[3]
             new_state_id = apply_rules(alpaca, playfield, x, y, rules, classes)
             if new_state_id is None:
                 new_state_id = state_id
-            #print "new state: %s" % new_state_id
+            if verbose:
+                print "new state: %s" % new_state_id
             new_pf.set(x, y, new_state_id)
             x += 1
         y += 1
