@@ -1,11 +1,25 @@
 # encoding: UTF-8
 
 class AST(object):
+    children_attrs = ()
+    child_attrs = ()
+    value_attrs = ()
+
     def __init__(self, **kwargs):
-        self.attrs = kwargs
-        for child in self.attrs.get('children', []):
+        self.attrs = {}
+        for attr in self.children_attrs:
+            self.attrs[attr] = kwargs.pop(attr, [])
+            for child in self.attrs[attr]:
+                assert isinstance(child, AST), \
+                  "child %r of %r is not an AST node" % (child, self)        
+        for attr in self.child_attrs:
+            self.attrs[attr] = kwargs.pop(attr, None)
+            child = self.attrs[attr]
             assert isinstance(child, AST), \
               "child %r of %r is not an AST node" % (child, self)        
+        for attr in self.value_attrs:
+            self.attrs[attr] = kwargs.pop(attr, None)
+        assert (not kwargs), "extra arguments supplied to {} node: {}".format(self.type, kwargs)
 
     @property
     def type(self):
@@ -20,37 +34,37 @@ class AST(object):
         raise AttributeError(name)
 
     def all_children(self):
-        if 'children' in self.attrs:
-            for child in self.children:
+        for attr in self.children_attrs:
+            for child in self.attrs(attr):
                 yield child
-        else:
-            raise StopIteration
+                for subchild in child.all_children():
+                    yield subchild
+        for attr in self.child_attrs:
+            yield child
+            for subchild in child.all_children():
+                yield subchild
 
 
 class Alpaca(AST):
-    def __init__(self, defns=None, playfield=None):
-        self.attrs = dict(defns=defns, playfield=playfield)
-
-    def all_children(self):
-        for defn in self.defns:
-            for child in defn.all_children():
-                yield child
+    children_attrs = ('defns',)
+    child_attrs = ('playfield',)
 
 
 class Neighbourhood(AST):
-    pass
+    children_attrs = ('children',)
 
-class StateRefRel(AST):
-    pass
 
 class Playfield(AST):
     pass
 
+
 class CharRepr(AST):
-    pass
+    value_attrs = ('value',)
+
 
 class MembershipDecls(AST):
-    pass
+    children_attrs = ('children',)
+
 
 class StateDefn(AST):
     pass
@@ -70,17 +84,22 @@ class Rules(AST):
 class Rule(AST):
     pass
 
+
 class StateRefEq(AST):
-    pass
+    value_attrs = ('value',)
+
 
 class StateRefRel(AST):
-    pass
+    value_attrs = ('value',)
+
 
 class NbhdRef(AST):
     pass
 
 class Adjacency(AST):
-    pass
+    child_attrs = ('lhs', 'rhs',)
+    value_attrs = ('value',)
+
 
 class Relational(AST):
     pass
@@ -91,5 +110,6 @@ class Not(AST):
 class BoolOp(AST):
     pass
 
+
 class BoolLit(AST):
-    pass
+    value_attrs = ('value',)
