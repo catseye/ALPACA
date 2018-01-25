@@ -504,6 +504,25 @@ Class membership is transitive.
     =  dd
     = -----
 
+It is possible for a class to be empty, i.e. for no states to belong to the
+class.  In this case, the class inclusion predicate will always evaluate to
+false.  (Thanks to [OrangeNote](https://github.com/OrangeNote) for this
+test case.)
+
+    | class A is B;
+    | class B;
+    | class C;
+    | 
+    | state Blank " ";
+    | state X "*" is A
+    |   to Blank when me is C
+    | 
+    | begin
+    | *
+    = -----
+    = *
+    = -----
+
 Informative: diamond inheritance is not in practice a problem, as classes do
 not defined or contain any state (information) which is not in the state
 itself, which is what makes diamond inheritance problematic in most languages
