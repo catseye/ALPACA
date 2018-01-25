@@ -27,11 +27,11 @@ def eval_relation(alpaca, playfield, x, y, state_id, ast, verbose=False):
     """
     if ast.type == 'ClassDecl':
         class_id = ast.value
-        print " => checking if {} is_a {}".format(state_id, class_id)
         state_ast = find_state_defn(alpaca, state_id)
-        print " => state ast {}".format(repr(state_ast))
         result = state_defn_is_a(alpaca, state_ast, class_id)
         if verbose:
+            print " => checking if {} is_a {}".format(state_id, class_id)
+            print " => state ast {}".format(repr(state_ast))
             print " => state_defn_is_a={}".format(result)
         return result
     elif ast.type in ('StateRefEq', 'StateRefRel'):
