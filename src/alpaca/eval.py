@@ -43,8 +43,8 @@ def eval_expr(alpaca, playfield, x, y, ast, verbose=False):
     
     """
     if ast.type == 'BoolOp':
-        lhs = eval_expr(alpaca, playfield, x, y, ast.children[0], verbose=verbose)
-        rhs = eval_expr(alpaca, playfield, x, y, ast.children[1], verbose=verbose)
+        lhs = eval_expr(alpaca, playfield, x, y, ast.lhs, verbose=verbose)
+        rhs = eval_expr(alpaca, playfield, x, y, ast.rhs, verbose=verbose)
         op = ast.value
         if op == 'and':
             return lhs and rhs
@@ -55,8 +55,8 @@ def eval_expr(alpaca, playfield, x, y, ast, verbose=False):
     elif ast.type == 'Not':
         return not eval_expr(alpaca, playfield, x, y, ast.children[0], verbose=verbose)
     elif ast.type == 'Adjacency':
-        rel = ast.children[0]
-        nb = ast.children[1]
+        rel = ast.lhs
+        nb = ast.rhs
         if nb.type == 'NbhdRef':
             nb = find_nbhd_defn(alpaca, nb.value).children[0]
         assert nb.type == 'Neighbourhood'
@@ -69,8 +69,8 @@ def eval_expr(alpaca, playfield, x, y, ast, verbose=False):
         #print "(%d,%d) has %d neighbours that are %r" % (x, y, count, rel)
         return count >= int(ast.value)
     elif ast.type == 'Relational':
-        state_id = eval_state_ref(playfield, x, y, ast.children[0])
-        rel = ast.children[1]
+        state_id = eval_state_ref(playfield, x, y, ast.lhs)
+        rel = ast.rhs
         return eval_relation(alpaca, playfield, x, y, state_id, rel, verbose=verbose)
     elif ast.type == 'BoolLit':
         if ast.value == 'true':
@@ -95,8 +95,8 @@ def eval_rules(alpaca, playfield, x, y, ast, verbose=False):
     assert ast.type == 'Rules'
     for rule in ast.children:
         assert rule.type == 'Rule'
-        s = rule.children[0]
-        e = rule.children[1]
+        s = rule.state_ref
+        e = rule.expr
         if eval_expr(alpaca, playfield, x, y, e, verbose=verbose):
             return eval_state_ref(playfield, x, y, s)
     return None
@@ -119,8 +119,8 @@ def evolve_playfield(playfield, new_pf, alpaca, verbose=False):
             state_ast = find_state_defn(alpaca, state_id)
             if verbose:
                 print " => %r" % state_ast
-            classes = state_ast.children[2]
-            rules = state_ast.children[3]
+            classes = state_ast.classes
+            rules = state_ast.rules
             new_state_id = apply_rules(alpaca, playfield, x, y, rules, classes, verbose=verbose)
             if new_state_id is None:
                 new_state_id = state_id
@@ -146,8 +146,8 @@ def apply_rules(alpaca, playfield, x, y, rules, class_decls, verbose=False):
         assert class_decl.type == 'ClassDecl'
         class_id = class_decl.value
         class_ast = find_class_defn(alpaca, class_id)
-        rules = class_ast.children[0]
-        classes = class_ast.children[1]
+        rules = class_ast.rules
+        classes = class_ast.classes
         new_state_id = apply_rules(alpaca, playfield, x, y, rules, classes)        
         if new_state_id is not None:
             return new_state_id

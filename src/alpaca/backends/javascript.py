@@ -312,11 +312,10 @@ function evolve_playfield(pf, new_pf) {
             for state_id in state_set:
                 self.file.write("(st === '%s') || " % state_id)
             self.file.write("0;\n}\n\n")
-        defns = self.alpaca.children[0]
-        for defn in defns.children:
+        for defn in self.alpaca.defns:
             if defn.type == 'ClassDefn':
                 self.compile_class_defn(defn)
-        for defn in defns.children:
+        for defn in self.alpaca.defns:
             if defn.type == 'StateDefn':
                 self.compile_state_defn(defn)
         self.write_evalstate_function()
@@ -344,8 +343,7 @@ console.log('-----');
 function evalState(pf, x, y) {
   var stateId = pf.get(x, y);
 """)
-        defns = self.alpaca.children[0]
-        for defn in defns.children:
+        for defn in self.alpaca.defns:
             if defn.type == 'StateDefn':
                 self.file.write("""\
   if (stateId === '%s') return eval_%s(pf, x, y);
@@ -353,12 +351,12 @@ function evalState(pf, x, y) {
         self.file.write('}\n')
 
     def compile_class_defn(self, defn):
-        membership = defn.children[1]
-        rules = defn.children[0]
+        membership = defn.classes
+        rules = defn.rules
         self.file.write("function evalClass_%s(pf, x, y) {\nvar id;\n" % defn.value);
         for rule in rules.children:
-            dest = rule.children[0]
-            expr = rule.children[1]
+            dest = rule.state_ref
+            expr = rule.expr
             self.file.write("if (")
             self.compile_expr(expr)
             self.file.write(") {\n  return ")
@@ -371,12 +369,12 @@ function evalState(pf, x, y) {
 
     def compile_state_defn(self, defn):
         #char_repr = defn.children[0]
-        membership = defn.children[2]
-        rules = defn.children[3]
+        membership = defn.classes
+        rules = defn.rules
         self.file.write("function eval_%s(pf, x, y) {\nvar id;\n" % defn.value);
         for rule in rules.children:
-            dest = rule.children[0]
-            expr = rule.children[1]
+            dest = rule.state_ref
+            expr = rule.expr
             self.file.write("if (")
             self.compile_expr(expr)
             self.file.write(") {\n  return ")
@@ -411,13 +409,13 @@ function evalState(pf, x, y) {
     def compile_expr(self, expr):
         if expr.type == 'BoolOp':
             self.file.write('(')
-            self.compile_expr(expr.children[0])
+            self.compile_expr(expr.lhs)
             self.file.write({
                 'or': '||',
                 'and': '&&',
                 'xor': '!==',
             }[expr.value])
-            self.compile_expr(expr.children[1])
+            self.compile_expr(expr.rhs)
             self.file.write(')')
         elif expr.type == 'Not':
             self.file.write('!(')
@@ -429,11 +427,11 @@ function evalState(pf, x, y) {
             else:
                 self.file.write(expr.value)
         elif expr.type == 'Relational':
-            self.compile_relation(expr.children[0], expr.children[1])
+            self.compile_relation(expr.lhs, expr.rhs)
         elif expr.type == 'Adjacency':
             count = expr.value
-            rel = expr.children[0]
-            nb = expr.children[1]
+            rel = expr.lhs
+            nb = expr.rhs
             if nb.type == 'NbhdRef':
                 nb = find_nbhd_defn(self.alpaca, nb.value).children[0]
             if rel.type == 'ClassDecl':
