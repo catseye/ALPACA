@@ -133,7 +133,7 @@ class Parser(object):
             r.append(self.rule())
             while self.scanner.consume(','):
                 r.append(self.rule())
-        return Rules(children=r)
+        return r
 
     def rule(self):
         self.scanner.expect('to')

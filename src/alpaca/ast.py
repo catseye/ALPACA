@@ -64,8 +64,8 @@ class CharRepr(AST):
 
 
 class StateDefn(AST):
-    children_attrs = ('classes',)
-    child_attrs = ('rules', 'char_repr',)
+    children_attrs = ('rules', 'classes',)
+    child_attrs = ('char_repr',)
     value_attrs = ('value',)
 
 
@@ -74,18 +74,13 @@ class ClassDecl(AST):
 
 
 class ClassDefn(AST):
-    children_attrs = ('classes',)
-    child_attrs = ('rules',)
+    children_attrs = ('rules', 'classes',)
     value_attrs = ('value',)
 
 
 class NbhdDefn(AST):
     children_attrs = ('children',)
     value_attrs = ('value',)
-
-
-class Rules(AST):
-    children_attrs = ('children',)
 
 
 class Rule(AST):

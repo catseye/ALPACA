@@ -85,15 +85,14 @@ def eval_expr(alpaca, playfield, x, y, ast, verbose=False):
         raise NotImplementedError(repr(ast))
 
 
-def eval_rules(alpaca, playfield, x, y, ast, verbose=False):
+def eval_rules(alpaca, playfield, x, y, rules, verbose=False):
     """Given a playfield and a position within it, and a set of rules,
     return the "to" state for the rule that applies.
 
     If no rule applies, None is returned.
 
     """
-    assert ast.type == 'Rules'
-    for rule in ast.children:
+    for rule in rules:
         assert rule.type == 'Rule'
         s = rule.state_ref
         e = rule.expr

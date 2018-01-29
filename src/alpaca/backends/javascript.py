@@ -351,9 +351,8 @@ function evalState(pf, x, y) {
         self.file.write('}\n')
 
     def compile_class_defn(self, defn):
-        rules = defn.rules
         self.file.write("function evalClass_%s(pf, x, y) {\nvar id;\n" % defn.value);
-        for rule in rules.children:
+        for rule in defn.rules:
             dest = rule.state_ref
             expr = rule.expr
             self.file.write("if (")
@@ -368,9 +367,8 @@ function evalState(pf, x, y) {
 
     def compile_state_defn(self, defn):
         #char_repr = defn.children[0]
-        rules = defn.rules
         self.file.write("function eval_%s(pf, x, y) {\nvar id;\n" % defn.value);
-        for rule in rules.children:
+        for rule in defn.rules:
             dest = rule.state_ref
             expr = rule.expr
             self.file.write("if (")
