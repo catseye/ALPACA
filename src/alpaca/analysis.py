@@ -86,12 +86,16 @@ def get_class_map(alpaca):
     the IDs of classes and the values are the sets of IDs of states which are
     members of those classes.
 
+    All classes are included in the map, even if they contain no states.
+
     """
     state_map = {}
+    class_map = {}
     for defn in alpaca.defns:
         if defn.type == 'StateDefn':
             state_map[defn.value] = get_state_membership(alpaca, defn.value)
-    class_map = {}
+        if defn.type == 'ClassDefn':
+            class_map[defn.value] = set()
     for (state_id, class_set) in state_map.iteritems():
         for class_id in class_set:
             class_map.setdefault(class_id, set()).add(state_id)
