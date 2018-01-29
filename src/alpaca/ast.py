@@ -35,11 +35,12 @@ class AST(object):
 
     def all_children(self):
         for attr in self.children_attrs:
-            for child in self.attrs(attr):
+            for child in self.attrs[attr]:
                 yield child
                 for subchild in child.all_children():
                     yield subchild
         for attr in self.child_attrs:
+            child = self.attrs[attr]
             yield child
             for subchild in child.all_children():
                 yield subchild
@@ -55,7 +56,7 @@ class Neighbourhood(AST):
 
 
 class Playfield(AST):
-    pass
+    value_attrs = ('value',)
 
 
 class CharRepr(AST):
@@ -67,22 +68,30 @@ class MembershipDecls(AST):
 
 
 class StateDefn(AST):
-    pass
+    child_attrs = ('rules', 'classes', 'char_repr',)
+    value_attrs = ('value',)
+
 
 class ClassDecl(AST):
-    pass
+    value_attrs = ('value',)
+
 
 class ClassDefn(AST):
-    pass
+    child_attrs = ('rules', 'classes',)
+    value_attrs = ('value',)
+
 
 class NbhdDefn(AST):
-    pass
+    children_attrs = ('children',)
+    value_attrs = ('value',)
+
 
 class Rules(AST):
-    pass
+    children_attrs = ('children',)
+
 
 class Rule(AST):
-    pass
+    child_attrs = ('expr', 'state_ref',)
 
 
 class StateRefEq(AST):
@@ -94,7 +103,8 @@ class StateRefRel(AST):
 
 
 class NbhdRef(AST):
-    pass
+    value_attrs = ('value',)
+
 
 class Adjacency(AST):
     child_attrs = ('lhs', 'rhs',)
@@ -102,13 +112,16 @@ class Adjacency(AST):
 
 
 class Relational(AST):
-    pass
+    child_attrs = ('lhs', 'rhs',)
+
 
 class Not(AST):
-    pass
+    children_attrs = ('children',)
+
 
 class BoolOp(AST):
-    pass
+    child_attrs = ('lhs', 'rhs',)
+    value_attrs = ('value',)
 
 
 class BoolLit(AST):
