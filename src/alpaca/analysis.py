@@ -28,9 +28,7 @@ def find_nbhd_defn(alpaca, nbhd_id):
 
 
 def state_defn_is_a(alpaca, state_ast, class_id, verbose=False):
-    class_decls = state_ast.classes
-    assert class_decls.type == 'MembershipDecls'
-    for class_decl in class_decls.children:
+    for class_decl in state_ast.classes:
         if verbose:
             print " ===> checking for {} in {}".format(class_id, repr(class_decl))
         assert class_decl.type == 'ClassDecl'
@@ -45,9 +43,7 @@ def state_defn_is_a(alpaca, state_ast, class_id, verbose=False):
 def class_defn_is_a(alpaca, class_ast, class_id, verbose=False):
     if class_ast.value == class_id:
         return True
-    class_decls = class_ast.classes
-    assert class_decls.type == 'MembershipDecls'
-    for class_decl in class_decls.children:
+    for class_decl in class_ast.classes:
         assert class_decl.type == 'ClassDecl'
         if class_id == class_decl.value:
             return True
@@ -58,9 +54,8 @@ def class_defn_is_a(alpaca, class_ast, class_id, verbose=False):
 
 
 def get_membership(alpaca, class_decls):
-    assert class_decls.type == 'MembershipDecls'
     membership = set()
-    for class_decl in class_decls.children:
+    for class_decl in class_decls:
         assert class_decl.type == 'ClassDecl'
         class_id = class_decl.value
         membership.add(class_id)

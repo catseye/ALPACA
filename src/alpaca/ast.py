@@ -63,12 +63,9 @@ class CharRepr(AST):
     value_attrs = ('value',)
 
 
-class MembershipDecls(AST):
-    children_attrs = ('children',)
-
-
 class StateDefn(AST):
-    child_attrs = ('rules', 'classes', 'char_repr',)
+    children_attrs = ('classes',)
+    child_attrs = ('rules', 'char_repr',)
     value_attrs = ('value',)
 
 
@@ -77,7 +74,8 @@ class ClassDecl(AST):
 
 
 class ClassDefn(AST):
-    child_attrs = ('rules', 'classes',)
+    children_attrs = ('classes',)
+    child_attrs = ('rules',)
     value_attrs = ('value',)
 
 

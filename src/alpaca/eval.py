@@ -141,8 +141,7 @@ def apply_rules(alpaca, playfield, x, y, rules, class_decls, verbose=False):
     new_state_id = eval_rules(alpaca, playfield, x, y, rules, verbose=verbose)
     if new_state_id is not None:
         return new_state_id
-    assert class_decls.type == 'MembershipDecls'
-    for class_decl in class_decls.children:
+    for class_decl in class_decls:
         assert class_decl.type == 'ClassDecl'
         class_id = class_decl.value
         class_ast = find_class_defn(alpaca, class_id)

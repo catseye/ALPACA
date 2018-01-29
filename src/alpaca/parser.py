@@ -103,7 +103,6 @@ class Parser(object):
         classes = []
         while self.scanner.on('is'):
             classes.append(self.class_decl())
-        classes = MembershipDecls(children=classes)
         rules = self.rules()
         return StateDefn(char_repr=char_repr, classes=classes, rules=rules, value=id)
 
@@ -118,7 +117,6 @@ class Parser(object):
         classes = []
         while self.scanner.on('is'):
             classes.append(self.class_decl())
-        classes = MembershipDecls(children=classes)
         rules = self.rules()
         return ClassDefn(rules=rules, classes=classes, value=id)
 
