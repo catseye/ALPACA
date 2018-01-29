@@ -45,7 +45,7 @@ def eval_expr(alpaca, playfield, x, y, ast, verbose=False):
     if ast.type == 'BoolOp':
         lhs = eval_expr(alpaca, playfield, x, y, ast.lhs, verbose=verbose)
         rhs = eval_expr(alpaca, playfield, x, y, ast.rhs, verbose=verbose)
-        op = ast.value
+        op = ast.op
         if op == 'and':
             return lhs and rhs
         elif op == 'or':
@@ -55,19 +55,18 @@ def eval_expr(alpaca, playfield, x, y, ast, verbose=False):
     elif ast.type == 'Not':
         return not eval_expr(alpaca, playfield, x, y, ast.expr, verbose=verbose)
     elif ast.type == 'Adjacency':
-        rel = ast.lhs
-        nb = ast.rhs
-        if nb.type == 'NbhdRef':
-            nb = find_nbhd_defn(alpaca, nb.id).children[0]
-        assert nb.type == 'Neighbourhood'
-        nb = set([node.value for node in nb.children])
+        rel = ast.rel
+        nbhd = ast.nbhd
+        if nbhd.type == 'NbhdRef':
+            nbhd = find_nbhd_defn(alpaca, nbhd.id).children[0]
+        assert nbhd.type == 'Neighbourhood'
         count = 0
-        for (dx, dy) in nb:
+        for (dx, dy) in set([node.value for node in nbhd.children]):
             pf_state_id = playfield.get(x + dx, y + dy)
             if eval_relation(alpaca, playfield, x, y, pf_state_id, rel, verbose=verbose):
                 count += 1
         #print "(%d,%d) has %d neighbours that are %r" % (x, y, count, rel)
-        return count >= int(ast.value)
+        return count >= int(ast.count)
     elif ast.type == 'Relational':
         state_id = eval_state_ref(playfield, x, y, ast.lhs)
         rel = ast.rhs

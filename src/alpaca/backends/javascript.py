@@ -410,7 +410,7 @@ function evalState(pf, x, y) {
                 'or': '||',
                 'and': '&&',
                 'xor': '!==',
-            }[expr.value])
+            }[expr.op])
             self.compile_expr(expr.rhs)
             self.file.write(')')
         elif expr.type == 'Not':
@@ -425,11 +425,12 @@ function evalState(pf, x, y) {
         elif expr.type == 'Relational':
             self.compile_relation(expr.lhs, expr.rhs)
         elif expr.type == 'Adjacency':
-            count = expr.value
-            rel = expr.lhs
-            nb = expr.rhs
-            if nb.type == 'NbhdRef':
-                nb = find_nbhd_defn(self.alpaca, nb.id).children[0]
+            count = expr.count
+            rel = expr.rel
+            nbhd = expr.nbhd
+            if nbhd.type == 'NbhdRef':
+                nbhd = find_nbhd_defn(self.alpaca, nbhd.id).children[0]
+            assert nbhd.type == 'Neighbourhood'
             if rel.type == 'ClassDecl':
                 self.file.write("(in_nbhd_pred(pf, x, y, is_%s" % rel.id)
             else:
@@ -437,7 +438,7 @@ function evalState(pf, x, y) {
                 self.compile_state_ref(rel)
             self.file.write(', [')
             self.file.write(','.join(
-                ['[%d,%d]' % child.value for child in nb.children]
+                ['[%d,%d]' % child.value for child in nbhd.children]
             ))
             self.file.write(']) >= %d)' % int(count))
         else:

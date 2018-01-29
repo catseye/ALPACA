@@ -167,24 +167,24 @@ class Parser(object):
         while self.scanner.on_type('boolean operator'):
             op = self.scanner.consume_type('boolean operator')
             t = self.term()
-            e = BoolOp(lhs=e, rhs=t, value=op)
+            e = BoolOp(lhs=e, rhs=t, op=op)
         return e
     
     def term(self):
         if self.scanner.on_type('integer literal'):
             count = self.scanner.consume_type('integer literal')
-            nb = NBHD_MOORE
+            nbhd = NBHD_MOORE
             if self.scanner.consume('in'):
                 if self.scanner.on_type('identifier'):
                     id = self.scanner.consume_type('identifier')
-                    nb = NbhdRef(id=id)
+                    nbhd = NbhdRef(id=id)
                 else:
-                    nb = self.neighbourhood()
+                    nbhd = self.neighbourhood()
             if self.scanner.on('is'):
                 rel = self.class_decl()
             else:
                 rel = self.state_ref()
-            return Adjacency(lhs=rel, rhs=nb, value=count)
+            return Adjacency(rel=rel, nbhd=nbhd, count=count)
         elif self.scanner.consume('('):
             e = self.expression()
             self.scanner.expect(')')

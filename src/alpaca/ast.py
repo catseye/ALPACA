@@ -100,8 +100,8 @@ class NbhdRef(AST):
 
 
 class Adjacency(AST):
-    child_attrs = ('lhs', 'rhs',)
-    value_attrs = ('value',)
+    child_attrs = ('rel', 'nbhd',)
+    value_attrs = ('count',)
 
 
 class Relational(AST):
@@ -114,7 +114,7 @@ class Not(AST):
 
 class BoolOp(AST):
     child_attrs = ('lhs', 'rhs',)
-    value_attrs = ('value',)
+    value_attrs = ('op',)
 
 
 class BoolLit(AST):
