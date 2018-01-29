@@ -122,11 +122,19 @@ def main(argv):
         if options.divider != '':
             print options.divider
 
-    count = 0
-    print_divider()
-    if options.show_initial:
+    def begin_output():
+        # TODO if not dumping to seperate files, then
+        print_divider()
+
+    def output_frame(count, pf):
+        # TODO if not dumping to seperate files, then
         print str(pf),
         print_divider()
+
+    count = 0
+    begin_output()
+    if options.show_initial:
+        output_frame(count, pf)
     while True:
         new_pf = Playfield(default_state, repr_map)
         evolve_playfield(pf, new_pf, ast, verbose=options.verbose)
@@ -135,12 +143,11 @@ def main(argv):
             if pf.equals(new_pf):
                 break
         pf = new_pf
+        count += 1
         if (options.show_intermediate or
             (options.generations is not None and
              count == options.generations - 1)):
-            print str(pf),
-            print_divider()
-        count += 1
+            output_frame(count, pf)
         if (options.generations is not None and
             count >= options.generations):
             break
