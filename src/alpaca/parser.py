@@ -1,4 +1,4 @@
-from alpaca.ast import AST
+from alpaca.ast import *
 from alpaca.scanner import Scanner
 
 """
@@ -44,22 +44,22 @@ BoolPrimitive   ::= "true" | "false" | "guess".
 Neighbourhood   ::= "(" {arrow-chain} ")".
 """
 
-NBHD_VON_NEUMANN = AST('Neighbourhood', [
-    AST('StateRefRel', value=(0, -1)),
-    AST('StateRefRel', value=(0, 1)),
-    AST('StateRefRel', value=(-1, 0)),
-    AST('StateRefRel', value=(1, 0))
+NBHD_VON_NEUMANN = Neighbourhood(children=[
+    StateRefRel(value=(0, -1)),
+    StateRefRel(value=(0, 1)),
+    StateRefRel(value=(-1, 0)),
+    StateRefRel(value=(1, 0)),
 ])
 
-NBHD_MOORE = AST('Neighbourhood', [
-    AST('StateRefRel', value=(0, -1)),
-    AST('StateRefRel', value=(0, 1)),
-    AST('StateRefRel', value=(-1, 0)),
-    AST('StateRefRel', value=(-1, 1)),
-    AST('StateRefRel', value=(-1, -1)),
-    AST('StateRefRel', value=(1, 0)),
-    AST('StateRefRel', value=(1, 1)),
-    AST('StateRefRel', value=(1, -1)),
+NBHD_MOORE = Neighbourhood(children=[
+    StateRefRel(value=(0, -1)),
+    StateRefRel(value=(0, 1)),
+    StateRefRel(value=(-1, 0)),
+    StateRefRel(value=(-1, 1)),
+    StateRefRel(value=(-1, -1)),
+    StateRefRel(value=(1, 0)),
+    StateRefRel(value=(1, 1)),
+    StateRefRel(value=(1, -1)),
 ])
 
 class Parser(object):
@@ -80,8 +80,8 @@ class Parser(object):
             pf = self.scanner.scan_playfield()
         else:
             self.scanner.expect('.')
-        playfield = AST('Playfield', value=pf)
-        return AST('Alpaca', [AST('Defns', defns), playfield])
+        playfield = Playfield(value=pf)
+        return Alpaca(defns=defns, playfield=playfield)
 
     def defn(self):
         if self.scanner.on('state'):
@@ -99,20 +99,17 @@ class Parser(object):
         self.scanner.expect('state')
         id = self.scanner.consume_type('identifier')
         attrs = []
-        char_repr = AST('CharRepr',
-                        value=self.scanner.consume_type('string literal'))
+        char_repr = CharRepr(value=self.scanner.consume_type('string literal'))
         classes = []
         while self.scanner.on('is'):
             classes.append(self.class_decl())
-        classes = AST('MembershipDecls', classes)
         rules = self.rules()
-        return AST('StateDefn', [char_repr, AST('Unused'), classes, rules],
-                   value=id)
+        return StateDefn(char_repr=char_repr, classes=classes, rules=rules, value=id)
 
     def class_decl(self):
         self.scanner.expect('is')
         id = self.scanner.consume_type('identifier')
-        return AST('ClassDecl', value=id)
+        return ClassDecl(value=id)
 
     def class_defn(self):
         self.scanner.expect('class')
@@ -120,16 +117,15 @@ class Parser(object):
         classes = []
         while self.scanner.on('is'):
             classes.append(self.class_decl())
-        classes = AST('MembershipDecls', classes)
         rules = self.rules()
-        return AST('ClassDefn', [rules, classes], value=id)
+        return ClassDefn(rules=rules, classes=classes, value=id)
 
     def nbhd_defn(self):
         self.scanner.expect('neighbourhood')
         self.scanner.check_type('identifier')
         id = self.scanner.consume_type('identifier')
         n = self.neighbourhood()
-        return AST('NbhdDefn', [n], value=id)
+        return NbhdDefn(children=[n], value=id)
 
     def rules(self):
         r = []
@@ -137,26 +133,26 @@ class Parser(object):
             r.append(self.rule())
             while self.scanner.consume(','):
                 r.append(self.rule())
-        return AST('Rules', r)
+        return r
 
     def rule(self):
         self.scanner.expect('to')
         s = self.state_ref()
-        e = AST('BoolLit', value='true')
+        e = BoolLit(value='true')
         if self.scanner.consume('when'):
             e = self.expression()
-        return AST('Rule', [s, e])
+        return Rule(state_ref=s, expr=e)
 
     def state_ref(self):
         if self.scanner.on_type('identifier'):
             id = self.scanner.consume_type('identifier')
-            return AST('StateRefEq', value=id)
+            return StateRefEq(value=id)
         elif self.scanner.on_type('arrow chain'):
             rel = self.scanner.consume_type('arrow chain')
             (dx, dy) = resolve_arrow_chain(rel)
-            return AST('StateRefRel', value=(dx, dy))
+            return StateRefRel(value=(dx, dy))
         self.scanner.expect('me')
-        return AST('StateRefRel', value=(0, 0))
+        return StateRefRel(value=(0, 0))
 
     def neighbourhood(self):
         self.scanner.expect('(')
@@ -164,14 +160,14 @@ class Parser(object):
         while self.scanner.on_type('arrow chain'):
             refs.append(self.state_ref())
         self.scanner.expect(')')
-        return AST('Neighbourhood', refs)
+        return Neighbourhood(children=refs)
 
     def expression(self):
         e = self.term()
         while self.scanner.on_type('boolean operator'):
             op = self.scanner.consume_type('boolean operator')
             t = self.term()
-            e = AST('BoolOp', [e, t], value=op)
+            e = BoolOp(lhs=e, rhs=t, value=op)
         return e
     
     def term(self):
@@ -180,25 +176,24 @@ class Parser(object):
             nb = NBHD_MOORE
             if self.scanner.consume('in'):
                 if self.scanner.on_type('identifier'):
-                    nb = AST('NbhdRef',
-                             value=self.scanner.consume_type('identifier'))
+                    nb = NbhdRef(value=self.scanner.consume_type('identifier'))
                 else:
                     nb = self.neighbourhood()
             if self.scanner.on('is'):
                 rel = self.class_decl()
             else:
                 rel = self.state_ref()
-            return AST('Adjacency', [rel, nb], value=count)
+            return Adjacency(lhs=rel, rhs=nb, value=count)
         elif self.scanner.consume('('):
             e = self.expression()
             self.scanner.expect(')')
             return e
         elif self.scanner.consume('not'):
             e = self.term()
-            return AST('Not', [e])
+            return Not(children=[e])
         elif self.scanner.on_type('boolean literal'):
             lit = self.scanner.consume_type('boolean literal')
-            return AST('BoolLit', value=lit)
+            return BoolLit(value=lit)
         else:
             sr = self.state_ref()
             if self.scanner.on('is'):
@@ -206,7 +201,7 @@ class Parser(object):
             else:
                 self.scanner.consume('=')  # optional
                 rel = self.state_ref()
-            return AST('Relational', [sr, rel])
+            return Relational(lhs=sr, rhs=rel)
 
 
 def resolve_arrow_chain(s):
