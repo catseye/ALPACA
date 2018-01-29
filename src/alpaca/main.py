@@ -6,7 +6,7 @@ version 1.0.
 
 """
 
-from optparse import OptionParser
+from argparse import ArgumentParser
 import sys
 
 from alpaca import analysis
@@ -21,55 +21,56 @@ from alpaca.playfield import Playfield
 
 
 def main(argv):
-    optparser = OptionParser(__doc__.strip())
-    optparser.add_option("-a", "--show-ast",
-                         action="store_true", dest="show_ast", default=False,
-                         help="show parsed AST instead of evaluating")
-    optparser.add_option("-c", "--compile-to", metavar='BACKEND',
-                         dest="compile_to", default=None,
-                         help="compile to given backend code instead "
-                              "of evaluating directly (available backends: "
-                              "javascript)")
-    optparser.add_option("-d", "--divider", metavar='STRING',
-                         dest="divider", default="-----",
-                         help="set the string shown between generations "
-                              "(default: '-----')")
-    optparser.add_option("-f", "--halt-at-fixpoint",
-                         action="store_true", dest="halt_at_fixpoint",
-                         default=False,
-                         help="stop evolving CA when it comes to a trivial "
-                              "fixed point (playfield = previous playfield)")
-    optparser.add_option("-g", "--generations", metavar='COUNT',
-                         dest="generations", default=None, type='int',
+    argparser = ArgumentParser()
+
+    argparser.add_argument('source', metavar='SOURCE', type=str,
+        help='Name of the file containing the ALPACA description to process, '
+             'or "test" to run internal tests only and exit'
+    )
+
+    argparser.add_argument("-a", "--show-ast", action="store_true",
+        help="show parsed AST instead of evaluating"
+    )
+    argparser.add_argument("-c", "--compile-to", metavar='BACKEND', default=None,
+        help="compile to given backend code instead "
+             "of evaluating directly (available backends: javascript)"
+    )
+    argparser.add_argument("-d", "--divider", metavar='STRING',
+        default="-----",
+        help="set the string shown between generations "
+             "(default: '-----')"
+    )
+    argparser.add_argument("-f", "--halt-at-fixpoint", action="store_true",
+        help="stop evolving CA when it comes to a trivial "
+             "fixed point (playfield = previous playfield)"
+    )
+    argparser.add_argument("-g", "--generations", metavar='COUNT',
+                         dest="generations", default=None, type=int,
                          help="evolve CA for only the given number of "
                               "generations")
-    optparser.add_option("-I", "--hide-initial",
-                         action="store_false", dest="show_initial",
-                         default=True,
-                         help="don't show initial configuration")
-    optparser.add_option("-J", "--hide-intermediate",
+    argparser.add_argument("-I", "--hide-initial", action="store_false", dest="show_initial",
+        help="don't show initial configuration"
+    )
+    argparser.add_argument("-J", "--hide-intermediate",
                          action="store_false", dest="show_intermediate",
                          default=True,
                          help="don't show intermediate configurations "
                               "(only show final configuration)")
-    optparser.add_option("-p", "--parse-only",
-                         action="store_true", dest="parse_only",
-                         default=False,
-                         help="parse the ALPACA description only and exit")
-    optparser.add_option("-t", "--test",
-                         action="store_true", dest="test", default=False,
-                         help="run test cases and exit")
-    optparser.add_option("-v", "--verbose",
-                         action="store_true", dest="verbose", default=False,
-                         help="run verbosely")
-    optparser.add_option("-y", "--include-yoob-playfield-inline",
-                         action="store_true",
-                         dest="include_yoob_playfield_inline", default=False,
-                         help="include yoob/playfield.js (from yoob.js) "
-                              "inline in generated Javascript (javascript "
-                              "backend only)")
-    (options, args) = optparser.parse_args(argv[1:])
-    if options.test:
+    argparser.add_argument("-p", "--parse-only", action="store_true",
+        help="parse the ALPACA description only and exit"
+    )
+    argparser.add_argument("-v", "--verbose", action="store_true",
+        help="run verbosely"
+    )
+    argparser.add_argument("-y", "--include-yoob-playfield-inline", action="store_true",
+        help="include yoob/playfield.js (from yoob.js) "
+             "inline in generated Javascript (javascript "
+             "backend only)"
+    )
+
+    options = argparser.parse_args(argv[1:])
+
+    if options.source == 'test':
         import doctest
         (fails, something) = doctest.testmod(analysis)
         if fails == 0:
@@ -77,14 +78,10 @@ def main(argv):
             sys.exit(0)
         else:
             sys.exit(1)
-    if not args:
-        print "No input files."
-        print
-        print "Usage: " + __doc__.strip()
-        sys.exit(1)
-    file = open(args[0])
-    text = file.read()
-    file.close()
+
+    with open(options.source, 'r') as f:
+        text = f.read()
+
     ast = Parser(text).alpaca()
     if options.parse_only:
         sys.exit(0)
