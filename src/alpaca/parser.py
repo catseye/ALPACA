@@ -191,7 +191,7 @@ class Parser(object):
             return e
         elif self.scanner.consume('not'):
             e = self.term()
-            return Not(children=[e])
+            return Not(expr=e)
         elif self.scanner.on_type('boolean literal'):
             lit = self.scanner.consume_type('boolean literal')
             return BoolLit(value=lit)

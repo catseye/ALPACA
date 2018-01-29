@@ -109,7 +109,7 @@ class Relational(AST):
 
 
 class Not(AST):
-    children_attrs = ('children',)
+    child_attrs = ('expr',)
 
 
 class BoolOp(AST):

@@ -53,7 +53,7 @@ def eval_expr(alpaca, playfield, x, y, ast, verbose=False):
         elif op == 'xor':
             return lhs != rhs
     elif ast.type == 'Not':
-        return not eval_expr(alpaca, playfield, x, y, ast.children[0], verbose=verbose)
+        return not eval_expr(alpaca, playfield, x, y, ast.expr, verbose=verbose)
     elif ast.type == 'Adjacency':
         rel = ast.lhs
         nb = ast.rhs

@@ -415,7 +415,7 @@ function evalState(pf, x, y) {
             self.file.write(')')
         elif expr.type == 'Not':
             self.file.write('!(')
-            self.compile_expr(expr.children[0])
+            self.compile_expr(expr.expr)
             self.file.write(')')
         elif expr.type == 'BoolLit':
             if expr.value == 'guess':
