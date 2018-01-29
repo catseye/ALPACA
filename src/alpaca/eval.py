@@ -12,7 +12,7 @@ import random
 
 def eval_state_ref(playfield, x, y, ast):
     if ast.type == 'StateRefEq':
-        return ast.value
+        return ast.id
     elif ast.type == 'StateRefRel':
         return playfield.get(x + ast.value[0], y + ast.value[1])
     else:
@@ -26,7 +26,7 @@ def eval_relation(alpaca, playfield, x, y, state_id, ast, verbose=False):
 
     """
     if ast.type == 'ClassDecl':
-        class_id = ast.value
+        class_id = ast.id
         state_ast = find_state_defn(alpaca, state_id)
         result = state_defn_is_a(alpaca, state_ast, class_id, verbose=verbose)
         if verbose:
@@ -58,7 +58,7 @@ def eval_expr(alpaca, playfield, x, y, ast, verbose=False):
         rel = ast.lhs
         nb = ast.rhs
         if nb.type == 'NbhdRef':
-            nb = find_nbhd_defn(alpaca, nb.value).children[0]
+            nb = find_nbhd_defn(alpaca, nb.id).children[0]
         assert nb.type == 'Neighbourhood'
         nb = set([node.value for node in nb.children])
         count = 0
@@ -142,7 +142,7 @@ def apply_rules(alpaca, playfield, x, y, rules, class_decls, verbose=False):
         return new_state_id
     for class_decl in class_decls:
         assert class_decl.type == 'ClassDecl'
-        class_id = class_decl.value
+        class_id = class_decl.id
         class_ast = find_class_defn(alpaca, class_id)
         rules = class_ast.rules
         classes = class_ast.classes

@@ -347,11 +347,11 @@ function evalState(pf, x, y) {
             if defn.type == 'StateDefn':
                 self.file.write("""\
   if (stateId === '%s') return eval_%s(pf, x, y);
-""" % (defn.value, defn.value));
+""" % (defn.id, defn.id));
         self.file.write('}\n')
 
     def compile_class_defn(self, defn):
-        self.file.write("function evalClass_%s(pf, x, y) {\nvar id;\n" % defn.value);
+        self.file.write("function evalClass_%s(pf, x, y) {\nvar id;\n" % defn.id);
         for rule in defn.rules:
             dest = rule.state_ref
             expr = rule.expr
@@ -361,13 +361,13 @@ function evalState(pf, x, y) {
             self.compile_state_ref(dest)
             self.file.write(";\n}\n")
         for superclass in defn.classes:
-            self.file.write("id = evalClass_%s(pf, x, y);\n" % superclass.value)
+            self.file.write("id = evalClass_%s(pf, x, y);\n" % superclass.id)
             self.file.write("if (id !== undefined) return id;\n")
         self.file.write("return undefined;\n}\n\n")
 
     def compile_state_defn(self, defn):
         #char_repr = defn.children[0]
-        self.file.write("function eval_%s(pf, x, y) {\nvar id;\n" % defn.value);
+        self.file.write("function eval_%s(pf, x, y) {\nvar id;\n" % defn.id);
         for rule in defn.rules:
             dest = rule.state_ref
             expr = rule.expr
@@ -377,14 +377,14 @@ function evalState(pf, x, y) {
             self.compile_state_ref(dest)
             self.file.write(";\n}\n")
         for superclass in defn.classes:
-            self.file.write("id = evalClass_%s(pf, x, y);\n" % superclass.value)
+            self.file.write("id = evalClass_%s(pf, x, y);\n" % superclass.id)
             self.file.write("if (id !== undefined) return id;\n")
-        self.file.write("return '%s';\n}\n\n" % defn.value)
+        self.file.write("return '%s';\n}\n\n" % defn.id)
 
     def compile_state_ref(self, ref):
         # compare to eval_state_ref
         if ref.type == 'StateRefEq':
-            self.file.write("'%s'" % ref.value)
+            self.file.write("'%s'" % ref.id)
         elif ref.type == 'StateRefRel':
             self.file.write("pf.get(x+%d,y+%d)" % (ref.value[0], ref.value[1]))
         else:
@@ -392,7 +392,7 @@ function evalState(pf, x, y) {
 
     def compile_relation(self, ref, ast):
         if ast.type == 'ClassDecl':
-            self.file.write('is_%s(' % ast.value)
+            self.file.write('is_%s(' % ast.id)
             self.compile_state_ref(ref)
             self.file.write(")")
         else:
@@ -429,9 +429,9 @@ function evalState(pf, x, y) {
             rel = expr.lhs
             nb = expr.rhs
             if nb.type == 'NbhdRef':
-                nb = find_nbhd_defn(self.alpaca, nb.value).children[0]
+                nb = find_nbhd_defn(self.alpaca, nb.id).children[0]
             if rel.type == 'ClassDecl':
-                self.file.write("(in_nbhd_pred(pf, x, y, is_%s" % rel.value)
+                self.file.write("(in_nbhd_pred(pf, x, y, is_%s" % rel.id)
             else:
                 self.file.write('(in_nbhd_eq(pf, x, y, ')
                 self.compile_state_ref(rel)

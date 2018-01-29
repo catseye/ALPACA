@@ -104,12 +104,12 @@ class Parser(object):
         while self.scanner.on('is'):
             classes.append(self.class_decl())
         rules = self.rules()
-        return StateDefn(char_repr=char_repr, classes=classes, rules=rules, value=id)
+        return StateDefn(id=id, char_repr=char_repr, classes=classes, rules=rules)
 
     def class_decl(self):
         self.scanner.expect('is')
         id = self.scanner.consume_type('identifier')
-        return ClassDecl(value=id)
+        return ClassDecl(id=id)
 
     def class_defn(self):
         self.scanner.expect('class')
@@ -118,14 +118,14 @@ class Parser(object):
         while self.scanner.on('is'):
             classes.append(self.class_decl())
         rules = self.rules()
-        return ClassDefn(rules=rules, classes=classes, value=id)
+        return ClassDefn(id=id, rules=rules, classes=classes)
 
     def nbhd_defn(self):
         self.scanner.expect('neighbourhood')
         self.scanner.check_type('identifier')
         id = self.scanner.consume_type('identifier')
         n = self.neighbourhood()
-        return NbhdDefn(children=[n], value=id)
+        return NbhdDefn(id=id, children=[n])
 
     def rules(self):
         r = []
@@ -146,7 +146,7 @@ class Parser(object):
     def state_ref(self):
         if self.scanner.on_type('identifier'):
             id = self.scanner.consume_type('identifier')
-            return StateRefEq(value=id)
+            return StateRefEq(id=id)
         elif self.scanner.on_type('arrow chain'):
             rel = self.scanner.consume_type('arrow chain')
             (dx, dy) = resolve_arrow_chain(rel)
@@ -176,7 +176,8 @@ class Parser(object):
             nb = NBHD_MOORE
             if self.scanner.consume('in'):
                 if self.scanner.on_type('identifier'):
-                    nb = NbhdRef(value=self.scanner.consume_type('identifier'))
+                    id = self.scanner.consume_type('identifier')
+                    nb = NbhdRef(id=id)
                 else:
                     nb = self.neighbourhood()
             if self.scanner.on('is'):

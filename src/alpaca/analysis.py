@@ -10,7 +10,7 @@ from alpaca.playfield import Playfield
 def find_defn(alpaca, type, id):
     assert isinstance(id, basestring)
     for defn in alpaca.defns:
-        if defn.type == type and defn.value == id:
+        if defn.type == type and defn.id == id:
             return defn
     raise KeyError, "No such %s '%s'" % (type, id)
 
@@ -32,22 +32,22 @@ def state_defn_is_a(alpaca, state_ast, class_id, verbose=False):
         if verbose:
             print " ===> checking for {} in {}".format(class_id, repr(class_decl))
         assert class_decl.type == 'ClassDecl'
-        if class_id == class_decl.value:
+        if class_id == class_decl.id:
             return True
-        class_ast = find_class_defn(alpaca, class_decl.value)
+        class_ast = find_class_defn(alpaca, class_decl.id)
         if class_defn_is_a(alpaca, class_ast, class_id, verbose=verbose):
             return True
     return False
 
 
 def class_defn_is_a(alpaca, class_ast, class_id, verbose=False):
-    if class_ast.value == class_id:
+    if class_ast.id == class_id:
         return True
     for class_decl in class_ast.classes:
         assert class_decl.type == 'ClassDecl'
-        if class_id == class_decl.value:
+        if class_id == class_decl.id:
             return True
-        parent_class_ast = find_class_defn(alpaca, class_decl.value)
+        parent_class_ast = find_class_defn(alpaca, class_decl.id)
         if class_defn_is_a(alpaca, parent_class_ast, class_id, verbose=verbose):
             return True
     return False
@@ -57,9 +57,8 @@ def get_membership(alpaca, class_decls):
     membership = set()
     for class_decl in class_decls:
         assert class_decl.type == 'ClassDecl'
-        class_id = class_decl.value
-        membership.add(class_id)
-        membership = membership.union(get_class_membership(alpaca, class_id))
+        membership.add(class_decl.id)
+        membership |= get_class_membership(alpaca, class_decl.id)
     return membership
 
 
@@ -93,9 +92,9 @@ def get_class_map(alpaca):
     class_map = {}
     for defn in alpaca.defns:
         if defn.type == 'StateDefn':
-            state_map[defn.value] = get_state_membership(alpaca, defn.value)
+            state_map[defn.id] = get_state_membership(alpaca, defn.id)
         if defn.type == 'ClassDefn':
-            class_map[defn.value] = set()
+            class_map[defn.id] = set()
     for (state_id, class_set) in state_map.iteritems():
         for class_id in class_set:
             class_map.setdefault(class_id, set()).add(state_id)
@@ -103,19 +102,18 @@ def get_class_map(alpaca):
 
 
 def construct_representation_map(alpaca):
-    map = {}
+    map_ = {}
     for defn in alpaca.defns:
         if defn.type == 'StateDefn':
-            repr = defn.char_repr
-            assert repr.type == 'CharRepr'
-            map[repr.value] = defn.value
-    return map
+            assert defn.char_repr.type == 'CharRepr'
+            map_[defn.char_repr.value] = defn.id
+    return map_
 
 
 def get_default_state(alpaca):
     for defn in alpaca.defns:
         if defn.type == 'StateDefn':
-            return defn.value
+            return defn.id
 
 
 def get_defined_playfield(alpaca):

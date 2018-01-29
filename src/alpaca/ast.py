@@ -66,21 +66,21 @@ class CharRepr(AST):
 class StateDefn(AST):
     children_attrs = ('rules', 'classes',)
     child_attrs = ('char_repr',)
-    value_attrs = ('value',)
+    value_attrs = ('id',)
 
 
 class ClassDecl(AST):
-    value_attrs = ('value',)
+    value_attrs = ('id',)
 
 
 class ClassDefn(AST):
     children_attrs = ('rules', 'classes',)
-    value_attrs = ('value',)
+    value_attrs = ('id',)
 
 
 class NbhdDefn(AST):
     children_attrs = ('children',)
-    value_attrs = ('value',)
+    value_attrs = ('id',)
 
 
 class Rule(AST):
@@ -88,7 +88,7 @@ class Rule(AST):
 
 
 class StateRefEq(AST):
-    value_attrs = ('value',)
+    value_attrs = ('id',)
 
 
 class StateRefRel(AST):
@@ -96,7 +96,7 @@ class StateRefRel(AST):
 
 
 class NbhdRef(AST):
-    value_attrs = ('value',)
+    value_attrs = ('id',)
 
 
 class Adjacency(AST):
