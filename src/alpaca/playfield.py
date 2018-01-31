@@ -88,16 +88,19 @@ class Playfield(object):
     def represent(self, name):
         return self.state_to_repr[name]
 
-    def __str__(self):
+    def to_str(self, min_x, min_y, max_x, max_y):
         s = ''
-        y = self.min_y
+        y = min_y
         if y is None:
             return ''
-        while y <= self.max_y:
-            x = self.min_x
-            while x <= self.max_x:
+        while y <= max_y:
+            x = min_x
+            while x <= max_x:
                 s += self.represent(self.get(x, y))
                 x += 1
             y += 1
             s += '\n'
         return s
+
+    def __str__(self):
+        return self.to_str(self.min_x, self.min_y, self.max_x, self.max_y)

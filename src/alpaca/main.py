@@ -7,6 +7,7 @@ version 1.0.
 """
 
 from argparse import ArgumentParser
+import re
 import sys
 
 from alpaca import analysis
@@ -68,6 +69,11 @@ def main(argv):
              "backend only)"
     )
 
+    argparser.add_argument("--display-window", metavar='RANGE', default=None,
+        help="A string in the form '(x1,y1)-(x2-y2)'; if given, every generation "
+             "displayed will only display the cells within this fixed window"
+    )
+
     options = argparser.parse_args(argv[1:])
 
     if options.source == 'test':
@@ -105,6 +111,17 @@ def main(argv):
             print "unsupported backend '%s'" % options.compile_to
         sys.exit(1)
 
+    display_x1, display_y1, display_x2, display_y2 = None, None, None, None
+    if options.display_window:
+        match = re.match(r'^\((-?\d+)\,(-?\d+)\)\-\((-?\d+)\,(-?\d+)\)$', options.display_window)
+        try:
+            (display_x1, display_y1, display_x2, display_y2) = (
+                int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))
+            )
+        except Exception as e:
+            print "Could not parse '{}'".format(options.display_window)
+            raise
+
     pf = get_defined_playfield(ast)
     if pf is None:
         if len(args) < 2:
@@ -128,7 +145,10 @@ def main(argv):
 
     def output_frame(count, pf):
         # TODO if not dumping to seperate files, then
-        print str(pf),
+        if options.display_window:
+            sys.stdout.write(pf.to_str(display_x1, display_y1, display_x2, display_y2))
+        else:
+            sys.stdout.write(str(pf))
         print_divider()
 
     count = 0
