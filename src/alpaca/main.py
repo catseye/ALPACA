@@ -74,6 +74,9 @@ def main(argv):
         help="A string in the form '(x1,y1)-(x2-y2)'; if given, every generation "
              "displayed will only display the cells within this fixed window"
     )
+    argparser.add_argument("--display-svg", action="store_true",
+        help="Display each generation as SVG"
+    )
     argparser.add_argument("--write-discrete-files-to", metavar='DIRNAME', default=None,
         help="If given, instead of displaying each generation on standard output, "
              "write it to a new numbered file in this directory"
@@ -152,9 +155,15 @@ def main(argv):
 
     def output_frame(count, pf):
         if options.display_window:
-            rendered = pf.to_str(display_x1, display_y1, display_x2, display_y2)
+            if options.display_svg:
+                rendered = pf.to_svg(display_x1, display_y1, display_x2, display_y2)
+            else:
+                rendered = pf.to_str(display_x1, display_y1, display_x2, display_y2)
         else:
-            rendered = str(pf)
+            if options.display_svg:
+                rendered = pf.to_svg(pf.min_x, pf.min_y, pf.max_x, pf.max_y)
+            else:
+                rendered = str(pf)
 
         if options.write_discrete_files_to:
             with open(os.path.join(options.write_discrete_files_to, "%08d.txt" % count), 'w') as f:
