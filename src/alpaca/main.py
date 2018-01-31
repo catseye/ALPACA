@@ -7,6 +7,7 @@ version 1.0.
 """
 
 from argparse import ArgumentParser
+import os
 import re
 import sys
 
@@ -73,6 +74,10 @@ def main(argv):
         help="A string in the form '(x1,y1)-(x2-y2)'; if given, every generation "
              "displayed will only display the cells within this fixed window"
     )
+    argparser.add_argument("--write-discrete-files-to", metavar='DIRNAME', default=None,
+        help="If given, instead of displaying each generation on standard output, "
+             "write it to a new numbered file in this directory"
+    )
 
     options = argparser.parse_args(argv[1:])
 
@@ -133,6 +138,8 @@ def main(argv):
         pf.load(file)
         file.close()
 
+    count = 0
+
     def print_divider():
         # TODO: allow formatting string in the divider, esp.
         # to show the # of this generation
@@ -140,18 +147,22 @@ def main(argv):
             print options.divider
 
     def begin_output():
-        # TODO if not dumping to seperate files, then
-        print_divider()
+        if not options.write_discrete_files_to:
+            print_divider()
 
     def output_frame(count, pf):
-        # TODO if not dumping to seperate files, then
         if options.display_window:
-            sys.stdout.write(pf.to_str(display_x1, display_y1, display_x2, display_y2))
+            rendered = pf.to_str(display_x1, display_y1, display_x2, display_y2)
         else:
-            sys.stdout.write(str(pf))
-        print_divider()
+            rendered = str(pf)
 
-    count = 0
+        if options.write_discrete_files_to:
+            with open(os.path.join(options.write_discrete_files_to, "%08d.txt" % count), 'w') as f:
+                f.write(rendered)
+        else:
+            sys.stdout.write(rendered)
+            print_divider()
+
     begin_output()
     if options.show_initial:
         output_frame(count, pf)
