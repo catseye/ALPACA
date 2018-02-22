@@ -64,11 +64,6 @@ def main(argv):
     argparser.add_argument("-v", "--verbose", action="store_true",
         help="run verbosely"
     )
-    argparser.add_argument("-y", "--include-yoob-playfield-inline", action="store_true",
-        help="include yoob/playfield.js (from yoob.js) "
-             "inline in generated Javascript (javascript "
-             "backend only)"
-    )
 
     argparser.add_argument("--display-window", metavar='RANGE', default=None,
         help="A string in the form '(x1,y1)-(x2-y2)'; if given, every generation "
