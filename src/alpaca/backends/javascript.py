@@ -355,7 +355,7 @@ function evalState(pf, x, y) {
     def compile_class_defn(self, defn):
         membership = defn.children[1]
         rules = defn.children[0]
-        self.file.write("function evalClass_%s(pf, x, y) {\nvar id;\n" % defn.value);
+        self.file.write("function evalClass_%s(pf, x, y, seen) {\nvar id;\nseen['%s'] = true;\n" % (defn.value, defn.value));
         for rule in rules.children:
             dest = rule.children[0]
             expr = rule.children[1]
@@ -365,7 +365,7 @@ function evalState(pf, x, y) {
             self.compile_state_ref(dest)
             self.file.write(";\n}\n")
         for superclass in membership.children:
-            self.file.write("id = evalClass_%s(pf, x, y);\n" % superclass.value)
+            self.file.write("id = seen['%s'] ? undefined : evalClass_%s(pf, x, y, seen);\n" % (superclass.value, superclass.value))
             self.file.write("if (id !== undefined) return id;\n")
         self.file.write("return undefined;\n}\n\n")
 
@@ -383,7 +383,7 @@ function evalState(pf, x, y) {
             self.compile_state_ref(dest)
             self.file.write(";\n}\n")
         for superclass in membership.children:
-            self.file.write("id = evalClass_%s(pf, x, y);\n" % superclass.value)
+            self.file.write("id = evalClass_%s(pf, x, y, {});\n" % superclass.value)
             self.file.write("if (id !== undefined) return id;\n")
         self.file.write("return '%s';\n}\n\n" % defn.value)
 
