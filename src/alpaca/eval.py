@@ -150,7 +150,10 @@ def apply_rules(alpaca, playfield, x, y, rules, class_decls, checked_classes=Non
         rules = class_ast.rules
         classes = class_ast.classes
         checked_classes.add(class_id)
-        new_state_id = apply_rules(alpaca, playfield, x, y, rules, classes)        
+        new_state_id = apply_rules(
+            alpaca, playfield, x, y, rules, classes,
+            checked_classes=checked_classes, verbose=verbose
+        )
         if new_state_id is not None:
             return new_state_id
     return None

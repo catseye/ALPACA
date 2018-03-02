@@ -53,31 +53,30 @@ def class_defn_is_a(alpaca, class_ast, class_id, verbose=False):
     return False
 
 
-def get_membership(alpaca, class_decls):
-    membership = set()
+def get_membership(alpaca, class_decls, membership):
     for class_decl in class_decls:
         assert class_decl.type == 'ClassDecl'
-        membership.add(class_decl.id)
-        membership |= get_class_membership(alpaca, class_decl.id)
-    return membership
+        if class_decl.id not in membership:
+            membership.add(class_decl.id)
+            get_class_membership(alpaca, class_decl.id, membership)
 
 
-def get_state_membership(alpaca, state_id):
+def get_state_membership(alpaca, state_id, membership):
     """Given a state ID, return a set of IDs of all classes of which that
     state is a member.
 
     """
     state_ast = find_state_defn(alpaca, state_id)
-    return get_membership(alpaca, state_ast.classes)
+    get_membership(alpaca, state_ast.classes, membership)
 
 
-def get_class_membership(alpaca, class_id):
+def get_class_membership(alpaca, class_id, membership):
     """Given a class ID, return a set of IDs of all classes of which that
     class is a member.
 
     """
     class_ast = find_class_defn(alpaca, class_id)
-    return get_membership(alpaca, class_ast.classes)
+    get_membership(alpaca, class_ast.classes, membership)
 
 
 def get_class_map(alpaca):
@@ -92,7 +91,9 @@ def get_class_map(alpaca):
     class_map = {}
     for defn in alpaca.defns:
         if defn.type == 'StateDefn':
-            state_map[defn.id] = get_state_membership(alpaca, defn.id)
+            membership = set()
+            get_state_membership(alpaca, defn.id, membership)
+            state_map[defn.id] = membership
         if defn.type == 'ClassDefn':
             class_map[defn.id] = set()
     for (state_id, class_set) in state_map.iteritems():
