@@ -125,13 +125,15 @@ def evolve_playfield(playfield, new_pf, alpaca):
         y += 1
 
 
-def apply_rules(alpaca, playfield, x, y, rules, class_decls, checked_classes=[]):
+def apply_rules(alpaca, playfield, x, y, rules, class_decls, checked_classes=None):
     """Given a set of rules and a set of superclasses (for a given state or
     class which is not given), try the rules; if none of them apply,
     recursively apply this function with the rules and superclasses for each
     given superclass.
 
     """
+    if checked_classes is None:
+        checked_classes = set()
     new_state_id = eval_rules(alpaca, playfield, x, y, rules)
     if new_state_id is not None:
         return new_state_id
@@ -144,8 +146,8 @@ def apply_rules(alpaca, playfield, x, y, rules, class_decls, checked_classes=[])
         class_ast = find_class_defn(alpaca, class_id)
         rules = class_ast.children[0]
         classes = class_ast.children[1]
-        checked_classes.append(class_id)
-        new_state_id = apply_rules(alpaca, playfield, x, y, rules, classes, checked_classes)
+        checked_classes.add(class_id)
+        new_state_id = apply_rules(alpaca, playfield, x, y, rules, classes, checked_classes=checked_classes)
         if new_state_id is not None:
             return new_state_id
     return None
