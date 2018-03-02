@@ -77,19 +77,10 @@ function evolve_playfield(pf, new_pf) {
         self.write_evalstate_function()
         pf = get_defined_playfield(self.alpaca)
         if pf is not None:
-            self.file.write("""
-pf = (new yoob.Playfield()).init({defaultValue:'%s'});
-""" % pf.default)
-            for (x, y, c) in pf.iteritems():
-                self.file.write("pf.putDirty(%d, %d, '%s');\n" % (x, y, c))
-            self.file.write("pf.recalculateBounds();\n")
-            self.file.write(r"""
-newPf = (new yoob.Playfield()).init({defaultValue:'%s'});
-evolve_playfield(pf, newPf);
-console.log('-----');
-console.log(newPf.dump(dumpMapper).replace(/\n$/, ""));
-console.log('-----');
-""" % pf.default)
+            self.file.write("var defaultCell = '%s';\n" % pf.default)
+            self.file.write("var initialPlayfield = [{}];\n".format(
+                ','.join("[%d, %d, '%s']" % (x, y, c) for (x, y, c) in pf.iteritems())
+            ))
         return True
 
     def write_evalstate_function(self):
