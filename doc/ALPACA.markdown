@@ -440,6 +440,24 @@ Example: overriding deep inheritance at a class level.
     = *       
     = -----
 
+It is not an error for classes to belong to themselves, either
+directly or transitively.  A class belonging to itself should
+not lead to infinite regress - each class it belongs to should
+only be checked once.  (Thanks to
+[OrangeNote](https://github.com/OrangeNote) for this test case.)
+
+    | class A is B to X when false;
+    | class B is A to X when false;
+    | 
+    | state Blank " ";
+    | state X "*" is A
+    | 
+    | begin
+    | *
+    = -----
+    = *
+    = -----
+
 #### Membership ####
 
 In a transition rule, a class-inclusion predicate may be used by giving a
