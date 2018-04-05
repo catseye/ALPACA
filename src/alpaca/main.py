@@ -72,6 +72,10 @@ def main(argv):
     argparser.add_argument("--display-svg", action="store_true",
         help="Display each generation as SVG"
     )
+    argparser.add_argument("--stylesheet", metavar='FILENAME', default=None,
+        help="Use the given file as the ALPACA stylesheet "
+             "(only supported in SVG output currently)"
+    )
     argparser.add_argument("--write-discrete-files-to", metavar='DIRNAME', default=None,
         help="If given, instead of displaying each generation on standard output, "
              "write it to a new numbered file in this directory"
@@ -148,15 +152,20 @@ def main(argv):
         if not options.write_discrete_files_to:
             print_divider()
 
+    if options.stylesheet:
+        stylesheet = open(options.stylesheet).read()
+    else:
+        stylesheet = None
+
     def output_frame(count, pf):
         if options.display_window:
             if options.display_svg:
-                rendered = pf.to_svg(display_x1, display_y1, display_x2, display_y2)
+                rendered = pf.to_svg(display_x1, display_y1, display_x2, display_y2, stylesheet=stylesheet)
             else:
                 rendered = pf.to_str(display_x1, display_y1, display_x2, display_y2)
         else:
             if options.display_svg:
-                rendered = pf.to_svg(pf.min_x, pf.min_y, pf.max_x, pf.max_y)
+                rendered = pf.to_svg(pf.min_x, pf.min_y, pf.max_x, pf.max_y, stylesheet=stylesheet)
             else:
                 rendered = str(pf)
 
