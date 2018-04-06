@@ -1,17 +1,18 @@
 The ALPACA Cellular Automaton Definition Language
 =================================================
 
-This document describes version 1.0 of ALPACA, a language for defining
+This document describes version 1.1 of ALPACA, a language for defining
 cellular automata.
 
-The language described herein is mostly compatible with the version
-of the language which has existed until now (version 0.9x).  However, it
-extends it in some significant ways, and is backwards-incompatible with it
-in certain minor ways.  The reference implementation of version 1.0 that
-accompanies this specification is included in the ALPACA reference
-distribution.
+The language described herein is mostly compatible with the legacy
+version (0.9x) of the language as it has existed for many years, with
+only some additions and only a small number of backwards-incompatible
+changes, and it is entirely backwards-compatible with version 1.0.
 
-In the remainder of this document, ALPACA refers to ALPACA version 1.0.
+The reference implementation of ALPACA version 1.1 that accompanies
+this specification is included in the ALPACA reference distribution.
+
+In the remainder of this document, ALPACA refers to ALPACA version 1.1.
 
 Abbreviations
 -------------
@@ -95,13 +96,7 @@ at least offer that as an option.  However, representation of states is
 ultimately implementation-defined.  Even if representation declarations are
 included for every state in the ALPACA description, there is nothing to
 prevent an implementation from overriding them with some other representation.
-Earlier efforts at defining ALPACA 1.0 wished to include a more sophisticated
-mechanism for describing appearance of states, but this effort was abandoned
-under the argument of "separation of content and presentation".  If such an
-effort is again undertaken at some point, it will likely be in a form very
-similar to (perhaps even directly repurposing) W3C's Cascading Style Sheets.
-Embedding these into ALPACA descriptions is not out of the question, but
-should not be the default approach followed by this specification.
+See also the section on ALPACA Stylesheets, below.
 
 Example: a trivial ALPACA description with single character representation
 declarations:
@@ -573,7 +568,7 @@ Example:
 
     -> Tests for functionality "Evolve ALPACA CA one generation"
 
-Note that, unlike previous version of ALPACA, ALPACA 1.0 allows essentially
+Note that, unlike versions of ALPACA before 1.0, ALPACA 1.x allows essentially
 arbitrary neighbourhoods -- they may extend beyond the Moore neighbourhood.
 Implementations must take care to check for all possible transitions inside
 the defined neighbourhood, even when it extends into the "empty space"
@@ -739,3 +734,49 @@ neighbourhood.)
 
 Previous versions of ALPACA did not support giving an initial configuration
 for the cellular automaton.
+
+Differences between ALPACA 1.1 and 1.0
+--------------------------------------
+
+-   ALPACA 1.1 explicitly states that it is valid for a class to be empty.
+-   ALPACA 1.1 defines what it means for a class to belong to itself, either
+    directly or transitively.  This was not defined in ALPACA 1.0.
+-   ALPACA 1.1 introduces ALPACA Stylesheets 1.1.
+
+ALPACA Stylesheets 1.1
+----------------------
+
+Informational: Early efforts at defining ALPACA 1.0 wished to include a more
+sophisticated mechanism for describing appearance of states, but this effort
+was abandoned under the argument of "separation of content and presentation".
+ALPACA Stylesheets are a rekindled attempt to define this mechanism.
+
+An ALPACA stylesheet is a way of specifying how the playfields of an ALPACA
+cellular automaton should be represented.  A single cellular automation may
+have multiple stylesheets that can be applied to it, and indeed a single
+stylesheet may apply to multiple cellular automata.
+
+An ALPACA stylesheet is based on a subset of the stylesheets supported by
+[SVG 1.1][].  In particular,
+
+-   Each state in the cellular automaton maps to a CSS class.
+-   `fill` is guaranteed to be supported.
+-   `#rrggbb` format for colours is guaranteed to be supported.
+-   No other guarantees are, at present, given.
+-   This does not prevent any implementation from using an extended
+    definition of ALPACA Stylesheets 1.1 to apply representation to
+    cellular automata.
+
+Example:
+
+    .Dead {
+        fill: #ffffff;
+    }
+    .Alive {
+        fill: #000000;
+    }
+
+This will style John Conway's Life with Dead cells being solid white
+rectangles and Alive cells being solid black rectangles.
+
+[SVG 1.1]: https://www.w3.org/Graphics/SVG/1.1/
