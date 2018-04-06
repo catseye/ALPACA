@@ -50,6 +50,10 @@ def main(argv):
                          dest="generations", default=None, type=int,
                          help="evolve CA for only the given number of "
                               "generations")
+    argparser.add_argument("-i", "--initial-configuration", metavar='FILENAME',
+        type=str, default=None, help="initial configuration to load into playfield "
+                                     "(when evolving a playfield only)"
+    )
     argparser.add_argument("-I", "--hide-initial", action="store_false", dest="show_initial",
         help="don't show initial configuration"
     )
@@ -131,14 +135,13 @@ def main(argv):
 
     pf = get_defined_playfield(ast)
     if pf is None:
-        if len(args) < 2:
+        if not options.initial_configuration:
             print "source file does not define an initial configuration,"
             print "and no cellular automaton configuration file given"
             sys.exit(1)
-        file = open(args[1])
-        pf = Playfield(default_state, repr_map)
-        pf.load(file)
-        file.close()
+        with open(options.initial_configuration) as f:
+            pf = Playfield(default_state, repr_map)
+            pf.load(f)
 
     count = 0
 
