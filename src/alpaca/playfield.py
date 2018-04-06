@@ -127,4 +127,4 @@ class Playfield(object):
     {}
   </style>
   {}
-</svg>""".format(min_x, min_y, max_x, max_y, stylesheet, '\n  '.join(rects))
+</svg>""".format(min_x, min_y, max_x-min_x, max_y-min_y, stylesheet, '\n  '.join(rects))
