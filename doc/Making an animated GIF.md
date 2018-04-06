@@ -23,7 +23,7 @@ Run ALPACA like:
         --generations 30
 
 Create a kinoje config file `life.yaml` like:
-    
+
     duration: 3.0
     fps: 10.0
     width: 20

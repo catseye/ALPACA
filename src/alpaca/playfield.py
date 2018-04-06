@@ -107,17 +107,16 @@ class Playfield(object):
 
     def to_svg(self, min_x, min_y, max_x, max_y, stylesheet=None):
         if stylesheet is None:
-            stylesheet = 'rect { fill: black } .SVGBackground { fill: white }'
+            stylesheet = 'rect { fill: white } .{} { fill: black }'.format(self.default)
         rects = []
         y = min_y
         while y is not None and y <= max_y:
             x = min_x
             while x <= max_x:
                 state = self.get(x, y)
-                if state != self.default:
-                    rects.append(
-                        '<rect class="{}" x="{}" y="{}" width="1" height="1" />'.format(state, x, y)
-                    )
+                rects.append(
+                    '<rect class="{}" x="{}" y="{}" width="1" height="1" />'.format(state, x, y)
+                )
                 x += 1
             y += 1
         return """\
@@ -127,6 +126,5 @@ class Playfield(object):
   <style type="text/css">
     {}
   </style>
-  <rect class="SVGBackground" width="100%" height="100%" />
   {}
 </svg>""".format(min_x, min_y, max_x, max_y, stylesheet, '\n  '.join(rects))
