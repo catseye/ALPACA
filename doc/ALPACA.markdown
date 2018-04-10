@@ -536,8 +536,8 @@ test case.)
     = *
     = -----
 
-Informative: diamond inheritance is not in practice a problem, as classes do
-not defined or contain any state (information) which is not in the state
+Informative: diamond inheritance seems to not be a problem in practice, as
+classes do not define or contain any state information which is not in the state
 itself, which is what makes diamond inheritance problematic in most languages
 with multiple inheritance.
 
