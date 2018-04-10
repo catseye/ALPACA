@@ -741,30 +741,34 @@ Differences between ALPACA 1.1 and 1.0
 -   ALPACA 1.1 explicitly states that it is valid for a class to be empty.
 -   ALPACA 1.1 defines what it means for a class to belong to itself, either
     directly or transitively.  This was not defined in ALPACA 1.0.
--   ALPACA 1.1 introduces ALPACA Stylesheets 1.1.
+-   ALPACA 1.1 introduces ALPACA Stylesheets 1.0.
 
-ALPACA Stylesheets 1.1
+ALPACA Stylesheets 1.0
 ----------------------
 
 Informational: Early efforts at defining ALPACA 1.0 wished to include a more
 sophisticated mechanism for describing appearance of states, but this effort
 was abandoned under the argument of "separation of content and presentation".
-ALPACA Stylesheets are a rekindled attempt to define this mechanism.
+ALPACA Stylesheets 1.0 is a rekindled attempt to define this mechanism.
 
 An ALPACA stylesheet is a way of specifying how the playfields of an ALPACA
 cellular automaton should be represented.  A single cellular automation may
 have multiple stylesheets that can be applied to it, and indeed a single
 stylesheet may apply to multiple cellular automata.
 
+Because there is currently no way to embed an ALPACA stylesheet in an ALPACA
+description, an ALPACA stylesheet, if any, must be supplied as a seperate
+input to whatever ALPACA-processing tools that may support it.
+
 An ALPACA stylesheet is based on a subset of the stylesheets supported by
 [SVG 1.1][].  In particular,
 
 -   Each state in the cellular automaton maps to a CSS class.
--   `fill` is guaranteed to be supported.
+-   The `fill` property, with a colour, is guaranteed to be supported.
 -   `#rrggbb` format for colours is guaranteed to be supported.
 -   No other guarantees are, at present, given.
 -   This does not prevent any implementation from using an extended
-    definition of ALPACA Stylesheets 1.1 to apply representation to
+    definition of ALPACA Stylesheets 1.0 to apply representation to
     cellular automata.
 
 Example:
@@ -778,5 +782,13 @@ Example:
 
 This will style John Conway's Life with Dead cells being solid white
 rectangles and Alive cells being solid black rectangles.
+
+Informational: It is expected that a future version of ALPACA Stylesheets
+will define a property called `glyph` that will correspond to the
+character used in the Representation Declaration of an ALPACA state
+(see above) with the understanding that it will be used primarily
+for display, while the Representation Declaration will be used primarily
+for interpreting a cellular automaton's configuration from a textual
+source, e.g. the initial playfield.
 
 [SVG 1.1]: https://www.w3.org/Graphics/SVG/1.1/
