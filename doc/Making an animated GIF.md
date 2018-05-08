@@ -1,6 +1,10 @@
 Making animated GIFs with ALPACA and kinoje
 ===========================================
 
+_This document describes a functionality of which the ALPACA
+reference implementation is capable, but is not a part of the
+ALPACA specification._
+
 The reference implementation of ALPACA can output one SVG file
 for each generation of the cellular automaton it has been
 instructed to evolve.

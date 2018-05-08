@@ -1,6 +1,9 @@
 Compiling ALPACA to Javascript
 ==============================
 
+_This document describes a functionality of which the ALPACA reference
+implementation is capable, but is not a part of the ALPACA specification._
+
 The reference implementation is able to compile an ALPACA description to
 a set of Javascript functions which, when called, will evolve a form for
 that cellular automaton.
@@ -20,4 +23,5 @@ the Javascript compiler will generate two `var` variables:
 *   `initialPlayfield`, which is an array of triples (3-element arrays);
     each triple consists of x co-ordinate, y co-ordinate, and state name.
 
-(Further info TBW)
+This interface can be used by additional Javascript code to evolve the
+automaton that the ALPACA description describes.

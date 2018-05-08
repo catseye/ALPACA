@@ -5,9 +5,10 @@ This document describes version 1.1 of ALPACA, a language for defining
 cellular automata.
 
 The language described herein is mostly compatible with the legacy
-version (0.9x) of the language as it has existed for many years, with
-only some additions and only a small number of backwards-incompatible
-changes, and it is entirely backwards-compatible with version 1.0.
+version (0.9x) of the language as it has existed for many years (since
+1998), with only some additions and only a small number of backwards-
+incompatible changes, and it is entirely backwards-compatible with
+version 1.0 (released 2013).
 
 The reference implementation of ALPACA version 1.1 that accompanies
 this specification is included in the ALPACA reference distribution.
@@ -766,7 +767,9 @@ An ALPACA stylesheet is based on a subset of the stylesheets supported by
 -   Each state in the cellular automaton maps to a CSS class.
 -   The `fill` property, with a colour, is guaranteed to be supported.
 -   `#rrggbb` format for colours is guaranteed to be supported.
--   No other guarantees are, at present, given.
+-   No other guarantees are, at present, given.  (This includes support
+    for comments.  There is no guaranteed way, at present, to include
+    comments in an ALPACA Stylesheet.)
 -   This does not prevent any implementation from using an extended
     definition of ALPACA Stylesheets 1.0 to apply representation to
     cellular automata.
@@ -780,8 +783,8 @@ Example:
         fill: #000000;
     }
 
-This will style John Conway's Life with Dead cells being solid white
-rectangles and Alive cells being solid black rectangles.
+This will style John Conway's Life with Dead cells appearing as solid
+white rectangles and Alive cells appearing as solid black rectangles.
 
 Informational: It is expected that a future version of ALPACA Stylesheets
 will define a property called `glyph` that will correspond to the
