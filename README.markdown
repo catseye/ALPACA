@@ -68,8 +68,8 @@ in the terminal based on the rules of the defined cellular automaton.
 
 Versions 0.93 and 0.94 succeeded version 0.90, but did not include any
 significant changes to the language, only to the reference implementation.
-Versions 0.91 and 0.92 possibly existed at some point as well, but they
-are now lost.
+Versions 0.91 and 0.92 possibly existed at some point as well, but if so,
+they are now lost.
 
 (Note that these version numbers are highly inaccurate.  Version 0.94
 was not the ninety-fourth iteration of development.)
@@ -149,5 +149,3 @@ Possible ways in which the language could be extended in the future:
 
 *   Allow the halting predicate to be defined in the ALPACA description
     itself somehow.  This would make ALPACA Turing-complete.
-*   Define how the presentation of the automaton could be styled using
-    (a subset of) CSS stylesheets (or something very similar.)
