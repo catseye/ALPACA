@@ -18,15 +18,16 @@ in ALPACA (it's short):
       to Dead when 4 Alive or 7 Dead.
 
 See the file `ALPACA.markdown` in the `doc` directory for a complete
-specification of the ALPACA language, version 1.0.  This document is
-written in [Falderal][] literate test suite format; the examples given in
-the spec are test cases, which can be run against an implementation.
+specification of the ALPACA language, version 1.1.  It is written in
+[Falderal][] literate test suite format; the examples given in the
+spec are test cases, which can be run against an implementation.
 The `test.sh` script does this.
 
 This distribution also contains the reference implementation of ALPACA
-version 1.0, written in Python.  Its source is in the `src` directory
+version 1.1, written in Python 2.7.  Its source is in the `src` directory
 and `bin/alpaca` is a script to start it from the command line (no
-installation is required.)  See below for more information on the reference
+installation is required; just put this `bin` directory on your executable
+search path.)  See below for more information on the reference
 implementation.
 
 This distribution also contains a compiler for an older version (0.94) of
