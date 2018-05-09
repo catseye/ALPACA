@@ -88,16 +88,43 @@ class Playfield(object):
     def represent(self, name):
         return self.state_to_repr[name]
 
-    def __str__(self):
+    def to_str(self, min_x, min_y, max_x, max_y):
         s = ''
-        y = self.min_y
+        y = min_y
         if y is None:
             return ''
-        while y <= self.max_y:
-            x = self.min_x
-            while x <= self.max_x:
+        while y <= max_y:
+            x = min_x
+            while x <= max_x:
                 s += self.represent(self.get(x, y))
                 x += 1
             y += 1
             s += '\n'
         return s
+
+    def __str__(self):
+        return self.to_str(self.min_x, self.min_y, self.max_x, self.max_y)
+
+    def to_svg(self, min_x, min_y, max_x, max_y, stylesheet=None):
+        if stylesheet is None:
+            stylesheet = 'rect { fill: white } .{} { fill: black }'.format(self.default)
+        rects = []
+        y = min_y
+        while y is not None and y <= max_y:
+            x = min_x
+            while x <= max_x:
+                state = self.get(x, y)
+                rects.append(
+                    '<rect class="{}" x="{}" y="{}" width="1" height="1" />'.format(state, x, y)
+                )
+                x += 1
+            y += 1
+        return """\
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg viewBox="{} {} {} {}" version="1.1">
+  <style type="text/css">
+    {}
+  </style>
+  {}
+</svg>""".format(min_x, min_y, max_x-min_x, max_y-min_y, stylesheet, '\n  '.join(rects))
