@@ -92,7 +92,7 @@ def main(argv):
         import doctest
         (fails, something) = doctest.testmod(analysis)
         if fails == 0:
-            print "All tests passed."
+            print("All tests passed.")
             sys.exit(0)
         else:
             sys.exit(1)
@@ -120,7 +120,7 @@ def main(argv):
             if success:
                 sys.exit(0)
         else:
-            print "unsupported backend '%s'" % options.compile_to
+            print("unsupported backend '%s'" % options.compile_to)
         sys.exit(1)
 
     display_x1, display_y1, display_x2, display_y2 = None, None, None, None
@@ -131,14 +131,14 @@ def main(argv):
                 int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))
             )
         except Exception as e:
-            print "Could not parse '{}'".format(options.display_window)
+            print("Could not parse '{}'".format(options.display_window))
             raise
 
     pf = get_defined_playfield(ast)
     if pf is None:
         if not options.initial_configuration:
-            print "source file does not define an initial configuration,"
-            print "and no cellular automaton configuration file given"
+            print("source file does not define an initial configuration,")
+            print("and no cellular automaton configuration file given")
             sys.exit(1)
         pf = Playfield(default_state, repr_map)
         if options.initial_configuration == '-':
@@ -153,7 +153,7 @@ def main(argv):
         # TODO: allow formatting string in the divider, esp.
         # to show the # of this generation
         if options.divider != '':
-            print options.divider
+            print(options.divider)
 
     def begin_output():
         if not options.write_discrete_files_to:

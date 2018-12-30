@@ -4,6 +4,7 @@
 # If node (node.js) is on path, will also test compiling to Javascript.
 
 bin/alpaca test -v || exit 1
+python3 bin/alpaca test -v || exit 1
 
 APPLIANCES="tests/appliances/alpaca.md"
 if [ x`which nodejs` != "x" ]; then

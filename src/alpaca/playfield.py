@@ -1,10 +1,10 @@
 class Playfield(object):
-    def __init__(self, default, map):
+    def __init__(self, default, map_):
         self.store = {}
         self.default = default
         self.recalculate_limits()
-        self.repr_to_state = map
-        self.state_to_repr = dict([(v, k) for (k, v) in map.iteritems()])
+        self.repr_to_state = map_
+        self.state_to_repr = dict([(v, k) for (k, v) in map_.items()])
 
     def iteritems(self):
         y = self.min_y
