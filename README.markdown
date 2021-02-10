@@ -51,7 +51,7 @@ Being described in ALPACA instead of C, the source code for REDGREEN is
 easily a hundred times clearer than the knotted mess that is RUBE.
 
 [RUBE]: http://catseye.tc/node/RUBE
-[REDGREEN]: http://catseye.tc/node/REDGEEN
+[REDGREEN]: http://catseye.tc/node/REDRGEEN
 
 Other cellular automata that have been successfully described in ALPACA
 include John Conway's famous Game of Life automaton, the lesser-known
