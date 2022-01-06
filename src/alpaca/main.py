@@ -6,8 +6,6 @@ version 1.0.
 
 """
 
-import logging
-from logging import debug
 from argparse import ArgumentParser
 import os
 import re
@@ -26,9 +24,7 @@ from playfield import Playfield
 
 
 def main(argv):
-	logging.basicConfig(level=logging.DEBUG)
-	debug("entered main func")
-	print("entered main func")
+
 	argparser = ArgumentParser()
 	
 	argparser.add_argument('source', metavar='SOURCE', type=str,
@@ -92,7 +88,7 @@ def main(argv):
 	)
 
 	options = argparser.parse_args(argv[1:])
-	debug("parsed args")
+
 	if options.source == 'test':
 		import doctest
 		(fails, something) = doctest.testmod(analysis)
