@@ -50,19 +50,19 @@ function evolve_playfield(pf, new_pf) {
         # write the CA's load and dump mappers
         repr_map = construct_representation_map(self.alpaca)
         self.file.write("function loadMapper(c) {\n")
-        for (char, state_id) in repr_map.items():
+        for (char, state_id) in repr_map.iteritems():
             self.file.write("  if (c === '%s') return '%s';\n" %
                             (char, state_id))
         self.file.write("};\n")
 
         self.file.write("function dumpMapper(s) {\n")
-        for (char, state_id) in repr_map.items():
+        for (char, state_id) in repr_map.iteritems():
             self.file.write("  if (s === '%s') return '%s';\n" %
                             (state_id, char))
         self.file.write("};\n")
 
         class_map = get_class_map(self.alpaca)
-        for (class_id, state_set) in class_map.items():
+        for (class_id, state_set) in class_map.iteritems():
             self.file.write("function is_%s(st) {\n" % class_id)
             self.file.write("  return ");
             for state_id in state_set:
@@ -79,7 +79,7 @@ function evolve_playfield(pf, new_pf) {
         if pf is not None:
             self.file.write("var defaultCell = '%s';\n" % pf.default)
             self.file.write("var initialPlayfield = [{}];\n".format(
-                ','.join("[%d, %d, '%s']" % (x, y, c) for (x, y, c) in pf.items())
+                ','.join("[%d, %d, '%s']" % (x, y, c) for (x, y, c) in pf.iteritems())
             ))
         return True
 

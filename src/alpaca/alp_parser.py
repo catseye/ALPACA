@@ -1,5 +1,6 @@
-from alpaca.ast import *
-from alpaca.scanner import Scanner
+from alp_ast import *
+#from ast import AST, Neighbourhood, StateRefRel, Playfield, Alpaca, StateDefn, ClassDefn, CharRepr, ClassDecl, NbhdDefn,BoolLit, Rule,NbhdRef, Relational,Adjacency,StateRefEq
+from scanner import Scanner
 
 """
 Alpaca          ::= Defns ("." | "begin" initial-configuration).
