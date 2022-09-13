@@ -4,9 +4,9 @@ class Playfield(object):
         self.default = default
         self.recalculate_limits()
         self.repr_to_state = map
-        self.state_to_repr = dict([(v, k) for (k, v) in map.iteritems()])
+        self.state_to_repr = dict([(v, k) for (k, v) in map.items()])
 
-    def iteritems(self):
+    def items(self):
         y = self.min_y
         while y <= self.max_y:
             x = self.min_x

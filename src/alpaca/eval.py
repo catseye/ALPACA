@@ -30,7 +30,7 @@ def eval_relation(alpaca, playfield, x, y, state_id, ast, verbose=False):
         state_ast = find_state_defn(alpaca, state_id)
         result = state_defn_is_a(alpaca, state_ast, class_id, verbose=verbose)
         if verbose:
-            print " => checking if {} is_a {}: {}".format(state_id, class_id, result)
+            print(" => checking if {} is_a {}: {}".format(state_id, class_id, result))
         return result
     elif ast.type in ('StateRefEq', 'StateRefRel'):
         pf_state_id = eval_state_ref(playfield, x, y, ast)
@@ -65,7 +65,7 @@ def eval_expr(alpaca, playfield, x, y, ast, verbose=False):
             pf_state_id = playfield.get(x + dx, y + dy)
             if eval_relation(alpaca, playfield, x, y, pf_state_id, rel, verbose=verbose):
                 count += 1
-        #print "(%d,%d) has %d neighbours that are %r" % (x, y, count, rel)
+        #print("(%d,%d) has %d neighbours that are %r" % (x, y, count, rel))
         return count >= int(ast.count)
     elif ast.type == 'Relational':
         state_id = eval_state_ref(playfield, x, y, ast.lhs)
@@ -113,17 +113,17 @@ def evolve_playfield(playfield, new_pf, alpaca, verbose=False):
         while x <= playfield.max_x - bb.min_dx:
             state_id = playfield.get(x, y)
             if verbose:
-                print "state at (%d,%d): %s" % (x, y, state_id)
+                print("state at (%d,%d): %s" % (x, y, state_id))
             state_ast = find_state_defn(alpaca, state_id)
             if verbose:
-                print " => %r" % state_ast
+                print(" => %r" % state_ast)
             classes = state_ast.classes
             rules = state_ast.rules
             new_state_id = apply_rules(alpaca, playfield, x, y, rules, classes, verbose=verbose)
             if new_state_id is None:
                 new_state_id = state_id
             if verbose:
-                print "new state: %s" % new_state_id
+                print("new state: %s" % new_state_id)
             new_pf.set(x, y, new_state_id)
             x += 1
         y += 1
