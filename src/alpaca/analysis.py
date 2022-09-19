@@ -8,11 +8,10 @@ from alpaca.playfield import Playfield
 
 
 def find_defn(alpaca, type, id):
-    assert isinstance(id, basestring)
     for defn in alpaca.defns:
         if defn.type == type and defn.id == id:
             return defn
-    raise KeyError, "No such %s '%s'" % (type, id)
+    raise KeyError("No such %s '%s'" % (type, id))
 
 
 def find_state_defn(alpaca, state_id):
@@ -30,7 +29,7 @@ def find_nbhd_defn(alpaca, nbhd_id):
 def state_defn_is_a(alpaca, state_ast, class_id, verbose=False):
     for class_decl in state_ast.classes:
         if verbose:
-            print " ===> checking for {} in {}".format(class_id, repr(class_decl))
+            print(" ===> checking for {} in {}".format(class_id, repr(class_decl)))
         assert class_decl.type == 'ClassDecl'
         if class_id == class_decl.id:
             return True
@@ -96,7 +95,7 @@ def get_class_map(alpaca):
             state_map[defn.id] = membership
         if defn.type == 'ClassDefn':
             class_map[defn.id] = set()
-    for (state_id, class_set) in state_map.iteritems():
+    for (state_id, class_set) in state_map.items():
         for class_id in class_set:
             class_map.setdefault(class_id, set()).add(state_id)
     return class_map

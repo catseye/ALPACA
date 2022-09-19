@@ -24,7 +24,8 @@ spec are test cases, which can be run against an implementation.
 The `test.sh` script does this.
 
 This distribution also contains the reference implementation of ALPACA
-version 1.1, written in Python 2.7.  Its source is in the `src` directory
+version 1.1, written in Python (runs under both Python 2.7 and Python 3.x).
+Its source is in the `src` directory
 and `bin/alpaca` is a script to start it from the command line (no
 installation is required; just put this `bin` directory on your executable
 search path.)  See below for more information on the reference
