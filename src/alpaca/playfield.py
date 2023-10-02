@@ -6,7 +6,7 @@ class Playfield(object):
         self.repr_to_state = map_
         self.state_to_repr = dict([(v, k) for (k, v) in map_.items()])
 
-    def iteritems(self):
+    def items(self):
         y = self.min_y
         while y <= self.max_y:
             x = self.min_x

@@ -8,7 +8,6 @@ from alpaca.playfield import Playfield
 
 
 def find_defn(alpaca, type, id):
-    #assert isinstance(id, basestring)
     for defn in alpaca.defns:
         if defn.type == type and defn.id == id:
             return defn
@@ -96,7 +95,7 @@ def get_class_map(alpaca):
             state_map[defn.id] = membership
         if defn.type == 'ClassDefn':
             class_map[defn.id] = set()
-    for (state_id, class_set) in state_map.iteritems():
+    for (state_id, class_set) in state_map.items():
         for class_id in class_set:
             class_map.setdefault(class_id, set()).add(state_id)
     return class_map
