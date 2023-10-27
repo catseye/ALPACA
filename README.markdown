@@ -139,7 +139,7 @@ are run as tests.  The reference implementation also contains internal tests.
 
 ### Contributors ###
 
-*   [Chris Pressey](https://github.com/cpressey) — bulk of the implementation
+*   [Chris Pressey](https://codeberg.org/cpressey) — bulk of the implementation
 *   [Xenon](https://github.com/cmura1) — implementation of the `guess` function
 *   [OrangeNote](https://github.com/OrangeNote) — addressing edge cases in spec
 

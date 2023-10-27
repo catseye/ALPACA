@@ -10,7 +10,7 @@ for each generation of the cellular automaton it has been
 instructed to evolve.
 
 These SVG files can be rendered and combined with a tool like
-[kinoje](https://github.com/catseye/kinoje) to produce an
+[kinoje](https://catseye.tc/node/kinoje) to produce an
 animated GIF.
 
 Create the directories to store intermediate files first:
